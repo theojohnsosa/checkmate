@@ -186,33 +186,63 @@ public class CreateClass extends AppCompatActivity {
         List<String> days = getSelectedDays();
         String userId = currentUser.getUid();
 
-        ClassModel classModel = new ClassModel();
-        classModel.setClassName(className);
-        classModel.setSubjectCode(subjectCode);
-        classModel.setRoom(room);
-        classModel.setStartTime(startTime);
-        classModel.setEndTime(endTime);
-        classModel.setDays(days);
-        classModel.setCreatedAt(System.currentTimeMillis());
-
+        // Fetch user data from Firestore first
         db.collection("users")
                 .document(userId)
-                .collection("classes")
-                .add(classModel)
-                .addOnSuccessListener(documentReference -> {
-                   String classId = documentReference.getId();
-                   documentReference.update("id", classId);
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    String teacherName;
+                    if (documentSnapshot.exists()) {
+                        String firstName = documentSnapshot.getString("firstName");
+                        String lastName = documentSnapshot.getString("lastName");
 
-                   Toast.makeText(CreateClass.this, "Class Created Successfully", Toast.LENGTH_SHORT).show();
-                   finish();
+                        if (firstName != null && lastName != null) {
+                            teacherName = firstName + " " + lastName;
+                        } else if (firstName != null) {
+                            teacherName = firstName;
+                        } else {
+                            teacherName = currentUser.getEmail();
+                        }
+                    } else {
+                        teacherName = currentUser.getEmail();
+                    }
+
+                    // Now create the class with the correct teacher name
+                    ClassModel classModel = new ClassModel();
+                    classModel.setClassName(className);
+                    classModel.setSubjectCode(subjectCode);
+                    classModel.setRoom(room);
+                    classModel.setStartTime(startTime);
+                    classModel.setEndTime(endTime);
+                    classModel.setDays(days);
+                    classModel.setCreatedAt(System.currentTimeMillis());
+                    classModel.setClassCode(null);
+                    classModel.setTeacher(teacherName);
+
+                    // Save the class
+                    db.collection("users")
+                            .document(userId)
+                            .collection("classes")
+                            .add(classModel)
+                            .addOnSuccessListener(documentReference -> {
+                                String classId = documentReference.getId();
+                                documentReference.update("id", classId);
+
+                                Toast.makeText(CreateClass.this, "Class Created Successfully", Toast.LENGTH_SHORT).show();
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(CreateClass.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                                createClassButton.setEnabled(true);
+                                createClassButton.setText("Create Class");
+                            });
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(CreateClass.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    finish();
+                    Toast.makeText(CreateClass.this, "Error fetching user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
 
                     createClassButton.setEnabled(true);
                     createClassButton.setText("Create Class");
                 });
-
     }
 }

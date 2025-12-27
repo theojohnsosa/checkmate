@@ -138,7 +138,7 @@ public class SignUp extends AppCompatActivity {
         yearLevelInput.setKeyListener(null);
 
         signUpButton.setOnClickListener(v -> {
-           createAccount();
+            createAccount();
         });
 
         hasAccountButton.setOnClickListener(v -> {
@@ -174,29 +174,29 @@ public class SignUp extends AppCompatActivity {
 
         mAuth.createUserWithEmailAndPassword(schoolEmail, password)
                 .addOnCompleteListener(this, task -> {
-                   if (task.isSuccessful()) {
-                       FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                       if (firebaseUser != null) {
-                           saveUserToFirestore(firebaseUser.getUid(),
-                                   firstName,
-                                   lastName,
-                                   schoolEmail,
-                                   userType,
-                                   department,
-                                   schoolNumber,
-                                   yearLevel);
-                       }
-                   } else {
-                       signUpButton.setEnabled(true);
-                       signUpButton.setText("Create Account");
+                    if (task.isSuccessful()) {
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            saveUserToFirestore(firebaseUser.getUid(),
+                                    firstName,
+                                    lastName,
+                                    schoolEmail,
+                                    userType,
+                                    department,
+                                    schoolNumber,
+                                    yearLevel);
+                        }
+                    } else {
+                        signUpButton.setEnabled(true);
+                        signUpButton.setText("Create Account");
 
-                       String errorMessage = "Sign up failed";
-                       if (task.getException() != null) {
-                           errorMessage = task.getException().getMessage();
-                       }
+                        String errorMessage = "Sign up failed";
+                        if (task.getException() != null) {
+                            errorMessage = task.getException().getMessage();
+                        }
 
-                       Toast.makeText(SignUp.this, errorMessage, Toast.LENGTH_LONG).show();
-                   }
+                        Toast.makeText(SignUp.this, errorMessage, Toast.LENGTH_LONG).show();
+                    }
                 });
     }
 
@@ -285,7 +285,7 @@ public class SignUp extends AppCompatActivity {
             String department,
             String schoolNumber,
             String yearLevel
-            ) {
+    ) {
         Map<String, Object> user = new HashMap<>();
         user.put("firstName", firstName);
         user.put("lastName", lastName);
@@ -299,12 +299,12 @@ public class SignUp extends AppCompatActivity {
         db.collection("users").document(userId)
                 .set(user)
                 .addOnCompleteListener(aVoid -> {
-                   Toast.makeText(SignUp.this,
-                           "Account created successfully!",
-                           Toast.LENGTH_SHORT).show();
-                   Intent intent = new Intent(SignUp.this, TeacherHome.class);
-                   startActivity(intent);
-                   finish();
+                    Toast.makeText(SignUp.this,
+                            "Account created successfully!",
+                            Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(SignUp.this, TeacherHome.class);
+                    startActivity(intent);
+                    finish();
                 })
                 .addOnFailureListener(e -> {
                     signUpButton.setEnabled(true);
