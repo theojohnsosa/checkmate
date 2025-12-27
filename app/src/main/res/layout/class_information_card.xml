@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="15dp"
+    app:cardBackgroundColor="#1A1A1A"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Class Information"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Class Name -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Class Name"
+                android:textColor="#828282"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/infoClassName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="DATA STRUCTURES AND ALGORITHM"
+                android:textAllCaps="true"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+        <!-- Class Code -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Class Code"
+                android:textColor="#828282"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/infoClassCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="CXSILP"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+        <!-- Subject Code -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Subject Code"
+                android:textColor="#828282"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/infoSubjectCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="DSA101"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+        <!-- Class Days -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Class Days"
+                android:textColor="#828282"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/infoClassDays"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Wed / Sat"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+        <!-- Start Time -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Start Time"
+                android:textColor="#828282"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/infoStartTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="11:00 AM"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+        <!-- End Time -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="End Time"
+                android:textColor="#828282"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/infoEndTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="3:00 PM"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+        <!-- Room -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Room"
+                android:textColor="#828282"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/infoRoom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Room 1007"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+        <!-- Students -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Students"
+                android:textColor="#828282"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/infoStudents"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+        <!-- Teacher -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Teacher"
+                android:textColor="#828282"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/infoTeacher"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Khail Garcia"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textAlignment="textEnd" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/attendanceCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="20dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- TOP ROW -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <!-- BELL -->
+            <TextView
+                android:id="@+id/bellIcon"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:gravity="center"
+                android:text="🔔"
+                android:textSize="22sp"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/attendance_button"
+                android:layout_marginEnd="12dp" />
+
+            <!-- CLASS CODE CHIP -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/classCodeCard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#2EAD00">
+
+                <TextView
+                    android:id="@+id/classCodeText"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="6dp"
+                    android:gravity="center"
+                    android:text="Class Code"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+        <!-- SUBTEXT -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share this code with students"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="14dp" />
+
+        <!-- BUTTON -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/attendanceButton"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:text="Start Attendance Session"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/attendance_button" />
+
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
