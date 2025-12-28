@@ -6,9 +6,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 
 import com.example.authtest.databinding.ActivityClassInformationBinding;
 import com.example.authtest.databinding.AttendanceCardBinding;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -20,8 +22,9 @@ public class ClassInformation extends AppCompatActivity {
     private ActivityClassInformationBinding binding;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
     private boolean isSessionActive = false;
+
+    private AppCompatButton addStudentsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +101,14 @@ public class ClassInformation extends AppCompatActivity {
         } else {
             Toast.makeText(this, "No class data was provided.", Toast.LENGTH_SHORT).show();
             finish();
+        }
+
+        addStudentsButton = findViewById(R.id.addStudentsButton);
+        if (addStudentsButton != null) {
+            addStudentsButton.setOnClickListener(v -> {
+                Intent altIntent = new Intent(ClassInformation.this, AddStudentsForm.class);
+                startActivity(altIntent);
+            });
         }
     }
 

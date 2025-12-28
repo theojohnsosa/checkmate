@@ -64,12 +64,28 @@ public class SignIn extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(schoolEmail, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        Toast.makeText(SignIn.this,
+
+                        String email = mAuth.getCurrentUser().getEmail();
+
+                        Intent intent;
+
+                        if (email != null && email.contains("@students.")) {
+                            // Student account
+                            intent = new Intent(SignIn.this, StudentHome.class);
+                        } else {
+                            // Teacher account
+                            intent = new Intent(SignIn.this, TeacherHome.class);
+                        }
+
+                        Toast.makeText(
+                                SignIn.this,
                                 "Sign in successful!",
-                                Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(SignIn.this, TeacherHome.class);
+                                Toast.LENGTH_SHORT
+                        ).show();
+
                         startActivity(intent);
                         finish();
+
                     } else {
                         signInButton.setEnabled(true);
                         signInButton.setText("Login");
@@ -78,11 +94,15 @@ public class SignIn extends AppCompatActivity {
                         if (task.getException() != null) {
                             errorMessage = task.getException().getMessage();
                         }
-                        Toast.makeText(SignIn.this,
+
+                        Toast.makeText(
+                                SignIn.this,
                                 errorMessage,
-                                Toast.LENGTH_LONG).show();
+                                Toast.LENGTH_LONG
+                        ).show();
                     }
                 });
+
     }
 
     private boolean validateInputs(String schoolEmail, String password) {
