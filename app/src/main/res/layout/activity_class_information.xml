@@ -67,10 +67,16 @@
             android:paddingHorizontal="20dp"
             android:paddingTop="20dp">
 
-            <!-- ATTENDANCE CARD -->
+            <!-- TEACHER ATTENDANCE CARD (Hidden for students) -->
             <include
                 android:id="@+id/attendanceCard"
                 layout="@layout/attendance_card" />
+
+            <!-- STUDENT ATTENDANCE STATUS CARD (Hidden for teachers) -->
+            <include
+                android:id="@+id/studentAttendanceCard"
+                layout="@layout/students_attendance_status_card"
+                android:visibility="gone" />
 
             <!-- CLASS INFO CARD -->
             <include
@@ -80,7 +86,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp" />
 
-            <!-- ADD STUDENTS BUTTON -->
+            <!-- ADD STUDENTS BUTTON (Hidden for students) -->
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/addStudentsButton"
                 android:text="Add Students"

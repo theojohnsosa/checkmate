@@ -3,6 +3,7 @@ package com.example.authtest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +24,7 @@ public class ClassInformation extends AppCompatActivity {
     private boolean isSessionActive = false;
 
     private AppCompatButton addStudentsButton;
+    private boolean isStudent = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +38,11 @@ public class ClassInformation extends AppCompatActivity {
         // Back button
         binding.backButton.setOnClickListener(v -> finish());
 
-        // Load teacher name
-        loadCurrentUserName();
+        // Initialize addStudentsButton
+        addStudentsButton = findViewById(R.id.addStudentsButton);
+
+        // Check if user is student or teacher
+        checkUserTypeAndSetupUI();
 
         // Get intent data
         Intent intent = getIntent();
@@ -46,7 +51,7 @@ public class ClassInformation extends AppCompatActivity {
 
             if (classModel != null) {
 
-                // --- Attendance Card Setup ---
+                // --- Attendance Card Setup (only for teachers) ---
                 AttendanceCardBinding attendanceBinding = binding.attendanceCard;
                 attendanceBinding.classCodeText.setText(classModel.getClassCode() != null ? classModel.getClassCode() : "N/A");
 
@@ -84,6 +89,10 @@ public class ClassInformation extends AppCompatActivity {
                     binding.classInfoCard.infoClassDays.setText("N/A");
                 }
 
+                // Set teacher name from ClassModel (not from current user!)
+                String teacherName = classModel.getTeacher();
+                binding.classInfoCard.infoTeacher.setText(teacherName != null && !teacherName.isEmpty() ? teacherName : "N/A");
+
             } else {
                 Toast.makeText(this, "Class data could not be loaded.", Toast.LENGTH_SHORT).show();
                 finish();
@@ -93,8 +102,8 @@ public class ClassInformation extends AppCompatActivity {
             finish();
         }
 
-        addStudentsButton = findViewById(R.id.addStudentsButton);
-        if (addStudentsButton != null) {
+        // Setup Add Students button click listener (only if visible for teachers)
+        if (addStudentsButton != null && !isStudent) {
             addStudentsButton.setOnClickListener(v -> {
                 Intent altIntent = new Intent(ClassInformation.this, AddStudentsForm.class);
                 startActivity(altIntent);
@@ -102,35 +111,31 @@ public class ClassInformation extends AppCompatActivity {
         }
     }
 
-    private void loadCurrentUserName() {
+    private void checkUserTypeAndSetupUI() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            String userId = currentUser.getUid();
-            db.collection("users").document(userId).get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String firstName = documentSnapshot.getString("firstName");
-                            String lastName = documentSnapshot.getString("lastName");
-                            String fullName = (firstName != null && lastName != null)
-                                    ? firstName + " " + lastName
-                                    : currentUser.getDisplayName();
-                            binding.classInfoCard.infoTeacher.setText(fullName != null ? fullName : "N/A");
-                        } else if (currentUser.getDisplayName() != null) {
-                            binding.classInfoCard.infoTeacher.setText(currentUser.getDisplayName());
-                        } else {
-                            binding.classInfoCard.infoTeacher.setText("N/A");
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("ClassInformation", "Error loading user name", e);
-                        if (currentUser.getDisplayName() != null) {
-                            binding.classInfoCard.infoTeacher.setText(currentUser.getDisplayName());
-                        } else {
-                            binding.classInfoCard.infoTeacher.setText("N/A");
-                        }
-                    });
-        } else {
-            binding.classInfoCard.infoTeacher.setText("N/A");
+            String email = currentUser.getEmail();
+
+            // Check if user is a student (email contains "@students.")
+            if (email != null && email.contains("@students.")) {
+                // User is a STUDENT - show student attendance card, hide teacher features
+                isStudent = true;
+                binding.attendanceCard.getRoot().setVisibility(View.GONE);
+                binding.studentAttendanceCard.getRoot().setVisibility(View.VISIBLE);
+                if (addStudentsButton != null) {
+                    addStudentsButton.setVisibility(View.GONE);
+                }
+                Log.d("ClassInformation", "Student user detected - showing student attendance card");
+            } else {
+                // User is a TEACHER - show teacher attendance card, hide student card
+                isStudent = false;
+                binding.attendanceCard.getRoot().setVisibility(View.VISIBLE);
+                binding.studentAttendanceCard.getRoot().setVisibility(View.GONE);
+                if (addStudentsButton != null) {
+                    addStudentsButton.setVisibility(View.VISIBLE);
+                }
+                Log.d("ClassInformation", "Teacher user detected - showing all features");
+            }
         }
     }
 }

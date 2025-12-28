@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -24,6 +26,7 @@ public class StudentHome extends AppCompatActivity {
     private ClassAdapter classAdapter;
     private List<ClassModel> classList = new ArrayList<>();
     private static final String TAG = "StudentHome";
+    private boolean isLoadingClasses = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +55,15 @@ public class StudentHome extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadClasses();
+        // Only reload if not currently loading
+        if (!isLoadingClasses) {
+            loadClasses();
+        }
     }
 
     private void setupRecyclerView() {
         classAdapter = new ClassAdapter(classModel -> {
-            // Open class information when clicked
+            // Open class information directly
             Intent intent = new Intent(StudentHome.this, ClassInformation.class);
             intent.putExtra("CLASS_MODEL", classModel);
             startActivity(intent);
@@ -70,8 +76,19 @@ public class StudentHome extends AppCompatActivity {
     }
 
     private void loadClasses() {
+        // Prevent concurrent loading
+        if (isLoadingClasses) {
+            Log.d(TAG, "Already loading classes, skipping duplicate call");
+            return;
+        }
+
+        isLoadingClasses = true;
         String studentId = mAuth.getCurrentUser().getUid();
         Log.d(TAG, "Loading enrolled classes for student: " + studentId);
+
+        // Clear the list first to avoid duplicates
+        classList.clear();
+        classAdapter.notifyDataSetChanged();
 
         // Load from enrolledClasses subcollection
         db.collection("users")
@@ -81,7 +98,15 @@ public class StudentHome extends AppCompatActivity {
                 .addOnSuccessListener(querySnapshot -> {
                     Log.d(TAG, "Found " + querySnapshot.size() + " enrolled classes");
 
-                    classList.clear();
+                    if (querySnapshot.isEmpty()) {
+                        isLoadingClasses = false;
+                        updateUI();
+                        return;
+                    }
+
+                    // Track how many classes we've loaded
+                    final int totalClasses = querySnapshot.size();
+                    final int[] loadedClasses = {0};
 
                     // Get full class details from allClasses collection
                     for (var doc : querySnapshot) {
@@ -97,21 +122,39 @@ public class StudentHome extends AppCompatActivity {
                                             if (model != null) {
                                                 model.setId(classDoc.getId());
                                                 classList.add(model);
-                                                classAdapter.notifyDataSetChanged();
-                                                updateUI();
                                             }
                                         }
-                                    });
-                        }
-                    }
 
-                    // Update UI immediately in case there are no classes
-                    if (querySnapshot.isEmpty()) {
-                        updateUI();
+                                        // Update UI after all classes are loaded
+                                        loadedClasses[0]++;
+                                        if (loadedClasses[0] == totalClasses) {
+                                            classAdapter.notifyDataSetChanged();
+                                            updateUI();
+                                            isLoadingClasses = false;
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "Error loading class details", e);
+                                        loadedClasses[0]++;
+                                        if (loadedClasses[0] == totalClasses) {
+                                            classAdapter.notifyDataSetChanged();
+                                            updateUI();
+                                            isLoadingClasses = false;
+                                        }
+                                    });
+                        } else {
+                            loadedClasses[0]++;
+                            if (loadedClasses[0] == totalClasses) {
+                                classAdapter.notifyDataSetChanged();
+                                updateUI();
+                                isLoadingClasses = false;
+                            }
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error loading classes", e);
+                    isLoadingClasses = false;
                     updateUI();
                 });
     }
@@ -120,5 +163,7 @@ public class StudentHome extends AppCompatActivity {
         boolean isEmpty = classList.isEmpty();
         binding.emptyStateLayout.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         binding.classesRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+
+        Log.d(TAG, "UI Updated - Total classes displayed: " + classList.size());
     }
 }
