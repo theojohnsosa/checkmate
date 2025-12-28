@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="24dp"
     android:background="@drawable/dialog_rounded_background">
-    
+
     <TextView
         android:text="Join Class"
         android:textSize="25sp"
@@ -21,7 +21,7 @@
         android:layout_marginBottom="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-    
+
     <EditText
         android:id="@+id/classCodeInput"
         android:hint="ENTER CLASS CODE"
@@ -37,7 +37,7 @@
         android:background="@drawable/dialog_input_background"
         android:layout_width="match_parent"
         android:layout_height="60dp" />
-    
+
     <LinearLayout
         android:gravity="end"
         android:layout_width="match_parent"
@@ -51,7 +51,7 @@
             android:background="@drawable/dialog_cancel_button"
             android:layout_width="115dp"
             android:layout_height="wrap_content" />
-        
+
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/joinButton"
             android:text="Join"
@@ -62,5 +62,5 @@
             android:layout_height="wrap_content" />
 
     </LinearLayout>
-    
+
 </LinearLayout>

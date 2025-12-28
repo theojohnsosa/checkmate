@@ -15,8 +15,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.List;
-
 public class ClassInformation extends AppCompatActivity {
 
     private ActivityClassInformationBinding binding;
@@ -79,17 +77,9 @@ public class ClassInformation extends AppCompatActivity {
                 binding.classInfoCard.infoStudents.setText(String.valueOf(classModel.getStudents()));
 
                 // Format class days
-                List<String> days = classModel.getDays();
-                if (days != null && !days.isEmpty()) {
-                    StringBuilder daysBuilder = new StringBuilder();
-                    for (int i = 0; i < days.size(); i++) {
-                        String day = days.get(i);
-                        if (day != null && !day.isEmpty()) {
-                            daysBuilder.append(day.substring(0, Math.min(day.length(), 3)));
-                            if (i < days.size() - 1) daysBuilder.append("/");
-                        }
-                    }
-                    binding.classInfoCard.infoClassDays.setText(daysBuilder.toString());
+                String classDays = classModel.getClassDays();
+                if (classDays != null && !classDays.isEmpty()) {
+                    binding.classInfoCard.infoClassDays.setText(classDays);
                 } else {
                     binding.classInfoCard.infoClassDays.setText("N/A");
                 }

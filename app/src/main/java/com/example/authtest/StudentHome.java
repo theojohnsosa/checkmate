@@ -1,77 +1,124 @@
 package com.example.authtest;
 
-import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.EditText;
+import android.util.Log;
+import android.view.View;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.example.authtest.databinding.ActivityStudentHomeBinding;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class StudentHome extends AppCompatActivity {
+
+    private ActivityStudentHomeBinding binding;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+
+    private ClassAdapter classAdapter;
+    private List<ClassModel> classList = new ArrayList<>();
+    private static final String TAG = "StudentHome";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_student_home);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        binding = ActivityStudentHomeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
+        setupRecyclerView();
+        loadClasses();
+
+        binding.joinClassButton.setOnClickListener(v -> {
+            JoinClassDialog dialog = new JoinClassDialog(this, this::loadClasses);
+            dialog.show();
         });
 
-        findViewById(R.id.joinClassButton).setOnClickListener(v -> showJoinClassDialog());
-
-        findViewById(R.id.ctaButton).setOnClickListener(v -> showJoinClassDialog());
-
+        binding.ctaButton.setOnClickListener(v -> {
+            JoinClassDialog dialog = new JoinClassDialog(this, this::loadClasses);
+            dialog.show();
+        });
     }
 
-    private void showJoinClassDialog() {
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_join_class);
-        dialog.setCancelable(true);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadClasses();
+    }
 
-        if (dialog.getWindow() != null) {
-            Window window = dialog.getWindow();
-
-            WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-            params.copyFrom(window.getAttributes());
-
-            params.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
-            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-
-            window.setAttributes(params);
-            window.setBackgroundDrawableResource(android.R.color.transparent);
-            window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            window.setDimAmount(0.6f);
-        }
-
-        EditText classCodeInput = dialog.findViewById(R.id.classCodeInput);
-        AppCompatButton cancelButton = dialog.findViewById(R.id.cancelButton);
-        AppCompatButton joinButton = dialog.findViewById(R.id.joinButton);
-
-        cancelButton.setOnClickListener(v -> dialog.dismiss());
-
-        joinButton.setOnClickListener(v -> {
-            String classCode = classCodeInput.getText().toString().trim();
-
-            if (classCode.isEmpty()) {
-                classCodeInput.setError("Class code is required");
-                return;
-            }
-
-            // TODO: Join class logic (Firestore lookup, etc.)
-            dialog.dismiss();
+    private void setupRecyclerView() {
+        classAdapter = new ClassAdapter(classModel -> {
+            // Open class information when clicked
+            Intent intent = new Intent(StudentHome.this, ClassInformation.class);
+            intent.putExtra("CLASS_MODEL", classModel);
+            startActivity(intent);
         });
 
-        dialog.show();
+        binding.classesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.classesRecyclerView.setAdapter(classAdapter);
+
+        classAdapter.setClasses(classList);
     }
 
+    private void loadClasses() {
+        String studentId = mAuth.getCurrentUser().getUid();
+        Log.d(TAG, "Loading enrolled classes for student: " + studentId);
+
+        // Load from enrolledClasses subcollection
+        db.collection("users")
+                .document(studentId)
+                .collection("enrolledClasses")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    Log.d(TAG, "Found " + querySnapshot.size() + " enrolled classes");
+
+                    classList.clear();
+
+                    // Get full class details from allClasses collection
+                    for (var doc : querySnapshot) {
+                        String classId = doc.getString("classId");
+
+                        if (classId != null) {
+                            db.collection("allClasses")
+                                    .document(classId)
+                                    .get()
+                                    .addOnSuccessListener(classDoc -> {
+                                        if (classDoc.exists()) {
+                                            ClassModel model = classDoc.toObject(ClassModel.class);
+                                            if (model != null) {
+                                                model.setId(classDoc.getId());
+                                                classList.add(model);
+                                                classAdapter.notifyDataSetChanged();
+                                                updateUI();
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+
+                    // Update UI immediately in case there are no classes
+                    if (querySnapshot.isEmpty()) {
+                        updateUI();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading classes", e);
+                    updateUI();
+                });
+    }
+
+    private void updateUI() {
+        boolean isEmpty = classList.isEmpty();
+        binding.emptyStateLayout.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        binding.classesRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+    }
 }
