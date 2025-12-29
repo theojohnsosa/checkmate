@@ -50,7 +50,21 @@
             android:textColor="#828282"
             android:textSize="14sp"
             android:textAlignment="center"
-            android:gravity="center" />
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Mark Attendance Button (Hidden by default) -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/markAttendanceButton"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:text="Mark Attendance"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:background="@drawable/create_account_button"
+            android:visibility="gone" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

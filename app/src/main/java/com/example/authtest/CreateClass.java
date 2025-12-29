@@ -38,7 +38,6 @@ public class CreateClass extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Initialize views
         classNameInput = findViewById(R.id.classNameInput);
         subjectCodeInput = findViewById(R.id.subjectCodeInput);
         monToggle = findViewById(R.id.monToggle);
@@ -53,13 +52,10 @@ public class CreateClass extends AppCompatActivity {
         createClassButton = findViewById(R.id.createClassButton);
         backButton = findViewById(R.id.backButton);
 
-        // Setup time dropdowns
         setupTimeDropdowns();
 
-        // Back button
         backButton.setOnClickListener(v -> finish());
 
-        // Create button listener
         createClassButton.setOnClickListener(v -> {
             if (validateInputs()) {
                 String classDays = getSelectedDays();
@@ -83,7 +79,6 @@ public class CreateClass extends AppCompatActivity {
     private void setupTimeDropdowns() {
         List<String> timeSlots = new ArrayList<>();
 
-        // Generate time slots from 6:00 AM to 10:00 PM
         String[] periods = {"AM", "PM"};
         for (String period : periods) {
             int startHour = period.equals("AM") ? 6 : 1;
@@ -104,7 +99,6 @@ public class CreateClass extends AppCompatActivity {
         startTimeInput.setAdapter(adapter);
         endTimeInput.setAdapter(adapter);
 
-        // Show dropdown on click
         startTimeInput.setOnClickListener(v -> startTimeInput.showDropDown());
         endTimeInput.setOnClickListener(v -> endTimeInput.showDropDown());
     }
@@ -161,7 +155,6 @@ public class CreateClass extends AppCompatActivity {
     private void createClass(ClassModel classModel) {
         String teacherId = mAuth.getCurrentUser().getUid();
 
-        // First get teacher's name from Firestore
         db.collection("users")
                 .document(teacherId)
                 .get()
@@ -180,7 +173,6 @@ public class CreateClass extends AppCompatActivity {
                         teacherName = mAuth.getCurrentUser().getDisplayName();
                     }
 
-                    // Now create the class with the teacher's name and empty allowed students list
                     ClassModel newClassModel = new ClassModel(
                             classModel.getClassName(),
                             classModel.getClassCode(),
@@ -193,8 +185,9 @@ public class CreateClass extends AppCompatActivity {
                             0
                     );
 
-                    // Initialize empty allowed students list
+                    // Initialize empty allowed students list and inactive attendance
                     newClassModel.setAllowedStudentEmails(new ArrayList<>());
+                    newClassModel.setAttendanceActive(false); // NEW: Set attendance as inactive initially
 
                     db.collection("users")
                             .document(teacherId)
@@ -203,12 +196,10 @@ public class CreateClass extends AppCompatActivity {
                             .addOnSuccessListener(documentReference -> {
                                 String classId = documentReference.getId();
 
-                                // Save to global collection for easy searching
                                 db.collection("allClasses")
                                         .document(classId)
                                         .set(newClassModel)
                                         .addOnSuccessListener(unused2 -> {
-                                            // Update both documents with ID
                                             documentReference.update("id", classId);
                                             db.collection("allClasses").document(classId).update("id", classId);
 

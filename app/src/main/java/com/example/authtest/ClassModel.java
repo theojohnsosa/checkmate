@@ -16,11 +16,13 @@ public class ClassModel implements Serializable {
     private String room;
     private String teacher;
     private int students;
-    private List<String> allowedStudentEmails; // NEW: List of allowed student emails
+    private List<String> allowedStudentEmails;
+    private boolean isAttendanceActive = false; // NEW: Track if attendance session is active
 
     public ClassModel() {
         // Required empty constructor for Firestore
         this.allowedStudentEmails = new ArrayList<>();
+        this.isAttendanceActive = false;
     }
 
     public ClassModel(String className, String classCode, String subjectCode,
@@ -36,6 +38,7 @@ public class ClassModel implements Serializable {
         this.teacher = teacher;
         this.students = students;
         this.allowedStudentEmails = new ArrayList<>();
+        this.isAttendanceActive = false;
     }
 
     public String getId() { return id; }
@@ -53,12 +56,20 @@ public class ClassModel implements Serializable {
 
     public void setStudents(int students) { this.students = students; }
 
-    // NEW: Getters and setters for allowedStudentEmails
     public List<String> getAllowedStudentEmails() {
         return allowedStudentEmails != null ? allowedStudentEmails : new ArrayList<>();
     }
 
     public void setAllowedStudentEmails(List<String> allowedStudentEmails) {
         this.allowedStudentEmails = allowedStudentEmails;
+    }
+
+    // NEW: Getters and setters for attendance session status
+    public boolean isAttendanceActive() {
+        return isAttendanceActive;
+    }
+
+    public void setAttendanceActive(boolean attendanceActive) {
+        isAttendanceActive = attendanceActive;
     }
 }
