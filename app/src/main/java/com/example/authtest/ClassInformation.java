@@ -11,7 +11,6 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.example.authtest.databinding.ActivityClassInformationBinding;
 import com.example.authtest.databinding.AttendanceCardBinding;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -25,6 +24,7 @@ public class ClassInformation extends AppCompatActivity {
 
     private AppCompatButton addStudentsButton;
     private boolean isStudent = false;
+    private String classId; // Store class ID
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,8 @@ public class ClassInformation extends AppCompatActivity {
             ClassModel classModel = (ClassModel) intent.getSerializableExtra("CLASS_MODEL");
 
             if (classModel != null) {
+                // Store class ID for later use
+                classId = classModel.getId();
 
                 // --- Attendance Card Setup (only for teachers) ---
                 AttendanceCardBinding attendanceBinding = binding.attendanceCard;
@@ -105,8 +107,13 @@ public class ClassInformation extends AppCompatActivity {
         // Setup Add Students button click listener (only if visible for teachers)
         if (addStudentsButton != null && !isStudent) {
             addStudentsButton.setOnClickListener(v -> {
-                Intent altIntent = new Intent(ClassInformation.this, AddStudentsForm.class);
-                startActivity(altIntent);
+                if (classId != null && !classId.isEmpty()) {
+                    Intent addStudentIntent = new Intent(ClassInformation.this, AddStudentsForm.class);
+                    addStudentIntent.putExtra("CLASS_ID", classId);
+                    startActivity(addStudentIntent);
+                } else {
+                    Toast.makeText(this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
+                }
             });
         }
     }

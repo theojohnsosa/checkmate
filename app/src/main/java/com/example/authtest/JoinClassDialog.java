@@ -21,8 +21,9 @@ import java.util.List;
 
 public class JoinClassDialog extends Dialog {
 
-    private final Runnable onSuccess;
     private static final String TAG = "JoinClassDialog";
+
+    private final Runnable onSuccess;
     private AppCompatButton joinButton;
 
     public JoinClassDialog(Context context, Runnable onSuccess) {
@@ -37,7 +38,7 @@ public class JoinClassDialog extends Dialog {
         if (window != null) {
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             window.setLayout(
-                    (int)(context.getResources().getDisplayMetrics().widthPixels * 0.92),
+                    (int) (context.getResources().getDisplayMetrics().widthPixels * 0.92),
                     ViewGroup.LayoutParams.WRAP_CONTENT
             );
         }
@@ -64,32 +65,30 @@ public class JoinClassDialog extends Dialog {
                 return;
             }
 
+            String rawEmail = mAuth.getCurrentUser().getEmail();
             String studentId = mAuth.getCurrentUser().getUid();
+
+            if (rawEmail == null) {
+                Toast.makeText(context, "Error: Could not retrieve your email", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            final String studentEmail = rawEmail.toLowerCase().trim();
+
             joinButton.setEnabled(false);
 
             Log.d(TAG, "Searching for class code: " + classCode);
+            Log.d(TAG, "Student email: " + studentEmail);
 
-            // First, let's see what's in allClasses
-            db.collection("allClasses")
-                    .get()
-                    .addOnSuccessListener(allSnapshot -> {
-                        Log.d(TAG, "Total classes in allClasses: " + allSnapshot.size());
-                        for (DocumentSnapshot doc : allSnapshot.getDocuments()) {
-                            String code = doc.getString("classCode");
-                            Log.d(TAG, "Found class code: '" + code + "'");
-                        }
-                    });
-
-            // Search in global allClasses collection
             db.collection("allClasses")
                     .whereEqualTo("classCode", classCode)
                     .limit(1)
                     .get()
                     .addOnSuccessListener(snapshot -> {
-                        Log.d(TAG, "Query result: " + snapshot.size() + " documents");
+
+                        Log.d(TAG, "Query result count: " + snapshot.size());
 
                         if (snapshot.isEmpty()) {
-                            Log.d(TAG, "Class not found with code: " + classCode);
                             codeInput.setError("Invalid code");
                             joinButton.setEnabled(true);
                             return;
@@ -97,23 +96,67 @@ public class JoinClassDialog extends Dialog {
 
                         DocumentSnapshot doc = snapshot.getDocuments().get(0);
                         ClassModel classModel = doc.toObject(ClassModel.class);
-                        String classId = doc.getId();
 
-                        if (classModel != null) {
-                            classModel.setId(classId);
-                            Log.d(TAG, "Class found: " + classModel.getClassName());
-                            addEnrolledClass(db, studentId, classId, classModel, context);
+                        if (classModel == null) {
+                            Toast.makeText(context, "Invalid class data", Toast.LENGTH_SHORT).show();
+                            joinButton.setEnabled(true);
+                            return;
                         }
+
+                        String classId = doc.getId();
+                        classModel.setId(classId);
+
+                        Log.d(TAG, "Class found: " + classModel.getClassName());
+
+                        List<String> allowedEmails = classModel.getAllowedStudentEmails();
+
+                        if (allowedEmails == null || allowedEmails.isEmpty()) {
+                            Toast.makeText(
+                                    context,
+                                    "No students have been added to this class yet. Contact your teacher.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                            joinButton.setEnabled(true);
+                            return;
+                        }
+
+                        boolean isAllowed = false;
+                        for (String allowedEmail : allowedEmails) {
+                            if (allowedEmail != null && allowedEmail.equalsIgnoreCase(studentEmail)) {
+                                isAllowed = true;
+                                break;
+                            }
+                        }
+
+                        if (!isAllowed) {
+                            Log.d(TAG, "Student not authorized: " + studentEmail);
+                            Toast.makeText(
+                                    context,
+                                    "You are not authorized to join this class. Contact your teacher.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                            joinButton.setEnabled(true);
+                            return;
+                        }
+
+                        Log.d(TAG, "Student authorized, enrolling...");
+                        addEnrolledClass(db, studentId, classId, classModel, context);
                     })
                     .addOnFailureListener(e -> {
-                        Log.e(TAG, "Error searching classes", e);
+                        Log.e(TAG, "Error querying class", e);
                         Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         joinButton.setEnabled(true);
                     });
         });
     }
 
-    private void addEnrolledClass(FirebaseFirestore db, String studentId, String classId, ClassModel classModel, Context context) {
+    private void addEnrolledClass(
+            FirebaseFirestore db,
+            String studentId,
+            String classId,
+            ClassModel classModel,
+            Context context
+    ) {
         HashMap<String, Object> enrollmentData = new HashMap<>();
         enrollmentData.put("classId", classId);
         enrollmentData.put("classCode", classModel.getClassCode());
@@ -126,7 +169,7 @@ public class JoinClassDialog extends Dialog {
                 .document(classId)
                 .set(enrollmentData)
                 .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "Successfully joined class!");
+                    Log.d(TAG, "Successfully joined class");
                     Toast.makeText(context, "Successfully joined class!", Toast.LENGTH_SHORT).show();
                     dismiss();
                     if (onSuccess != null) {
@@ -134,7 +177,7 @@ public class JoinClassDialog extends Dialog {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error enrolling in class", e);
+                    Log.e(TAG, "Enrollment failed", e);
                     Toast.makeText(context, "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     joinButton.setEnabled(true);
                 });

@@ -180,7 +180,7 @@ public class CreateClass extends AppCompatActivity {
                         teacherName = mAuth.getCurrentUser().getDisplayName();
                     }
 
-                    // Now create the class with the teacher's name
+                    // Now create the class with the teacher's name and empty allowed students list
                     ClassModel newClassModel = new ClassModel(
                             classModel.getClassName(),
                             classModel.getClassCode(),
@@ -192,6 +192,9 @@ public class CreateClass extends AppCompatActivity {
                             teacherName,
                             0
                     );
+
+                    // Initialize empty allowed students list
+                    newClassModel.setAllowedStudentEmails(new ArrayList<>());
 
                     db.collection("users")
                             .document(teacherId)

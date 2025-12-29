@@ -1,6 +1,8 @@
 package com.example.authtest;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClassModel implements Serializable {
 
@@ -14,9 +16,11 @@ public class ClassModel implements Serializable {
     private String room;
     private String teacher;
     private int students;
+    private List<String> allowedStudentEmails; // NEW: List of allowed student emails
 
     public ClassModel() {
         // Required empty constructor for Firestore
+        this.allowedStudentEmails = new ArrayList<>();
     }
 
     public ClassModel(String className, String classCode, String subjectCode,
@@ -31,6 +35,7 @@ public class ClassModel implements Serializable {
         this.room = room;
         this.teacher = teacher;
         this.students = students;
+        this.allowedStudentEmails = new ArrayList<>();
     }
 
     public String getId() { return id; }
@@ -47,4 +52,13 @@ public class ClassModel implements Serializable {
     public int getStudents() { return students; }
 
     public void setStudents(int students) { this.students = students; }
+
+    // NEW: Getters and setters for allowedStudentEmails
+    public List<String> getAllowedStudentEmails() {
+        return allowedStudentEmails != null ? allowedStudentEmails : new ArrayList<>();
+    }
+
+    public void setAllowedStudentEmails(List<String> allowedStudentEmails) {
+        this.allowedStudentEmails = allowedStudentEmails;
+    }
 }
