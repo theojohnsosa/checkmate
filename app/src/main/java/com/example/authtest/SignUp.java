@@ -302,7 +302,15 @@ public class SignUp extends AppCompatActivity {
                     Toast.makeText(SignUp.this,
                             "Account created successfully!",
                             Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(SignUp.this, TeacherHome.class);
+
+                    // FIXED: Navigate based on email (student emails contain "@students.")
+                    Intent intent;
+                    if (schoolEmail.contains("@students.")) {
+                        intent = new Intent(SignUp.this, StudentHome.class);
+                    } else {
+                        intent = new Intent(SignUp.this, TeacherHome.class);
+                    }
+
                     startActivity(intent);
                     finish();
                 })
