@@ -18,6 +18,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 public class ClassInformation extends AppCompatActivity {
 
     private ActivityClassInformationBinding binding;
@@ -28,7 +34,9 @@ public class ClassInformation extends AppCompatActivity {
     private AppCompatButton addStudentsButton;
     private boolean isStudent = false;
     private String classId;
-    private ListenerRegistration attendanceListener; // For real-time updates
+    private ListenerRegistration attendanceListener;
+    private boolean hasMarkedAttendance = false;
+    private String attendanceTimestamp = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +94,6 @@ public class ClassInformation extends AppCompatActivity {
         AttendanceCardBinding attendanceBinding = binding.attendanceCard;
         attendanceBinding.classCodeText.setText(classModel.getClassCode() != null ? classModel.getClassCode() : "N/A");
 
-        // Set initial state from class model
         isSessionActive = classModel.isAttendanceActive();
         updateTeacherAttendanceUI(attendanceBinding);
 
@@ -98,7 +105,16 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void setupStudentView(ClassModel classModel) {
-        // Set up real-time listener for attendance status changes
+        StudentsAttendanceStatusCardBinding studentCard = binding.studentAttendanceCard;
+
+        // Set up Mark Attendance button click
+        studentCard.markAttendanceButton.setOnClickListener(v -> {
+            markAttendance();
+        });
+
+        // Check if student has already marked attendance for current session
+        checkExistingAttendance();
+
         if (classId != null && !classId.isEmpty()) {
             DocumentReference classRef = db.collection("allClasses").document(classId);
 
@@ -111,11 +127,107 @@ public class ClassInformation extends AppCompatActivity {
                 if (snapshot != null && snapshot.exists()) {
                     Boolean isActive = snapshot.getBoolean("attendanceActive");
                     if (isActive != null) {
+                        // If session ended, reset attendance status
+                        if (!isActive) {
+                            hasMarkedAttendance = false;
+                            attendanceTimestamp = "";
+                        }
                         updateStudentAttendanceCard(isActive);
                     }
                 }
             });
         }
+    }
+
+    private void checkExistingAttendance() {
+        if (classId == null || classId.isEmpty()) return;
+
+        String studentId = mAuth.getCurrentUser().getUid();
+
+        // Check if there's an active attendance record for this student in this class
+        db.collection("allClasses")
+                .document(classId)
+                .collection("attendanceRecords")
+                .document(studentId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Boolean marked = documentSnapshot.getBoolean("marked");
+                        Long timestamp = documentSnapshot.getLong("timestamp");
+
+                        if (marked != null && marked && timestamp != null) {
+                            hasMarkedAttendance = true;
+                            attendanceTimestamp = formatTimestamp(timestamp);
+
+                            // Check if session is still active
+                            db.collection("allClasses")
+                                    .document(classId)
+                                    .get()
+                                    .addOnSuccessListener(classDoc -> {
+                                        Boolean isActive = classDoc.getBoolean("attendanceActive");
+                                        if (isActive != null && isActive) {
+                                            showAttendanceMarkedState();
+                                        }
+                                    });
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ClassInformation", "Error checking attendance", e);
+                });
+    }
+
+    private void markAttendance() {
+        if (classId == null || classId.isEmpty()) {
+            Toast.makeText(this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String studentId = mAuth.getCurrentUser().getUid();
+        long timestamp = System.currentTimeMillis();
+
+        Map<String, Object> attendanceRecord = new HashMap<>();
+        attendanceRecord.put("studentId", studentId);
+        attendanceRecord.put("classId", classId);
+        attendanceRecord.put("timestamp", timestamp);
+        attendanceRecord.put("marked", true);
+
+        // Save attendance record to Firestore
+        db.collection("allClasses")
+                .document(classId)
+                .collection("attendanceRecords")
+                .document(studentId)
+                .set(attendanceRecord)
+                .addOnSuccessListener(unused -> {
+                    hasMarkedAttendance = true;
+                    attendanceTimestamp = formatTimestamp(timestamp);
+                    showAttendanceMarkedState();
+                    Log.d("ClassInformation", "Attendance marked successfully");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ClassInformation", "Error marking attendance", e);
+                    Toast.makeText(this, "Failed to mark attendance", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private String formatTimestamp(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        return "Recorded at " + sdf.format(new Date(timestamp));
+    }
+
+    private void showAttendanceMarkedState() {
+        StudentsAttendanceStatusCardBinding studentCard = binding.studentAttendanceCard;
+
+        // Change to GREEN success state
+        studentCard.getRoot().setCardBackgroundColor(0xFF51CF66);
+        studentCard.clockIcon.setText("✓");
+        studentCard.clockIcon.setTextSize(56);
+        studentCard.clockIcon.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF2F9E44));
+        studentCard.sessionStatusTitle.setText("Attendance Marked!");
+        studentCard.sessionStatusTitle.setTextColor(0xFFFFFFFF);
+        studentCard.sessionStatusDescription.setText(attendanceTimestamp);
+        studentCard.sessionStatusDescription.setTextColor(0xFFFFFFFF);
+        studentCard.markAttendanceButton.setVisibility(View.GONE);
     }
 
     private void updateTeacherAttendanceUI(AttendanceCardBinding attendanceBinding) {
@@ -133,36 +245,49 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void updateStudentAttendanceCard(boolean isActive) {
+        // If already marked attendance and session is still active, keep showing success state
+        if (hasMarkedAttendance && isActive) {
+            showAttendanceMarkedState();
+            return;
+        }
+
         StudentsAttendanceStatusCardBinding studentCard = binding.studentAttendanceCard;
 
         if (isActive) {
             // Session is ACTIVE - show blue "Mark Attendance" state
-            studentCard.getRoot().setCardBackgroundColor(0xFF4C6EF5); // Blue
+            studentCard.getRoot().setCardBackgroundColor(0xFF4C6EF5);
             studentCard.clockIcon.setText("🔔");
+            studentCard.clockIcon.setTextSize(48);
             studentCard.clockIcon.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF364FC7));
             studentCard.sessionStatusTitle.setText("Session Active");
-            studentCard.sessionStatusTitle.setTextColor(0xFFFFFFFF); // White text
+            studentCard.sessionStatusTitle.setTextColor(0xFFFFFFFF);
             studentCard.sessionStatusDescription.setText("Started a few seconds ago");
-            studentCard.sessionStatusDescription.setTextColor(0xFFFFFFFF); // White text
-
-            // Show Mark Attendance button if it exists
-            if (studentCard.markAttendanceButton != null) {
-                studentCard.markAttendanceButton.setVisibility(View.VISIBLE);
-            }
+            studentCard.sessionStatusDescription.setTextColor(0xFFFFFFFF);
+            studentCard.markAttendanceButton.setVisibility(View.VISIBLE);
         } else {
-            // Session is INACTIVE - show default gray state
-            studentCard.getRoot().setCardBackgroundColor(0xFFD9D9D9); // Gray
+            // Session is INACTIVE - show default gray state and clear attendance
+            hasMarkedAttendance = false;
+            attendanceTimestamp = "";
+
+            // Delete the attendance record when session ends
+            if (classId != null) {
+                String studentId = mAuth.getCurrentUser().getUid();
+                db.collection("allClasses")
+                        .document(classId)
+                        .collection("attendanceRecords")
+                        .document(studentId)
+                        .delete();
+            }
+
+            studentCard.getRoot().setCardBackgroundColor(0xFFD9D9D9);
             studentCard.clockIcon.setText("🕐");
+            studentCard.clockIcon.setTextSize(48);
             studentCard.clockIcon.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFC6C6C7));
             studentCard.sessionStatusTitle.setText("No Active Session");
-            studentCard.sessionStatusTitle.setTextColor(0xFF000000); // Black text
+            studentCard.sessionStatusTitle.setTextColor(0xFF000000);
             studentCard.sessionStatusDescription.setText("Wait for your teacher to start an attendance session");
-            studentCard.sessionStatusDescription.setTextColor(0xFF828282); // Gray text
-
-            // Hide Mark Attendance button if it exists
-            if (studentCard.markAttendanceButton != null) {
-                studentCard.markAttendanceButton.setVisibility(View.GONE);
-            }
+            studentCard.sessionStatusDescription.setTextColor(0xFF828282);
+            studentCard.markAttendanceButton.setVisibility(View.GONE);
         }
     }
 
@@ -174,20 +299,23 @@ public class ClassInformation extends AppCompatActivity {
 
         String teacherId = mAuth.getCurrentUser().getUid();
 
-        // Update in teacher's classes collection
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
                 .document(classId)
                 .update("attendanceActive", isActive)
                 .addOnSuccessListener(unused -> {
-                    // Also update in global allClasses collection
                     db.collection("allClasses")
                             .document(classId)
                             .update("attendanceActive", isActive)
                             .addOnSuccessListener(unused2 -> {
                                 String message = isActive ? "Attendance session started!" : "Attendance session ended!";
                                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+
+                                // If ending session, clear all attendance records
+                                if (!isActive) {
+                                    clearAllAttendanceRecords();
+                                }
                             })
                             .addOnFailureListener(e -> {
                                 Log.e("ClassInformation", "Failed to update allClasses", e);
@@ -196,6 +324,24 @@ public class ClassInformation extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Log.e("ClassInformation", "Failed to update attendance status", e);
                     Toast.makeText(this, "Failed to update status", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void clearAllAttendanceRecords() {
+        if (classId == null || classId.isEmpty()) return;
+
+        db.collection("allClasses")
+                .document(classId)
+                .collection("attendanceRecords")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (var doc : querySnapshot.getDocuments()) {
+                        doc.getReference().delete();
+                    }
+                    Log.d("ClassInformation", "All attendance records cleared");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ClassInformation", "Error clearing attendance records", e);
                 });
     }
 
@@ -247,7 +393,6 @@ public class ClassInformation extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Remove the real-time listener when activity is destroyed
         if (attendanceListener != null) {
             attendanceListener.remove();
         }
