@@ -88,11 +88,8 @@ public class AddStudentsForm extends AppCompatActivity {
                             .document(classId)
                             .update("allowedStudentEmails", FieldValue.arrayUnion(studentEmail))
                             .addOnSuccessListener(unused2 -> {
-                                Log.d(TAG, "Student email added successfully: " + studentEmail);
-                                Toast.makeText(this, "Student added successfully!", Toast.LENGTH_SHORT).show();
-                                studentEmailInput.setText("");
-                                addStudentButton.setEnabled(true);
-                                addStudentButton.setText("Add Student");
+                                // Increment the student count in both locations
+                                incrementStudentCount(teacherId);
                             })
                             .addOnFailureListener(e -> {
                                 Log.e(TAG, "Failed to update allClasses", e);
@@ -104,6 +101,40 @@ public class AddStudentsForm extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to add student", e);
                     Toast.makeText(this, "Failed to add student: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    addStudentButton.setEnabled(true);
+                    addStudentButton.setText("Add Student");
+                });
+    }
+
+    private void incrementStudentCount(String teacherId) {
+        // Increment in teacher's class collection
+        db.collection("users")
+                .document(teacherId)
+                .collection("classes")
+                .document(classId)
+                .update("students", FieldValue.increment(1))
+                .addOnSuccessListener(unused -> {
+                    // Also increment in allClasses collection
+                    db.collection("allClasses")
+                            .document(classId)
+                            .update("students", FieldValue.increment(1))
+                            .addOnSuccessListener(unused2 -> {
+                                Log.d(TAG, "Student count incremented successfully");
+                                Toast.makeText(this, "Student added successfully!", Toast.LENGTH_SHORT).show();
+                                studentEmailInput.setText("");
+                                addStudentButton.setEnabled(true);
+                                addStudentButton.setText("Add Student");
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Failed to increment count in allClasses", e);
+                                Toast.makeText(this, "Student added but count not updated", Toast.LENGTH_SHORT).show();
+                                addStudentButton.setEnabled(true);
+                                addStudentButton.setText("Add Student");
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to increment student count", e);
+                    Toast.makeText(this, "Student added but count not updated", Toast.LENGTH_SHORT).show();
                     addStudentButton.setEnabled(true);
                     addStudentButton.setText("Add Student");
                 });

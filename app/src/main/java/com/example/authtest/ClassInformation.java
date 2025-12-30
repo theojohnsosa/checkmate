@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,8 +37,17 @@ public class ClassInformation extends AppCompatActivity {
     private boolean isStudent = false;
     private String classId;
     private ListenerRegistration attendanceListener;
+    private ListenerRegistration statsListener;
+    private ListenerRegistration classInfoListener;
     private boolean hasMarkedAttendance = false;
     private String attendanceTimestamp = "";
+
+    private TextView totalStudentsCount;
+    private TextView presentCount;
+    private TextView lateCount;
+    private TextView absentCount;
+
+    private String classStartTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +62,13 @@ public class ClassInformation extends AppCompatActivity {
 
         addStudentsButton = findViewById(R.id.addStudentsButton);
 
+        // Initialize stats TextViews
+        View statsCard = binding.attendanceStatsCard.getRoot();
+        totalStudentsCount = statsCard.findViewById(R.id.totalStudentsCount);
+        presentCount = statsCard.findViewById(R.id.presentCount);
+        lateCount = statsCard.findViewById(R.id.lateCount);
+        absentCount = statsCard.findViewById(R.id.absentCount);
+
         checkUserTypeAndSetupUI();
 
         Intent intent = getIntent();
@@ -59,9 +77,12 @@ public class ClassInformation extends AppCompatActivity {
 
             if (classModel != null) {
                 classId = classModel.getId();
+                classStartTime = classModel.getStartTime();
 
                 if (!isStudent) {
                     setupTeacherView(classModel);
+                    setupAttendanceStatsListener();
+                    setupClassInfoListener();
                 } else {
                     setupStudentView(classModel);
                 }
@@ -107,12 +128,10 @@ public class ClassInformation extends AppCompatActivity {
     private void setupStudentView(ClassModel classModel) {
         StudentsAttendanceStatusCardBinding studentCard = binding.studentAttendanceCard;
 
-        // Set up Mark Attendance button click
         studentCard.markAttendanceButton.setOnClickListener(v -> {
             markAttendance();
         });
 
-        // Check if student has already marked attendance for current session
         checkExistingAttendance();
 
         if (classId != null && !classId.isEmpty()) {
@@ -127,7 +146,6 @@ public class ClassInformation extends AppCompatActivity {
                 if (snapshot != null && snapshot.exists()) {
                     Boolean isActive = snapshot.getBoolean("attendanceActive");
                     if (isActive != null) {
-                        // If session ended, reset attendance status
                         if (!isActive) {
                             hasMarkedAttendance = false;
                             attendanceTimestamp = "";
@@ -139,12 +157,117 @@ public class ClassInformation extends AppCompatActivity {
         }
     }
 
+    private void setupAttendanceStatsListener() {
+        if (classId == null || classId.isEmpty()) return;
+
+        statsListener = db.collection("allClasses")
+                .document(classId)
+                .collection("attendanceRecords")
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Log.e("ClassInformation", "Error listening to attendance stats", error);
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        calculateAttendanceStats(snapshots.getDocuments());
+                    }
+                });
+    }
+
+    private void setupClassInfoListener() {
+        if (classId == null || classId.isEmpty()) return;
+
+        classInfoListener = db.collection("allClasses")
+                .document(classId)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null) {
+                        Log.e("ClassInformation", "Error listening to class info", error);
+                        return;
+                    }
+
+                    if (snapshot != null && snapshot.exists()) {
+                        Long studentCount = snapshot.getLong("students");
+                        if (studentCount != null) {
+                            binding.classInfoCard.infoStudents.setText(String.valueOf(studentCount));
+                        }
+                    }
+                });
+    }
+
+    private void calculateAttendanceStats(java.util.List<com.google.firebase.firestore.DocumentSnapshot> documents) {
+        int total = documents.size();
+        int present = 0;
+        int late = 0;
+        int absent = 0;
+
+        for (var doc : documents) {
+            Long timestamp = doc.getLong("timestamp");
+            if (timestamp != null) {
+                String status = getAttendanceStatus(timestamp);
+                switch (status) {
+                    case "Present":
+                        present++;
+                        break;
+                    case "Late":
+                        late++;
+                        break;
+                    case "Absent":
+                        absent++;
+                        break;
+                }
+            }
+        }
+
+        // Update UI
+        totalStudentsCount.setText(String.valueOf(total));
+        presentCount.setText(String.valueOf(present));
+        lateCount.setText(String.valueOf(late));
+        absentCount.setText(String.valueOf(absent));
+    }
+
+    private String getAttendanceStatus(long markedTimestamp) {
+        if (classStartTime == null || classStartTime.isEmpty()) {
+            return "Present";
+        }
+
+        try {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
+            Date startTime = timeFormat.parse(classStartTime);
+            Date markedTime = new Date(markedTimestamp);
+
+            // Get current date and set the time to class start time
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String today = dateFormat.format(markedTime);
+            String startTimeString = today + " " + classStartTime;
+
+            SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd h:mm a", Locale.getDefault());
+            Date classStartDateTime = fullFormat.parse(startTimeString);
+
+            if (classStartDateTime == null) return "Present";
+
+            long differenceMs = markedTimestamp - classStartDateTime.getTime();
+            long differenceMinutes = differenceMs / (60 * 1000);
+
+            if (differenceMinutes <= 15) {
+                return "Present";
+            } else if (differenceMinutes <= 30) {
+                return "Late";
+            } else {
+                return "Absent";
+            }
+
+        } catch (ParseException e) {
+            Log.e("ClassInformation", "Error parsing time", e);
+            return "Present";
+        }
+    }
+
     private void checkExistingAttendance() {
         if (classId == null || classId.isEmpty()) return;
 
         String studentId = mAuth.getCurrentUser().getUid();
 
-        // Check if there's an active attendance record for this student in this class
         db.collection("allClasses")
                 .document(classId)
                 .collection("attendanceRecords")
@@ -159,7 +282,6 @@ public class ClassInformation extends AppCompatActivity {
                             hasMarkedAttendance = true;
                             attendanceTimestamp = formatTimestamp(timestamp);
 
-                            // Check if session is still active
                             db.collection("allClasses")
                                     .document(classId)
                                     .get()
@@ -192,7 +314,6 @@ public class ClassInformation extends AppCompatActivity {
         attendanceRecord.put("timestamp", timestamp);
         attendanceRecord.put("marked", true);
 
-        // Save attendance record to Firestore
         db.collection("allClasses")
                 .document(classId)
                 .collection("attendanceRecords")
@@ -218,7 +339,6 @@ public class ClassInformation extends AppCompatActivity {
     private void showAttendanceMarkedState() {
         StudentsAttendanceStatusCardBinding studentCard = binding.studentAttendanceCard;
 
-        // Change to GREEN success state
         studentCard.getRoot().setCardBackgroundColor(0xFF51CF66);
         studentCard.clockIcon.setText("✓");
         studentCard.clockIcon.setTextSize(56);
@@ -245,7 +365,6 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void updateStudentAttendanceCard(boolean isActive) {
-        // If already marked attendance and session is still active, keep showing success state
         if (hasMarkedAttendance && isActive) {
             showAttendanceMarkedState();
             return;
@@ -254,7 +373,6 @@ public class ClassInformation extends AppCompatActivity {
         StudentsAttendanceStatusCardBinding studentCard = binding.studentAttendanceCard;
 
         if (isActive) {
-            // Session is ACTIVE - show blue "Mark Attendance" state
             studentCard.getRoot().setCardBackgroundColor(0xFF4C6EF5);
             studentCard.clockIcon.setText("🔔");
             studentCard.clockIcon.setTextSize(48);
@@ -265,11 +383,9 @@ public class ClassInformation extends AppCompatActivity {
             studentCard.sessionStatusDescription.setTextColor(0xFFFFFFFF);
             studentCard.markAttendanceButton.setVisibility(View.VISIBLE);
         } else {
-            // Session is INACTIVE - show default gray state and clear attendance
             hasMarkedAttendance = false;
             attendanceTimestamp = "";
 
-            // Delete the attendance record when session ends
             if (classId != null) {
                 String studentId = mAuth.getCurrentUser().getUid();
                 db.collection("allClasses")
@@ -312,7 +428,6 @@ public class ClassInformation extends AppCompatActivity {
                                 String message = isActive ? "Attendance session started!" : "Attendance session ended!";
                                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 
-                                // If ending session, clear all attendance records
                                 if (!isActive) {
                                     clearAllAttendanceRecords();
                                 }
@@ -374,6 +489,7 @@ public class ClassInformation extends AppCompatActivity {
                 isStudent = true;
                 binding.attendanceCard.getRoot().setVisibility(View.GONE);
                 binding.studentAttendanceCard.getRoot().setVisibility(View.VISIBLE);
+                binding.attendanceStatsCard.getRoot().setVisibility(View.GONE);
                 if (addStudentsButton != null) {
                     addStudentsButton.setVisibility(View.GONE);
                 }
@@ -382,6 +498,7 @@ public class ClassInformation extends AppCompatActivity {
                 isStudent = false;
                 binding.attendanceCard.getRoot().setVisibility(View.VISIBLE);
                 binding.studentAttendanceCard.getRoot().setVisibility(View.GONE);
+                binding.attendanceStatsCard.getRoot().setVisibility(View.VISIBLE);
                 if (addStudentsButton != null) {
                     addStudentsButton.setVisibility(View.VISIBLE);
                 }
@@ -395,6 +512,12 @@ public class ClassInformation extends AppCompatActivity {
         super.onDestroy();
         if (attendanceListener != null) {
             attendanceListener.remove();
+        }
+        if (statsListener != null) {
+            statsListener.remove();
+        }
+        if (classInfoListener != null) {
+            classInfoListener.remove();
         }
     }
 }
