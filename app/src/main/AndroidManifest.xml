@@ -20,16 +20,10 @@
             android:name=".AddStudentsForm"
             android:exported="false" />
         <activity
-            android:name=".ClassInformationCard"
-            android:exported="false" />
-        <activity
             android:name=".AttendanceCard"
             android:exported="false" />
         <activity
             android:name=".ClassInformation"
-            android:exported="false" />
-        <activity
-            android:name=".ItemClassCard"
             android:exported="false" />
         <activity
             android:name=".CreateClass"
