@@ -61,11 +61,13 @@
         android:fillViewport="true">
 
         <LinearLayout
+            android:id="@+id/mainContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="20dp"
-            android:paddingTop="20dp">
+            android:paddingTop="20dp"
+            android:paddingBottom="40dp">
 
             <!-- TEACHER ATTENDANCE CARD (Hidden for students) -->
             <include
@@ -107,8 +109,30 @@
                 android:padding="20dp"
                 android:textAlignment="center"
                 android:gravity="center"
+                android:layout_marginBottom="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="60dp" />
+
+            <!-- STUDENTS ATTENDED SECTION (Only visible for teachers) -->
+            <TextView
+                android:id="@+id/studentsAttendedHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Students Attended"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone" />
+
+            <!-- Students RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/studentsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone" />
 
         </LinearLayout>
 

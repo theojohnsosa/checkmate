@@ -124,6 +124,9 @@ public class AddStudentsForm extends AppCompatActivity {
                                 studentEmailInput.setText("");
                                 addStudentButton.setEnabled(true);
                                 addStudentButton.setText("Add Student");
+
+                                // Set result to notify ClassInformation to refresh
+                                setResult(RESULT_OK);
                             })
                             .addOnFailureListener(e -> {
                                 Log.e(TAG, "Failed to increment count in allClasses", e);
