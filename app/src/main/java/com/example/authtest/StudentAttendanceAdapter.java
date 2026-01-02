@@ -1,6 +1,7 @@
 package com.example.authtest;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttendanceAdapter.StudentViewHolder> {
 
+    private static final String TAG = "StudentAdapter";
     private List<StudentAttendanceModel> studentList = new ArrayList<>();
     private OnStudentRemoveListener removeListener;
 
@@ -46,7 +48,13 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
     }
 
     public void setStudents(List<StudentAttendanceModel> students) {
-        this.studentList = students;
+        if (students == null) {
+            Log.w(TAG, "Attempted to set null student list");
+            this.studentList = new ArrayList<>();
+        } else {
+            this.studentList = students;
+            Log.d(TAG, "Updated adapter with " + students.size() + " students");
+        }
         notifyDataSetChanged();
     }
 
@@ -54,11 +62,15 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         if (position >= 0 && position < studentList.size()) {
             studentList.remove(position);
             notifyItemRemoved(position);
+            Log.d(TAG, "Removed student at position " + position);
         }
     }
 
     public StudentAttendanceModel getStudentAt(int position) {
-        return studentList.get(position);
+        if (position >= 0 && position < studentList.size()) {
+            return studentList.get(position);
+        }
+        return null;
     }
 
     class StudentViewHolder extends RecyclerView.ViewHolder {
@@ -76,12 +88,37 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         }
 
         public void bind(StudentAttendanceModel student) {
-            studentNameText.setText(student.getFullName());
-            studentEmailText.setText(student.getEmail());
-            attendanceStatusText.setText(student.getAttendanceStatus());
+            if (student == null) {
+                Log.e(TAG, "Attempted to bind null student");
+                return;
+            }
+
+            // Set student name with null safety
+            String fullName = student.getFullName();
+            if (fullName == null || fullName.trim().isEmpty()) {
+                fullName = "Unknown User";
+            }
+            studentNameText.setText(fullName);
+
+            // Set student email with null safety
+            String email = student.getEmail();
+            if (email == null || email.trim().isEmpty()) {
+                email = "No email";
+            }
+            studentEmailText.setText(email);
+
+            // Set attendance status with null safety
+            String status = student.getAttendanceStatus();
+            if (status == null || status.trim().isEmpty()) {
+                status = "Not Marked";
+            }
+            attendanceStatusText.setText(status);
+
+            // Log binding for debugging
+            Log.d(TAG, "Binding: " + fullName + " (" + email + ") - Status: " + status);
 
             // Set status badge color based on attendance status
-            switch (student.getAttendanceStatus()) {
+            switch (status) {
                 case "Present":
                     statusBadge.setCardBackgroundColor(Color.parseColor("#2F9E44"));
                     attendanceStatusText.setTextColor(Color.parseColor("#FFFFFF"));

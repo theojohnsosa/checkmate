@@ -109,6 +109,7 @@ public class ClassInformation extends AppCompatActivity {
                     setupAttendanceStatsListener();
                     setupClassInfoListener();
                     setupStudentListRecyclerView();
+                    diagnoseFirestoreStructure();
                     loadStudentList();
                 } else {
                     setupStudentView(classModel);
@@ -136,6 +137,116 @@ public class ClassInformation extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    // Add this method to ClassInformation.java
+// Call it in onCreate() to diagnose the issue
+
+    private void diagnoseFirestoreStructure() {
+        Log.d(TAG, "==========================================");
+        Log.d(TAG, "DIAGNOSTIC: Starting Firestore Analysis");
+        Log.d(TAG, "==========================================");
+
+        // Step 1: Check what's in allowedStudentEmails
+        db.collection("allClasses")
+                .document(classId)
+                .get()
+                .addOnSuccessListener(classDoc -> {
+                    if (classDoc.exists()) {
+                        List<String> allowedEmails = (List<String>) classDoc.get("allowedStudentEmails");
+                        Log.d(TAG, "DIAGNOSTIC: allowedStudentEmails = " + allowedEmails);
+
+                        if (allowedEmails != null && !allowedEmails.isEmpty()) {
+                            String targetEmail = allowedEmails.get(0);
+                            Log.d(TAG, "DIAGNOSTIC: Target email = '" + targetEmail + "'");
+
+                            // Step 2: Get ALL users and find which fields they have
+                            db.collection("users")
+                                    .get()
+                                    .addOnSuccessListener(querySnapshot -> {
+                                        Log.d(TAG, "DIAGNOSTIC: Total users in database = " + querySnapshot.size());
+
+                                        boolean foundMatch = false;
+
+                                        for (var doc : querySnapshot.getDocuments()) {
+                                            // Get ALL fields from this document
+                                            Map<String, Object> allFields = doc.getData();
+
+                                            Log.d(TAG, "----------------------------------------");
+                                            Log.d(TAG, "DIAGNOSTIC: User ID = " + doc.getId());
+                                            Log.d(TAG, "DIAGNOSTIC: All fields = " + allFields.keySet());
+
+                                            // Check all possible email field names
+                                            String schoolEmail = doc.getString("schoolEmail");
+                                            String email = doc.getString("email");
+                                            String userEmail = doc.getString("userEmail");
+                                            String studentEmail = doc.getString("studentEmail");
+                                            String emailAddress = doc.getString("emailAddress");
+
+                                            Log.d(TAG, "DIAGNOSTIC:   schoolEmail = " + schoolEmail);
+                                            Log.d(TAG, "DIAGNOSTIC:   email = " + email);
+                                            Log.d(TAG, "DIAGNOSTIC:   userEmail = " + userEmail);
+                                            Log.d(TAG, "DIAGNOSTIC:   studentEmail = " + studentEmail);
+                                            Log.d(TAG, "DIAGNOSTIC:   emailAddress = " + emailAddress);
+
+                                            String firstName = doc.getString("firstName");
+                                            String lastName = doc.getString("lastName");
+                                            String first_name = doc.getString("first_name");
+                                            String last_name = doc.getString("last_name");
+
+                                            Log.d(TAG, "DIAGNOSTIC:   firstName = " + firstName);
+                                            Log.d(TAG, "DIAGNOSTIC:   lastName = " + lastName);
+                                            Log.d(TAG, "DIAGNOSTIC:   first_name = " + first_name);
+                                            Log.d(TAG, "DIAGNOSTIC:   last_name = " + last_name);
+
+                                            // Check if ANY email field matches our target
+                                            String cleanTarget = targetEmail.toLowerCase().trim();
+
+                                            if ((schoolEmail != null && schoolEmail.toLowerCase().trim().equals(cleanTarget)) ||
+                                                    (email != null && email.toLowerCase().trim().equals(cleanTarget)) ||
+                                                    (userEmail != null && userEmail.toLowerCase().trim().equals(cleanTarget)) ||
+                                                    (studentEmail != null && studentEmail.toLowerCase().trim().equals(cleanTarget)) ||
+                                                    (emailAddress != null && emailAddress.toLowerCase().trim().equals(cleanTarget))) {
+
+                                                foundMatch = true;
+                                                Log.d(TAG, "==========================================");
+                                                Log.d(TAG, "✓✓✓ FOUND MATCHING USER! ✓✓✓");
+                                                Log.d(TAG, "==========================================");
+                                                Log.d(TAG, "DIAGNOSTIC: User ID = " + doc.getId());
+                                                Log.d(TAG, "DIAGNOSTIC: First Name = " + (firstName != null ? firstName : first_name));
+                                                Log.d(TAG, "DIAGNOSTIC: Last Name = " + (lastName != null ? lastName : last_name));
+                                                Log.d(TAG, "DIAGNOSTIC: Matching email field value = " +
+                                                        (schoolEmail != null && schoolEmail.toLowerCase().trim().equals(cleanTarget) ? "schoolEmail: " + schoolEmail :
+                                                                email != null && email.toLowerCase().trim().equals(cleanTarget) ? "email: " + email :
+                                                                        userEmail != null && userEmail.toLowerCase().trim().equals(cleanTarget) ? "userEmail: " + userEmail :
+                                                                                studentEmail != null && studentEmail.toLowerCase().trim().equals(cleanTarget) ? "studentEmail: " + studentEmail :
+                                                                                        "emailAddress: " + emailAddress));
+                                                Log.d(TAG, "==========================================");
+                                            }
+                                        }
+
+                                        if (!foundMatch) {
+                                            Log.e(TAG, "==========================================");
+                                            Log.e(TAG, "✗✗✗ NO MATCHING USER FOUND! ✗✗✗");
+                                            Log.e(TAG, "==========================================");
+                                            Log.e(TAG, "DIAGNOSTIC: Looking for email = '" + targetEmail + "'");
+                                            Log.e(TAG, "DIAGNOSTIC: This email does NOT exist in any user document!");
+                                            Log.e(TAG, "DIAGNOSTIC: Check if:");
+                                            Log.e(TAG, "  1. The student has registered with this email");
+                                            Log.e(TAG, "  2. The email has correct spelling");
+                                            Log.e(TAG, "  3. The email case matches (should be lowercase)");
+                                            Log.e(TAG, "==========================================");
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "DIAGNOSTIC: Error loading users", e);
+                                    });
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "DIAGNOSTIC: Error loading class", e);
+                });
     }
 
     @Override
@@ -260,59 +371,90 @@ public class ClassInformation extends AppCompatActivity {
                             String cleanEmail = email.toLowerCase().trim();
                             Log.d(TAG, "Searching for user with email: " + cleanEmail);
 
-                            // Get all users and find the matching one
+                            // Query directly by schoolEmail field - THIS IS THE KEY FIX
                             db.collection("users")
+                                    .whereEqualTo("schoolEmail", cleanEmail)
+                                    .limit(1)
                                     .get()
-                                    .addOnSuccessListener(allUsersSnapshot -> {
-                                        boolean foundUser = false;
-
-                                        for (var userDoc : allUsersSnapshot.getDocuments()) {
+                                    .addOnSuccessListener(querySnapshot -> {
+                                        if (!querySnapshot.isEmpty()) {
+                                            // User found
+                                            var userDoc = querySnapshot.getDocuments().get(0);
+                                            String firstName = userDoc.getString("firstName");
+                                            String lastName = userDoc.getString("lastName");
+                                            String studentId = userDoc.getId();
                                             String userEmail = userDoc.getString("schoolEmail");
 
-                                            if (userEmail != null && userEmail.toLowerCase().trim().equals(cleanEmail)) {
-                                                String firstName = userDoc.getString("firstName");
-                                                String lastName = userDoc.getString("lastName");
-                                                String studentId = userDoc.getId();
+                                            Log.d(TAG, "✓ Found student: " + firstName + " " + lastName + " (ID: " + studentId + ")");
 
-                                                Log.d(TAG, "Found student: " + firstName + " " + lastName + " (" + userEmail + ")");
-
-                                                StudentAttendanceModel student = new StudentAttendanceModel(
-                                                        studentId, email,
-                                                        firstName != null ? firstName : "Unknown",
-                                                        lastName != null ? lastName : "User"
-                                                );
-
-                                                // Check if student has marked attendance
-                                                checkStudentAttendance(student);
-                                                studentList.add(student);
-                                                foundUser = true;
-                                                break;
-                                            }
-                                        }
-
-                                        if (!foundUser) {
-                                            Log.w(TAG, "No user found for email: " + cleanEmail);
-                                            // Still add the student with just email info
                                             StudentAttendanceModel student = new StudentAttendanceModel(
-                                                    null, email, "Unknown", "User"
+                                                    studentId,
+                                                    userEmail != null ? userEmail : email,
+                                                    firstName != null ? firstName : "Unknown",
+                                                    lastName != null ? lastName : "User"
                                             );
-                                            student.setAttendanceStatus("Not Marked");
+
                                             studentList.add(student);
+
+                                            // Check attendance AFTER adding to list
+                                            checkStudentAttendance(student);
+                                        } else {
+                                            // Try alternate query with 'email' field (fallback)
+                                            Log.w(TAG, "No user found with schoolEmail field, trying 'email' field");
+
+                                            db.collection("users")
+                                                    .whereEqualTo("email", cleanEmail)
+                                                    .limit(1)
+                                                    .get()
+                                                    .addOnSuccessListener(altQuerySnapshot -> {
+                                                        if (!altQuerySnapshot.isEmpty()) {
+                                                            var userDoc = altQuerySnapshot.getDocuments().get(0);
+                                                            String firstName = userDoc.getString("firstName");
+                                                            String lastName = userDoc.getString("lastName");
+                                                            String studentId = userDoc.getId();
+                                                            String userEmail = userDoc.getString("email");
+
+                                                            Log.d(TAG, "✓ Found student via 'email' field: " + firstName + " " + lastName);
+
+                                                            StudentAttendanceModel student = new StudentAttendanceModel(
+                                                                    studentId,
+                                                                    userEmail != null ? userEmail : email,
+                                                                    firstName != null ? firstName : "Unknown",
+                                                                    lastName != null ? lastName : "User"
+                                                            );
+
+                                                            studentList.add(student);
+                                                            checkStudentAttendance(student);
+                                                        } else {
+                                                            Log.e(TAG, "✗ User not found in Firestore for: " + cleanEmail);
+                                                            StudentAttendanceModel student = new StudentAttendanceModel(
+                                                                    null, email, "Unknown", "User"
+                                                            );
+                                                            student.setAttendanceStatus("Not Marked");
+                                                            studentList.add(student);
+                                                        }
+
+                                                        loadedCount[0]++;
+                                                        checkIfAllLoaded(loadedCount[0], totalEmails);
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e(TAG, "Error in fallback query", e);
+                                                        StudentAttendanceModel student = new StudentAttendanceModel(
+                                                                null, email, "Unknown", "User"
+                                                        );
+                                                        student.setAttendanceStatus("Not Marked");
+                                                        studentList.add(student);
+
+                                                        loadedCount[0]++;
+                                                        checkIfAllLoaded(loadedCount[0], totalEmails);
+                                                    });
                                         }
 
                                         loadedCount[0]++;
-                                        Log.d(TAG, "Loaded " + loadedCount[0] + " of " + totalEmails + " students");
-
-                                        if (loadedCount[0] == totalEmails) {
-                                            Log.d(TAG, "All students loaded, updating UI. Total students: " + studentList.size());
-                                            studentAdapter.setStudents(studentList);
-                                            updateStudentsHeaderVisibility();
-                                            setupStudentsListener();
-                                        }
+                                        checkIfAllLoaded(loadedCount[0], totalEmails);
                                     })
                                     .addOnFailureListener(e -> {
-                                        Log.e(TAG, "Error loading all users: " + cleanEmail, e);
-                                        // Still add the student with just email info
+                                        Log.e(TAG, "Error querying user: " + cleanEmail, e);
                                         StudentAttendanceModel student = new StudentAttendanceModel(
                                                 null, email, "Unknown", "User"
                                         );
@@ -320,11 +462,7 @@ public class ClassInformation extends AppCompatActivity {
                                         studentList.add(student);
 
                                         loadedCount[0]++;
-                                        if (loadedCount[0] == totalEmails) {
-                                            Log.d(TAG, "All students loaded (with errors), updating UI. Total students: " + studentList.size());
-                                            studentAdapter.setStudents(studentList);
-                                            updateStudentsHeaderVisibility();
-                                        }
+                                        checkIfAllLoaded(loadedCount[0], totalEmails);
                                     });
                         }
                     } else {
@@ -336,14 +474,33 @@ public class ClassInformation extends AppCompatActivity {
                 });
     }
 
+    // Helper method to check if all students are loaded
+    private void checkIfAllLoaded(int loadedCount, int totalEmails) {
+        if (loadedCount == totalEmails) {
+            Log.d(TAG, "=== All " + totalEmails + " students loaded ===");
+            Log.d(TAG, "Students in list: " + studentList.size());
+
+            // Log each student for debugging
+            for (StudentAttendanceModel s : studentList) {
+                Log.d(TAG, "  - " + s.getFullName() + " (" + s.getEmail() + ") Status: " + s.getAttendanceStatus());
+            }
+
+            studentAdapter.setStudents(new ArrayList<>(studentList));
+            updateStudentsHeaderVisibility();
+            setupStudentsListener();
+        }
+    }
+
     private void checkStudentAttendance(StudentAttendanceModel student) {
         if (classId == null || student.getStudentId() == null) {
-            Log.d(TAG, "Cannot check attendance - classId or studentId is null");
+            Log.d(TAG, "Cannot check attendance - classId or studentId is null for: " + student.getEmail());
             student.setAttendanceStatus("Not Marked");
+            student.setMarked(false);
+            student.setTimestamp(null);
             return;
         }
 
-        Log.d(TAG, "Checking attendance for student: " + student.getFullName());
+        Log.d(TAG, "Checking attendance for: " + student.getFullName() + " (ID: " + student.getStudentId() + ")");
 
         db.collection("allClasses")
                 .document(classId)
@@ -355,35 +512,51 @@ public class ClassInformation extends AppCompatActivity {
                         Boolean marked = doc.getBoolean("marked");
                         Long timestamp = doc.getLong("timestamp");
 
-                        Log.d(TAG, "Attendance record found for " + student.getFullName() + ": marked=" + marked + ", timestamp=" + timestamp);
+                        Log.d(TAG, "✓ Attendance record EXISTS for " + student.getFullName() + ": marked=" + marked + ", timestamp=" + timestamp);
 
                         if (marked != null && marked && timestamp != null) {
                             student.setMarked(true);
                             student.setTimestamp(timestamp);
                             String status = getAttendanceStatus(timestamp);
                             student.setAttendanceStatus(status);
-                            Log.d(TAG, "Student " + student.getFullName() + " attendance status: " + status);
+                            Log.d(TAG, "  → Status set to: " + status);
                         } else {
                             student.setAttendanceStatus("Not Marked");
-                            Log.d(TAG, "Student " + student.getFullName() + " has not marked attendance");
+                            student.setMarked(false);
+                            student.setTimestamp(null);
+                            Log.d(TAG, "  → Marked is false or timestamp is null");
                         }
                     } else {
                         student.setAttendanceStatus("Not Marked");
-                        Log.d(TAG, "No attendance record found for " + student.getFullName());
+                        student.setMarked(false);
+                        student.setTimestamp(null);
+                        Log.d(TAG, "✗ No attendance record for " + student.getFullName());
                     }
+
+                    // Update adapter immediately after checking
                     studentAdapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error checking attendance for " + student.getFullName(), e);
                     student.setAttendanceStatus("Not Marked");
+                    student.setMarked(false);
+                    student.setTimestamp(null);
                     studentAdapter.notifyDataSetChanged();
                 });
     }
 
     private void setupStudentsListener() {
-        if (classId == null || classId.isEmpty()) return;
+        if (classId == null || classId.isEmpty()) {
+            Log.e(TAG, "Cannot setup listener - classId is null");
+            return;
+        }
 
-        Log.d(TAG, "Setting up real-time attendance listener");
+        Log.d(TAG, "=== Setting up real-time attendance listener ===");
+
+        // Remove existing listener if any
+        if (studentsListener != null) {
+            studentsListener.remove();
+        }
 
         studentsListener = db.collection("allClasses")
                 .document(classId)
@@ -395,52 +568,68 @@ public class ClassInformation extends AppCompatActivity {
                     }
 
                     if (snapshots != null) {
-                        Log.d(TAG, "Attendance records updated: " + snapshots.size() + " records");
+                        Log.d(TAG, "🔔 Attendance records updated! Total records: " + snapshots.size());
 
-                        // Update each student's attendance status
+                        // Create a map of studentId -> attendance data for quick lookup
+                        java.util.Map<String, com.google.firebase.firestore.DocumentSnapshot> attendanceMap = new java.util.HashMap<>();
                         for (var doc : snapshots.getDocuments()) {
-                            String studentId = doc.getId();
-                            Boolean marked = doc.getBoolean("marked");
-                            Long timestamp = doc.getLong("timestamp");
-
-                            Log.d(TAG, "Processing attendance update for studentId: " + studentId);
-
-                            for (StudentAttendanceModel student : studentList) {
-                                if (student.getStudentId() != null && student.getStudentId().equals(studentId)) {
-                                    if (marked != null && marked && timestamp != null) {
-                                        student.setMarked(true);
-                                        student.setTimestamp(timestamp);
-                                        String status = getAttendanceStatus(timestamp);
-                                        student.setAttendanceStatus(status);
-                                        Log.d(TAG, "Updated " + student.getFullName() + " status to: " + status);
-                                    } else {
-                                        student.setAttendanceStatus("Not Marked");
-                                    }
-                                    break;
-                                }
-                            }
+                            attendanceMap.put(doc.getId(), doc);
+                            Log.d(TAG, "  Record: " + doc.getId() + " marked=" + doc.getBoolean("marked"));
                         }
 
-                        // Also check for students who haven't marked yet
+                        // Update each student's attendance status
+                        boolean updated = false;
                         for (StudentAttendanceModel student : studentList) {
                             if (student.getStudentId() != null) {
-                                boolean found = false;
-                                for (var doc : snapshots.getDocuments()) {
-                                    if (doc.getId().equals(student.getStudentId())) {
-                                        found = true;
-                                        break;
+                                var attendanceDoc = attendanceMap.get(student.getStudentId());
+
+                                if (attendanceDoc != null) {
+                                    // Student has an attendance record
+                                    Boolean marked = attendanceDoc.getBoolean("marked");
+                                    Long timestamp = attendanceDoc.getLong("timestamp");
+
+                                    if (marked != null && marked && timestamp != null) {
+                                        String newStatus = getAttendanceStatus(timestamp);
+                                        String oldStatus = student.getAttendanceStatus();
+
+                                        if (!newStatus.equals(oldStatus)) {
+                                            Log.d(TAG, "  ✓ Updating " + student.getFullName() + ": " + oldStatus + " → " + newStatus);
+                                            updated = true;
+                                        }
+
+                                        student.setMarked(true);
+                                        student.setTimestamp(timestamp);
+                                        student.setAttendanceStatus(newStatus);
+                                    } else {
+                                        if (!student.getAttendanceStatus().equals("Not Marked")) {
+                                            Log.d(TAG, "  ✓ Resetting " + student.getFullName() + " to Not Marked");
+                                            updated = true;
+                                        }
+                                        student.setAttendanceStatus("Not Marked");
+                                        student.setMarked(false);
+                                        student.setTimestamp(null);
                                     }
-                                }
-                                if (!found) {
+                                } else {
+                                    // No attendance record - mark as Not Marked
+                                    if (!student.getAttendanceStatus().equals("Not Marked")) {
+                                        Log.d(TAG, "  ✓ No record for " + student.getFullName() + ", setting to Not Marked");
+                                        updated = true;
+                                    }
                                     student.setAttendanceStatus("Not Marked");
                                     student.setMarked(false);
                                     student.setTimestamp(null);
                                 }
+                            } else {
+                                Log.w(TAG, "  ⚠ Student " + student.getEmail() + " has null ID, cannot update attendance");
                             }
                         }
 
-                        studentAdapter.notifyDataSetChanged();
-                        Log.d(TAG, "Student adapter updated");
+                        if (updated) {
+                            Log.d(TAG, "📱 Refreshing adapter with updates");
+                            studentAdapter.notifyDataSetChanged();
+                        } else {
+                            Log.d(TAG, "No status changes detected");
+                        }
                     }
                 });
     }
