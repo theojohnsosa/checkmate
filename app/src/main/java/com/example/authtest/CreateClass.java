@@ -1,6 +1,7 @@
 package com.example.authtest;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -12,12 +13,31 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
+/**
+ * FILE: CreateClass.java
+ * LOCATION: src/main/java/com/example/authtest/CreateClass.java
+ *
+ * PURPOSE: Activity for creating new classes with comprehensive duplicate prevention
+ *
+ * DUPLICATE CHECKS:
+ * 1. Same class name check
+ * 2. Time overlap + day overlap + same room check (comprehensive scheduling conflict detection)
+ *    - Checks if any day overlaps between classes
+ *    - Checks if times overlap on those overlapping days
+ *    - If both overlap and room is same, prevents creation
+ */
 public class CreateClass extends AppCompatActivity {
 
+    private static final String TAG = "CreateClass";
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
@@ -60,6 +80,9 @@ public class CreateClass extends AppCompatActivity {
             if (validateInputs()) {
                 String classDays = getSelectedDays();
 
+                createClassButton.setEnabled(false);
+                createClassButton.setText("Checking...");
+
                 ClassModel classModel = new ClassModel(
                         classNameInput.getText().toString().trim(),
                         generateClassCode(),
@@ -71,9 +94,236 @@ public class CreateClass extends AppCompatActivity {
                         mAuth.getCurrentUser().getDisplayName(),
                         0
                 );
-                createClass(classModel);
+
+                checkForDuplicateClasses(classModel);
             }
         });
+    }
+
+    /**
+     * Comprehensive duplicate check:
+     * 1. Same class name
+     * 2. Time + day overlap + same room (scheduling conflict)
+     */
+    private void checkForDuplicateClasses(ClassModel classModel) {
+        String teacherId = mAuth.getCurrentUser().getUid();
+        String className = classModel.getClassName();
+        String startTime = classModel.getStartTime();
+        String endTime = classModel.getEndTime();
+        String classDays = classModel.getClassDays();
+        String room = classModel.getRoom();
+
+        Log.d(TAG, "Checking for duplicate classes...");
+        Log.d(TAG, "  Class name: " + className);
+        Log.d(TAG, "  Time: " + startTime + " - " + endTime);
+        Log.d(TAG, "  Days: " + classDays);
+        Log.d(TAG, "  Room: " + room);
+
+        db.collection("users")
+                .document(teacherId)
+                .collection("classes")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<ClassModel> existingClasses = querySnapshot.toObjects(ClassModel.class);
+
+                    boolean hasNameConflict = false;
+                    boolean hasScheduleConflict = false;
+                    String conflictClassName = "";
+
+                    for (ClassModel existing : existingClasses) {
+                        // Check 1: Same class name
+                        if (existing.getClassName() != null &&
+                                existing.getClassName().equalsIgnoreCase(className)) {
+                            hasNameConflict = true;
+                            Log.d(TAG, "Name conflict found: " + existing.getClassName());
+                            break;
+                        }
+
+                        // Check 2: Comprehensive schedule conflict
+                        // - Check if rooms are same
+                        // - Check if days overlap
+                        // - Check if times overlap on those days
+                        if (existing.getRoom() != null &&
+                                existing.getRoom().equalsIgnoreCase(room) &&
+                                existing.getStartTime() != null &&
+                                existing.getEndTime() != null &&
+                                existing.getClassDays() != null) {
+
+                            // Check if any days overlap
+                            if (daysOverlap(classDays, existing.getClassDays())) {
+                                // Days overlap, now check if times overlap
+                                if (timesOverlap(startTime, endTime, existing.getStartTime(), existing.getEndTime())) {
+                                    hasScheduleConflict = true;
+                                    conflictClassName = existing.getClassName();
+                                    Log.d(TAG, "Schedule conflict found with: " + conflictClassName);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (hasNameConflict) {
+                        classNameInput.setError("This class name already exists");
+                        Toast.makeText(
+                                CreateClass.this,
+                                "A class with this name already exists",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        createClassButton.setEnabled(true);
+                        createClassButton.setText("Create Class");
+                    } else if (hasScheduleConflict) {
+                        Toast.makeText(
+                                CreateClass.this,
+                                "You already have a class \"" + conflictClassName +
+                                        "\" that conflicts with this schedule in " + room,
+                                Toast.LENGTH_LONG
+                        ).show();
+                        createClassButton.setEnabled(true);
+                        createClassButton.setText("Create Class");
+                    } else {
+                        Log.d(TAG, "No conflicts found, proceeding with class creation");
+                        createNewClass(classModel);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to check for duplicate classes", e);
+                    Toast.makeText(
+                            CreateClass.this,
+                            "Error checking classes: " + e.getMessage(),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    createClassButton.setEnabled(true);
+                    createClassButton.setText("Create Class");
+                });
+    }
+
+    /**
+     * Check if any days overlap between two day strings
+     * Example: "Mon/Wed/Fri" and "Wed/Sat" -> true (both have Wed)
+     */
+    private boolean daysOverlap(String days1, String days2) {
+        String[] daysArray1 = days1.split("/");
+        String[] daysArray2 = days2.split("/");
+
+        for (String day1 : daysArray1) {
+            for (String day2 : daysArray2) {
+                if (day1.trim().equalsIgnoreCase(day2.trim())) {
+                    Log.d(TAG, "Days overlap: " + day1);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if time ranges overlap
+     * Example: "10:00 AM" - "3:00 PM" and "10:00 AM" - "11:30 AM" -> true
+     * Uses the principle: two ranges overlap if start1 < end2 AND start2 < end1
+     */
+    private boolean timesOverlap(String startTime1, String endTime1, String startTime2, String endTime2) {
+        try {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
+
+            Date start1 = timeFormat.parse(startTime1);
+            Date end1 = timeFormat.parse(endTime1);
+            Date start2 = timeFormat.parse(startTime2);
+            Date end2 = timeFormat.parse(endTime2);
+
+            if (start1 == null || end1 == null || start2 == null || end2 == null) {
+                return false;
+            }
+
+            // Two time ranges overlap if: start1 < end2 AND start2 < end1
+            boolean overlaps = start1.before(end2) && start2.before(end1);
+
+            if (overlaps) {
+                Log.d(TAG, "Times overlap: " + startTime1 + "-" + endTime1 + " conflicts with " + startTime2 + "-" + endTime2);
+            }
+
+            return overlaps;
+        } catch (ParseException e) {
+            Log.e(TAG, "Error parsing times", e);
+            return false;
+        }
+    }
+
+    private void createNewClass(ClassModel classModel) {
+        createClassButton.setText("Creating...");
+        String teacherId = mAuth.getCurrentUser().getUid();
+
+        db.collection("users")
+                .document(teacherId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    String teacherName = "Unknown";
+
+                    if (documentSnapshot.exists()) {
+                        String firstName = documentSnapshot.getString("firstName");
+                        String lastName = documentSnapshot.getString("lastName");
+                        if (firstName != null && lastName != null) {
+                            teacherName = firstName + " " + lastName;
+                        } else if (mAuth.getCurrentUser().getDisplayName() != null) {
+                            teacherName = mAuth.getCurrentUser().getDisplayName();
+                        }
+                    } else if (mAuth.getCurrentUser().getDisplayName() != null) {
+                        teacherName = mAuth.getCurrentUser().getDisplayName();
+                    }
+
+                    ClassModel newClassModel = new ClassModel(
+                            classModel.getClassName(),
+                            classModel.getClassCode(),
+                            classModel.getSubjectCode(),
+                            classModel.getClassDays(),
+                            classModel.getStartTime(),
+                            classModel.getEndTime(),
+                            classModel.getRoom(),
+                            teacherName,
+                            0
+                    );
+
+                    newClassModel.setAllowedStudentEmails(new ArrayList<>());
+                    newClassModel.setAttendanceActive(false);
+
+                    db.collection("users")
+                            .document(teacherId)
+                            .collection("classes")
+                            .add(newClassModel)
+                            .addOnSuccessListener(documentReference -> {
+                                String classId = documentReference.getId();
+
+                                db.collection("allClasses")
+                                        .document(classId)
+                                        .set(newClassModel)
+                                        .addOnSuccessListener(unused2 -> {
+                                            documentReference.update("id", classId);
+                                            db.collection("allClasses").document(classId).update("id", classId);
+
+                                            Log.d(TAG, "Class created successfully with ID: " + classId);
+                                            Toast.makeText(CreateClass.this, "Class created successfully!", Toast.LENGTH_SHORT).show();
+                                            finish();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.e(TAG, "Failed to sync class globally", e);
+                                            Toast.makeText(CreateClass.this, "Class created but not searchable", Toast.LENGTH_SHORT).show();
+                                            createClassButton.setEnabled(true);
+                                            createClassButton.setText("Create Class");
+                                            finish();
+                                        });
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Failed to create class", e);
+                                Toast.makeText(CreateClass.this, "Failed to create class: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                createClassButton.setEnabled(true);
+                                createClassButton.setText("Create Class");
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to fetch teacher info", e);
+                    Toast.makeText(CreateClass.this, "Failed to fetch teacher info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    createClassButton.setEnabled(true);
+                    createClassButton.setText("Create Class");
+                });
     }
 
     private void setupTimeDropdowns() {
@@ -150,73 +400,5 @@ public class CreateClass extends AppCompatActivity {
             return false;
         }
         return true;
-    }
-
-    private void createClass(ClassModel classModel) {
-        String teacherId = mAuth.getCurrentUser().getUid();
-
-        db.collection("users")
-                .document(teacherId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    String teacherName = "Unknown";
-
-                    if (documentSnapshot.exists()) {
-                        String firstName = documentSnapshot.getString("firstName");
-                        String lastName = documentSnapshot.getString("lastName");
-                        if (firstName != null && lastName != null) {
-                            teacherName = firstName + " " + lastName;
-                        } else if (mAuth.getCurrentUser().getDisplayName() != null) {
-                            teacherName = mAuth.getCurrentUser().getDisplayName();
-                        }
-                    } else if (mAuth.getCurrentUser().getDisplayName() != null) {
-                        teacherName = mAuth.getCurrentUser().getDisplayName();
-                    }
-
-                    ClassModel newClassModel = new ClassModel(
-                            classModel.getClassName(),
-                            classModel.getClassCode(),
-                            classModel.getSubjectCode(),
-                            classModel.getClassDays(),
-                            classModel.getStartTime(),
-                            classModel.getEndTime(),
-                            classModel.getRoom(),
-                            teacherName,
-                            0
-                    );
-
-                    // Initialize empty allowed students list and inactive attendance
-                    newClassModel.setAllowedStudentEmails(new ArrayList<>());
-                    newClassModel.setAttendanceActive(false); // NEW: Set attendance as inactive initially
-
-                    db.collection("users")
-                            .document(teacherId)
-                            .collection("classes")
-                            .add(newClassModel)
-                            .addOnSuccessListener(documentReference -> {
-                                String classId = documentReference.getId();
-
-                                db.collection("allClasses")
-                                        .document(classId)
-                                        .set(newClassModel)
-                                        .addOnSuccessListener(unused2 -> {
-                                            documentReference.update("id", classId);
-                                            db.collection("allClasses").document(classId).update("id", classId);
-
-                                            Toast.makeText(this, "Class created successfully!", Toast.LENGTH_SHORT).show();
-                                            finish();
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Toast.makeText(this, "Class created but not searchable", Toast.LENGTH_SHORT).show();
-                                            finish();
-                                        });
-                            })
-                            .addOnFailureListener(e ->
-                                    Toast.makeText(this, "Failed to create class: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                            );
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to fetch teacher info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
     }
 }
