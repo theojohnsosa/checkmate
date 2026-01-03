@@ -12,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.content.ContextCompat;
@@ -139,15 +138,11 @@ public class ClassInformation extends AppCompatActivity {
         }
     }
 
-    // Add this method to ClassInformation.java
-// Call it in onCreate() to diagnose the issue
-
     private void diagnoseFirestoreStructure() {
         Log.d(TAG, "==========================================");
         Log.d(TAG, "DIAGNOSTIC: Starting Firestore Analysis");
         Log.d(TAG, "==========================================");
 
-        // Step 1: Check what's in allowedStudentEmails
         db.collection("allClasses")
                 .document(classId)
                 .get()
@@ -160,7 +155,6 @@ public class ClassInformation extends AppCompatActivity {
                             String targetEmail = allowedEmails.get(0);
                             Log.d(TAG, "DIAGNOSTIC: Target email = '" + targetEmail + "'");
 
-                            // Step 2: Get ALL users and find which fields they have
                             db.collection("users")
                                     .get()
                                     .addOnSuccessListener(querySnapshot -> {
@@ -169,14 +163,12 @@ public class ClassInformation extends AppCompatActivity {
                                         boolean foundMatch = false;
 
                                         for (var doc : querySnapshot.getDocuments()) {
-                                            // Get ALL fields from this document
                                             Map<String, Object> allFields = doc.getData();
 
                                             Log.d(TAG, "----------------------------------------");
                                             Log.d(TAG, "DIAGNOSTIC: User ID = " + doc.getId());
                                             Log.d(TAG, "DIAGNOSTIC: All fields = " + allFields.keySet());
 
-                                            // Check all possible email field names
                                             String schoolEmail = doc.getString("schoolEmail");
                                             String email = doc.getString("email");
                                             String userEmail = doc.getString("userEmail");
@@ -199,7 +191,6 @@ public class ClassInformation extends AppCompatActivity {
                                             Log.d(TAG, "DIAGNOSTIC:   first_name = " + first_name);
                                             Log.d(TAG, "DIAGNOSTIC:   last_name = " + last_name);
 
-                                            // Check if ANY email field matches our target
                                             String cleanTarget = targetEmail.toLowerCase().trim();
 
                                             if ((schoolEmail != null && schoolEmail.toLowerCase().trim().equals(cleanTarget)) ||
@@ -253,7 +244,6 @@ public class ClassInformation extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 100 && resultCode == RESULT_OK) {
-            // Refresh student list when returning from AddStudentsForm
             Log.d(TAG, "Returning from AddStudentsForm, refreshing list");
             loadStudentList();
         }
@@ -261,7 +251,6 @@ public class ClassInformation extends AppCompatActivity {
 
     private void setupStudentListRecyclerView() {
         Log.d(TAG, "Setting up student list RecyclerView");
-        // Setup adapter
         studentAdapter = new StudentAttendanceAdapter(this::removeStudentFromClass);
         studentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         studentsRecyclerView.setAdapter(studentAdapter);
@@ -286,19 +275,24 @@ public class ClassInformation extends AppCompatActivity {
                 int position = viewHolder.getAdapterPosition();
                 StudentAttendanceModel student = studentAdapter.getStudentAt(position);
 
-                // Show confirmation dialog
-                new AlertDialog.Builder(ClassInformation.this)
-                        .setTitle("Remove Student")
-                        .setMessage("Are you sure you want to remove " + student.getFullName() + " from this class?")
-                        .setPositiveButton("Remove", (dialog, which) -> {
-                            removeStudentFromClass(student, position);
-                        })
-                        .setNegativeButton("Cancel", (dialog, which) -> {
-                            // Restore the item
-                            studentAdapter.notifyItemChanged(position);
-                        })
-                        .setCancelable(false)
-                        .show();
+                if (student != null) {
+                    // Show custom confirmation dialog
+                    RemoveStudentConfirmationDialog confirmDialog = new RemoveStudentConfirmationDialog(
+                            ClassInformation.this,
+                            student.getFullName(),
+                            () -> {
+                                // On confirm - remove the student
+                                removeStudentFromClass(student, position);
+                            },
+                            () -> {
+                                // On cancel - restore the item
+                                studentAdapter.notifyItemChanged(position);
+                            }
+                    );
+                    confirmDialog.show();
+                } else {
+                    studentAdapter.notifyItemChanged(position);
+                }
             }
 
             @Override
@@ -371,14 +365,12 @@ public class ClassInformation extends AppCompatActivity {
                             String cleanEmail = email.toLowerCase().trim();
                             Log.d(TAG, "Searching for user with email: " + cleanEmail);
 
-                            // Query directly by schoolEmail field - THIS IS THE KEY FIX
                             db.collection("users")
                                     .whereEqualTo("schoolEmail", cleanEmail)
                                     .limit(1)
                                     .get()
                                     .addOnSuccessListener(querySnapshot -> {
                                         if (!querySnapshot.isEmpty()) {
-                                            // User found
                                             var userDoc = querySnapshot.getDocuments().get(0);
                                             String firstName = userDoc.getString("firstName");
                                             String lastName = userDoc.getString("lastName");
@@ -395,11 +387,8 @@ public class ClassInformation extends AppCompatActivity {
                                             );
 
                                             studentList.add(student);
-
-                                            // Check attendance AFTER adding to list
                                             checkStudentAttendance(student);
                                         } else {
-                                            // Try alternate query with 'email' field (fallback)
                                             Log.w(TAG, "No user found with schoolEmail field, trying 'email' field");
 
                                             db.collection("users")
@@ -474,13 +463,11 @@ public class ClassInformation extends AppCompatActivity {
                 });
     }
 
-    // Helper method to check if all students are loaded
     private void checkIfAllLoaded(int loadedCount, int totalEmails) {
         if (loadedCount == totalEmails) {
             Log.d(TAG, "=== All " + totalEmails + " students loaded ===");
             Log.d(TAG, "Students in list: " + studentList.size());
 
-            // Log each student for debugging
             for (StudentAttendanceModel s : studentList) {
                 Log.d(TAG, "  - " + s.getFullName() + " (" + s.getEmail() + ") Status: " + s.getAttendanceStatus());
             }
@@ -533,7 +520,6 @@ public class ClassInformation extends AppCompatActivity {
                         Log.d(TAG, "✗ No attendance record for " + student.getFullName());
                     }
 
-                    // Update adapter immediately after checking
                     studentAdapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
@@ -553,7 +539,6 @@ public class ClassInformation extends AppCompatActivity {
 
         Log.d(TAG, "=== Setting up real-time attendance listener ===");
 
-        // Remove existing listener if any
         if (studentsListener != null) {
             studentsListener.remove();
         }
@@ -570,21 +555,18 @@ public class ClassInformation extends AppCompatActivity {
                     if (snapshots != null) {
                         Log.d(TAG, "🔔 Attendance records updated! Total records: " + snapshots.size());
 
-                        // Create a map of studentId -> attendance data for quick lookup
                         java.util.Map<String, com.google.firebase.firestore.DocumentSnapshot> attendanceMap = new java.util.HashMap<>();
                         for (var doc : snapshots.getDocuments()) {
                             attendanceMap.put(doc.getId(), doc);
                             Log.d(TAG, "  Record: " + doc.getId() + " marked=" + doc.getBoolean("marked"));
                         }
 
-                        // Update each student's attendance status
                         boolean updated = false;
                         for (StudentAttendanceModel student : studentList) {
                             if (student.getStudentId() != null) {
                                 var attendanceDoc = attendanceMap.get(student.getStudentId());
 
                                 if (attendanceDoc != null) {
-                                    // Student has an attendance record
                                     Boolean marked = attendanceDoc.getBoolean("marked");
                                     Long timestamp = attendanceDoc.getLong("timestamp");
 
@@ -610,7 +592,6 @@ public class ClassInformation extends AppCompatActivity {
                                         student.setTimestamp(null);
                                     }
                                 } else {
-                                    // No attendance record - mark as Not Marked
                                     if (!student.getAttendanceStatus().equals("Not Marked")) {
                                         Log.d(TAG, "  ✓ No record for " + student.getFullName() + ", setting to Not Marked");
                                         updated = true;
@@ -658,27 +639,22 @@ public class ClassInformation extends AppCompatActivity {
 
         String teacherId = mAuth.getCurrentUser().getUid();
 
-        // Remove from teacher's class
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
                 .document(classId)
                 .update("allowedStudentEmails", FieldValue.arrayRemove(student.getEmail()))
                 .addOnSuccessListener(unused -> {
-                    // Remove from allClasses
                     db.collection("allClasses")
                             .document(classId)
                             .update("allowedStudentEmails", FieldValue.arrayRemove(student.getEmail()))
                             .addOnSuccessListener(unused2 -> {
-                                // Decrement student count
                                 decrementStudentCount(teacherId);
 
-                                // Remove from adapter
                                 studentAdapter.removeStudent(position);
                                 studentList.remove(student);
                                 updateStudentsHeaderVisibility();
 
-                                // Remove student's attendance record if exists
                                 if (student.getStudentId() != null) {
                                     db.collection("allClasses")
                                             .document(classId)
@@ -686,7 +662,6 @@ public class ClassInformation extends AppCompatActivity {
                                             .document(student.getStudentId())
                                             .delete();
 
-                                    // Remove from student's enrolledClasses
                                     db.collection("users")
                                             .document(student.getStudentId())
                                             .collection("enrolledClasses")
@@ -710,14 +685,12 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void decrementStudentCount(String teacherId) {
-        // Decrement in teacher's class collection
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
                 .document(classId)
                 .update("students", FieldValue.increment(-1))
                 .addOnSuccessListener(unused -> {
-                    // Also decrement in allClasses collection
                     db.collection("allClasses")
                             .document(classId)
                             .update("students", FieldValue.increment(-1))
@@ -841,7 +814,6 @@ public class ClassInformation extends AppCompatActivity {
             }
         }
 
-        // Update UI
         totalStudentsCount.setText(String.valueOf(total));
         presentCount.setText(String.valueOf(present));
         lateCount.setText(String.valueOf(late));
@@ -858,7 +830,6 @@ public class ClassInformation extends AppCompatActivity {
             Date startTime = timeFormat.parse(classStartTime);
             Date markedTime = new Date(markedTimestamp);
 
-            // Get current date and set the time to class start time
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             String today = dateFormat.format(markedTime);
             String startTimeString = today + " " + classStartTime;
@@ -1079,7 +1050,6 @@ public class ClassInformation extends AppCompatActivity {
                     }
                     Log.d("ClassInformation", "All attendance records cleared");
 
-                    // Reset all student statuses to "Not Marked"
                     for (StudentAttendanceModel student : studentList) {
                         student.setAttendanceStatus("Not Marked");
                         student.setMarked(false);
@@ -1125,7 +1095,6 @@ public class ClassInformation extends AppCompatActivity {
                 if (addStudentsButton != null) {
                     addStudentsButton.setVisibility(View.GONE);
                 }
-                // Hide student list for students
                 if (studentsAttendedHeader != null) {
                     studentsAttendedHeader.setVisibility(View.GONE);
                 }
