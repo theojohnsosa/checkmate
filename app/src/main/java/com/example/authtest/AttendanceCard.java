@@ -21,7 +21,6 @@ public class AttendanceCard {
         void onSessionEnded();
     }
 
-    // Setup method for <include> root view
     public void setup(View rootView) {
         bellIcon = rootView.findViewById(R.id.bellIcon);
         classCodeCard = rootView.findViewById(R.id.classCodeCard);
@@ -56,17 +55,15 @@ public class AttendanceCard {
         if (attendanceButton == null || bellIcon == null || classCodeCard == null) return;
 
         if (isSessionActive) {
-            // --- ACTIVE STATE ---
             attendanceButton.setText("End Attendance Session");
             attendanceButton.setBackgroundResource(R.drawable.alt_attendance_button);
             bellIcon.setBackgroundResource(R.drawable.alt_attendance_button);
-            classCodeCard.setCardBackgroundColor(Color.parseColor("#FA5252")); // Red
+            classCodeCard.setCardBackgroundColor(Color.parseColor("#FA5252"));
         } else {
-            // --- INACTIVE STATE ---
             attendanceButton.setText("Start Attendance Session");
             attendanceButton.setBackgroundResource(R.drawable.attendance_button);
             bellIcon.setBackgroundResource(R.drawable.attendance_button);
-            classCodeCard.setCardBackgroundColor(Color.parseColor("#2EAD00")); // Green
+            classCodeCard.setCardBackgroundColor(Color.parseColor("#2EAD00"));
         }
     }
 }
