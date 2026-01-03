@@ -105,12 +105,12 @@ public class CreateClass extends AppCompatActivity {
 
     private String getSelectedDays() {
         List<String> days = new ArrayList<>();
-        if (monToggle.isChecked()) days.add("Monday");
-        if (tueToggle.isChecked()) days.add("Tuesday");
-        if (wedToggle.isChecked()) days.add("Wednesday");
-        if (thuToggle.isChecked()) days.add("Thursday");
-        if (friToggle.isChecked()) days.add("Friday");
-        if (satToggle.isChecked()) days.add("Saturday");
+        if (monToggle.isChecked()) days.add("Mon");
+        if (tueToggle.isChecked()) days.add("Tue");
+        if (wedToggle.isChecked()) days.add("Wed");
+        if (thuToggle.isChecked()) days.add("Thu");
+        if (friToggle.isChecked()) days.add("Fri");
+        if (satToggle.isChecked()) days.add("Sat");
 
         return String.join("/", days);
     }
