@@ -46,7 +46,6 @@ public class ClassInformation extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private boolean isSessionActive = false;
-
     private AppCompatButton addStudentsButton;
     private boolean isStudent = false;
     private String classId;
@@ -56,15 +55,11 @@ public class ClassInformation extends AppCompatActivity {
     private ListenerRegistration studentsListener;
     private boolean hasMarkedAttendance = false;
     private String attendanceTimestamp = "";
-
     private TextView totalStudentsCount;
     private TextView presentCount;
     private TextView lateCount;
     private TextView absentCount;
-
     private String classStartTime;
-
-    // Student List Components
     private RecyclerView studentsRecyclerView;
     private StudentAttendanceAdapter studentAdapter;
     private List<StudentAttendanceModel> studentList = new ArrayList<>();
@@ -83,14 +78,12 @@ public class ClassInformation extends AppCompatActivity {
 
         addStudentsButton = findViewById(R.id.addStudentsButton);
 
-        // Initialize stats TextViews
         View statsCard = binding.attendanceStatsCard.getRoot();
         totalStudentsCount = statsCard.findViewById(R.id.totalStudentsCount);
         presentCount = statsCard.findViewById(R.id.presentCount);
         lateCount = statsCard.findViewById(R.id.lateCount);
         absentCount = statsCard.findViewById(R.id.absentCount);
 
-        // Initialize student list views
         studentsRecyclerView = findViewById(R.id.studentsRecyclerView);
         studentsAttendedHeader = findViewById(R.id.studentsAttendedHeader);
 
@@ -302,7 +295,7 @@ public class ClassInformation extends AppCompatActivity {
                 View itemView = viewHolder.itemView;
                 int backgroundCornerOffset = 20;
 
-                if (dX < 0) { // Swiping to the left
+                if (dX < 0) {
                     int iconMargin = (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
                     int iconTop = itemView.getTop() + (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
                     int iconBottom = iconTop + deleteIcon.getIntrinsicHeight();
@@ -470,7 +463,6 @@ public class ClassInformation extends AppCompatActivity {
                 Log.d(TAG, "  - " + s.getFullName() + " (" + s.getEmail() + ") Status: " + s.getAttendanceStatus());
             }
 
-            // Sort students by last name alphabetically
             sortStudentsByLastName();
 
             studentAdapter.setStudents(new ArrayList<>(studentList));
@@ -485,7 +477,6 @@ public class ClassInformation extends AppCompatActivity {
             String lastName2 = student2.getLastName() != null ? student2.getLastName() : "";
             int lastNameComparison = lastName1.compareToIgnoreCase(lastName2);
 
-            // If last names are the same, sort by first name
             if (lastNameComparison == 0) {
                 String firstName1 = student1.getFirstName() != null ? student1.getFirstName() : "";
                 String firstName2 = student2.getFirstName() != null ? student2.getFirstName() : "";
