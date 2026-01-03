@@ -32,6 +32,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -276,16 +277,13 @@ public class ClassInformation extends AppCompatActivity {
                 StudentAttendanceModel student = studentAdapter.getStudentAt(position);
 
                 if (student != null) {
-                    // Show custom confirmation dialog
                     RemoveStudentConfirmationDialog confirmDialog = new RemoveStudentConfirmationDialog(
                             ClassInformation.this,
                             student.getFullName(),
                             () -> {
-                                // On confirm - remove the student
                                 removeStudentFromClass(student, position);
                             },
                             () -> {
-                                // On cancel - restore the item
                                 studentAdapter.notifyItemChanged(position);
                             }
                     );
@@ -472,9 +470,34 @@ public class ClassInformation extends AppCompatActivity {
                 Log.d(TAG, "  - " + s.getFullName() + " (" + s.getEmail() + ") Status: " + s.getAttendanceStatus());
             }
 
+            // Sort students by last name alphabetically
+            sortStudentsByLastName();
+
             studentAdapter.setStudents(new ArrayList<>(studentList));
             updateStudentsHeaderVisibility();
             setupStudentsListener();
+        }
+    }
+
+    private void sortStudentsByLastName() {
+        Collections.sort(studentList, (student1, student2) -> {
+            String lastName1 = student1.getLastName() != null ? student1.getLastName() : "";
+            String lastName2 = student2.getLastName() != null ? student2.getLastName() : "";
+            int lastNameComparison = lastName1.compareToIgnoreCase(lastName2);
+
+            // If last names are the same, sort by first name
+            if (lastNameComparison == 0) {
+                String firstName1 = student1.getFirstName() != null ? student1.getFirstName() : "";
+                String firstName2 = student2.getFirstName() != null ? student2.getFirstName() : "";
+                return firstName1.compareToIgnoreCase(firstName2);
+            }
+
+            return lastNameComparison;
+        });
+
+        Log.d(TAG, "Students sorted alphabetically by last name");
+        for (StudentAttendanceModel s : studentList) {
+            Log.d(TAG, "  - " + s.getFullName());
         }
     }
 
