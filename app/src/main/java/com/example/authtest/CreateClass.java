@@ -13,7 +13,6 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,25 +21,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * FILE: CreateClass.java
- * LOCATION: src/main/java/com/example/authtest/CreateClass.java
- *
- * PURPOSE: Activity for creating new classes with comprehensive duplicate prevention
- *
- * DUPLICATE CHECKS:
- * 1. Same class name check
- * 2. Time overlap + day overlap + same room check (comprehensive scheduling conflict detection)
- *    - Checks if any day overlaps between classes
- *    - Checks if times overlap on those overlapping days
- *    - If both overlap and room is same, prevents creation
- */
 public class CreateClass extends AppCompatActivity {
 
     private static final String TAG = "CreateClass";
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-
     private EditText classNameInput;
     private EditText subjectCodeInput;
     private ToggleButton monToggle, tueToggle, wedToggle, thuToggle, friToggle, satToggle;
@@ -99,12 +84,6 @@ public class CreateClass extends AppCompatActivity {
             }
         });
     }
-
-    /**
-     * Comprehensive duplicate check:
-     * 1. Same class name
-     * 2. Time + day overlap + same room (scheduling conflict)
-     */
     private void checkForDuplicateClasses(ClassModel classModel) {
         String teacherId = mAuth.getCurrentUser().getUid();
         String className = classModel.getClassName();
@@ -131,7 +110,6 @@ public class CreateClass extends AppCompatActivity {
                     String conflictClassName = "";
 
                     for (ClassModel existing : existingClasses) {
-                        // Check 1: Same class name
                         if (existing.getClassName() != null &&
                                 existing.getClassName().equalsIgnoreCase(className)) {
                             hasNameConflict = true;
@@ -139,19 +117,13 @@ public class CreateClass extends AppCompatActivity {
                             break;
                         }
 
-                        // Check 2: Comprehensive schedule conflict
-                        // - Check if rooms are same
-                        // - Check if days overlap
-                        // - Check if times overlap on those days
                         if (existing.getRoom() != null &&
                                 existing.getRoom().equalsIgnoreCase(room) &&
                                 existing.getStartTime() != null &&
                                 existing.getEndTime() != null &&
                                 existing.getClassDays() != null) {
 
-                            // Check if any days overlap
                             if (daysOverlap(classDays, existing.getClassDays())) {
-                                // Days overlap, now check if times overlap
                                 if (timesOverlap(startTime, endTime, existing.getStartTime(), existing.getEndTime())) {
                                     hasScheduleConflict = true;
                                     conflictClassName = existing.getClassName();
@@ -197,10 +169,6 @@ public class CreateClass extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Check if any days overlap between two day strings
-     * Example: "Mon/Wed/Fri" and "Wed/Sat" -> true (both have Wed)
-     */
     private boolean daysOverlap(String days1, String days2) {
         String[] daysArray1 = days1.split("/");
         String[] daysArray2 = days2.split("/");
@@ -216,11 +184,6 @@ public class CreateClass extends AppCompatActivity {
         return false;
     }
 
-    /**
-     * Check if time ranges overlap
-     * Example: "10:00 AM" - "3:00 PM" and "10:00 AM" - "11:30 AM" -> true
-     * Uses the principle: two ranges overlap if start1 < end2 AND start2 < end1
-     */
     private boolean timesOverlap(String startTime1, String endTime1, String startTime2, String endTime2) {
         try {
             SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
@@ -234,7 +197,6 @@ public class CreateClass extends AppCompatActivity {
                 return false;
             }
 
-            // Two time ranges overlap if: start1 < end2 AND start2 < end1
             boolean overlaps = start1.before(end2) && start2.before(end1);
 
             if (overlaps) {
