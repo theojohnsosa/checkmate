@@ -17,10 +17,9 @@ public class ClassModel implements Serializable {
     private String teacher;
     private int students;
     private List<String> allowedStudentEmails;
-    private boolean isAttendanceActive = false; // NEW: Track if attendance session is active
+    private boolean isAttendanceActive = false;
 
     public ClassModel() {
-        // Required empty constructor for Firestore
         this.allowedStudentEmails = new ArrayList<>();
         this.isAttendanceActive = false;
     }
@@ -41,20 +40,53 @@ public class ClassModel implements Serializable {
         this.isAttendanceActive = false;
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getClassName() { return className; }
-    public String getClassCode() { return classCode; }
-    public String getSubjectCode() { return subjectCode; }
-    public String getClassDays() { return classDays; }
-    public String getStartTime() { return startTime; }
-    public String getEndTime() { return endTime; }
-    public String getRoom() { return room; }
-    public String getTeacher() { return teacher; }
-    public int getStudents() { return students; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public void setStudents(int students) { this.students = students; }
+    public String getClassName() {
+        return className;
+    }
+
+    public String getClassCode() {
+        return classCode;
+    }
+
+    public String getSubjectCode() {
+        return subjectCode;
+    }
+
+    public String getClassDays() {
+        return classDays;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public String getTeacher() {
+        return teacher;
+    }
+
+    public int getStudents() {
+        return students;
+    }
+
+    public void setStudents(int students) {
+        this.students = students;
+    }
 
     public List<String> getAllowedStudentEmails() {
         return allowedStudentEmails != null ? allowedStudentEmails : new ArrayList<>();
@@ -64,7 +96,6 @@ public class ClassModel implements Serializable {
         this.allowedStudentEmails = allowedStudentEmails;
     }
 
-    // NEW: Getters and setters for attendance session status
     public boolean isAttendanceActive() {
         return isAttendanceActive;
     }
