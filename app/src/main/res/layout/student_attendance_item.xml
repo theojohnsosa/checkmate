@@ -16,14 +16,12 @@
         android:padding="16dp"
         android:gravity="center_vertical">
 
-        <!-- Student Info (Left side) -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <!-- Student Name -->
             <TextView
                 android:id="@+id/studentNameText"
                 android:layout_width="wrap_content"
@@ -34,7 +32,6 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp" />
 
-            <!-- Student Email -->
             <TextView
                 android:id="@+id/studentEmailText"
                 android:layout_width="wrap_content"
@@ -47,7 +44,6 @@
 
         </LinearLayout>
 
-        <!-- Attendance Status Badge (Right side) -->
         <androidx.cardview.widget.CardView
             android:id="@+id/statusBadge"
             android:layout_width="wrap_content"
