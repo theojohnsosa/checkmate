@@ -22,7 +22,6 @@ public class StudentHome extends AppCompatActivity {
     private ActivityStudentHomeBinding binding;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-
     private ClassAdapter classAdapter;
     private List<ClassModel> classList = new ArrayList<>();
     private static final String TAG = "StudentHome";
@@ -55,7 +54,6 @@ public class StudentHome extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Only reload if not currently loading
         if (!isLoadingClasses) {
             loadClasses();
         }
@@ -63,7 +61,6 @@ public class StudentHome extends AppCompatActivity {
 
     private void setupRecyclerView() {
         classAdapter = new ClassAdapter(classModel -> {
-            // Open class information directly
             Intent intent = new Intent(StudentHome.this, ClassInformation.class);
             intent.putExtra("CLASS_MODEL", classModel);
             startActivity(intent);
@@ -76,7 +73,6 @@ public class StudentHome extends AppCompatActivity {
     }
 
     private void loadClasses() {
-        // Prevent concurrent loading
         if (isLoadingClasses) {
             Log.d(TAG, "Already loading classes, skipping duplicate call");
             return;
@@ -86,11 +82,9 @@ public class StudentHome extends AppCompatActivity {
         String studentId = mAuth.getCurrentUser().getUid();
         Log.d(TAG, "Loading enrolled classes for student: " + studentId);
 
-        // Clear the list first to avoid duplicates
         classList.clear();
         classAdapter.notifyDataSetChanged();
 
-        // Load from enrolledClasses subcollection
         db.collection("users")
                 .document(studentId)
                 .collection("enrolledClasses")
@@ -104,11 +98,9 @@ public class StudentHome extends AppCompatActivity {
                         return;
                     }
 
-                    // Track how many classes we've loaded
                     final int totalClasses = querySnapshot.size();
                     final int[] loadedClasses = {0};
 
-                    // Get full class details from allClasses collection
                     for (var doc : querySnapshot) {
                         String classId = doc.getString("classId");
 
@@ -125,7 +117,6 @@ public class StudentHome extends AppCompatActivity {
                                             }
                                         }
 
-                                        // Update UI after all classes are loaded
                                         loadedClasses[0]++;
                                         if (loadedClasses[0] == totalClasses) {
                                             classAdapter.notifyDataSetChanged();
