@@ -16,7 +16,6 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- TOP ROW -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,7 +23,6 @@
             android:gravity="top"
             android:layout_marginBottom="14dp">
 
-            <!-- BELL -->
             <TextView
                 android:id="@+id/bellIcon"
                 android:layout_width="56dp"
@@ -36,14 +34,12 @@
                 android:background="@drawable/attendance_button"
                 android:layout_marginEnd="12dp" />
 
-            <!-- RIGHT SIDE: CLASS CODE & SUBTEXT -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <!-- CLASS CODE CHIP -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/classCodeCard"
                     android:layout_width="wrap_content"
@@ -66,7 +62,6 @@
 
                 </androidx.cardview.widget.CardView>
 
-                <!-- SUBTEXT -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
