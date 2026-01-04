@@ -91,7 +91,6 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
 
-        <!-- Empty State -->
         <LinearLayout
             android:id="@+id/emptyStateLayout"
             android:layout_width="match_parent"
