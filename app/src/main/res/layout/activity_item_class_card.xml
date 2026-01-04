@@ -17,7 +17,6 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Class Name and Arrow -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,12 +56,10 @@
                 android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/card_arrow"
-                android:tint="#828282" />
+                android:src="@drawable/card_arrow" />
 
         </RelativeLayout>
 
-        <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -70,13 +67,11 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="12dp" />
 
-        <!-- Class Details -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Days -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -100,7 +95,6 @@
 
             </LinearLayout>
 
-            <!-- Time -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -124,7 +118,6 @@
 
             </LinearLayout>
 
-            <!-- Room -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
