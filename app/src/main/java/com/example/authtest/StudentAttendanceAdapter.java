@@ -6,11 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,31 +91,26 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
                 return;
             }
 
-            // Set student name with null safety
             String fullName = student.getFullName();
             if (fullName == null || fullName.trim().isEmpty()) {
                 fullName = "Unknown User";
             }
             studentNameText.setText(fullName);
 
-            // Set student email with null safety
             String email = student.getEmail();
             if (email == null || email.trim().isEmpty()) {
                 email = "No email";
             }
             studentEmailText.setText(email);
 
-            // Set attendance status with null safety
             String status = student.getAttendanceStatus();
             if (status == null || status.trim().isEmpty()) {
                 status = "Not Marked";
             }
             attendanceStatusText.setText(status);
 
-            // Log binding for debugging
             Log.d(TAG, "Binding: " + fullName + " (" + email + ") - Status: " + status);
 
-            // Set status badge color based on attendance status
             switch (status) {
                 case "Present":
                     statusBadge.setCardBackgroundColor(Color.parseColor("#2F9E44"));
