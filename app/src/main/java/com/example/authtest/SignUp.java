@@ -25,7 +25,6 @@ public class SignUp extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
     private EditText firstNameInput;
     private EditText lastNameInput;
     private EditText schoolEmailInput;
@@ -303,7 +302,6 @@ public class SignUp extends AppCompatActivity {
                             "Account created successfully!",
                             Toast.LENGTH_SHORT).show();
 
-                    // FIXED: Navigate based on email (student emails contain "@students.")
                     Intent intent;
                     if (schoolEmail.contains("@students.")) {
                         intent = new Intent(SignUp.this, StudentHome.class);
