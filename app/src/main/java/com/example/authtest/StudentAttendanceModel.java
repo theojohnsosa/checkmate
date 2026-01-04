@@ -18,7 +18,6 @@ public class StudentAttendanceModel {
         this.marked = false;
     }
 
-    // Getters and Setters
     public String getStudentId() {
         return studentId;
     }
