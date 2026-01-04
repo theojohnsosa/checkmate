@@ -5,13 +5,9 @@ public class StudentAttendanceModel {
     private String email;
     private String firstName;
     private String lastName;
-    private String attendanceStatus; // "Not Marked", "Present", "Late", "Absent"
+    private String attendanceStatus;
     private Long timestamp;
     private boolean marked;
-
-    public StudentAttendanceModel() {
-        // Required empty constructor for Firestore
-    }
 
     public StudentAttendanceModel(String studentId, String email, String firstName, String lastName) {
         this.studentId = studentId;
