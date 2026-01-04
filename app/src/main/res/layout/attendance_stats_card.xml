@@ -13,14 +13,12 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <!-- Grid of 4 widgets (2x2) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="2">
 
-            <!-- Total Students Widget -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -60,7 +58,6 @@
 
             </androidx.cardview.widget.CardView>
 
-            <!-- Present Widget -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -102,14 +99,12 @@
 
         </LinearLayout>
 
-        <!-- Second Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="2">
 
-            <!-- Late Widget -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -148,7 +143,6 @@
 
             </androidx.cardview.widget.CardView>
 
-            <!-- Absent Widget -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
