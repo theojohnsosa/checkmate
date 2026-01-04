@@ -17,7 +17,6 @@
         android:padding="24dp"
         android:gravity="center">
 
-        <!-- Clock Icon -->
         <TextView
             android:id="@+id/clockIcon"
             android:layout_width="80dp"
@@ -30,7 +29,6 @@
             android:backgroundTint="#C6C6C7"
             android:layout_marginBottom="16dp" />
 
-        <!-- Title -->
         <TextView
             android:id="@+id/sessionStatusTitle"
             android:layout_width="wrap_content"
@@ -41,7 +39,6 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
-        <!-- Description -->
         <TextView
             android:id="@+id/sessionStatusDescription"
             android:layout_width="wrap_content"
@@ -53,7 +50,6 @@
             android:gravity="center"
             android:layout_marginBottom="16dp" />
 
-        <!-- Mark Attendance Button (Hidden by default) -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/markAttendanceButton"
             android:layout_width="match_parent"
