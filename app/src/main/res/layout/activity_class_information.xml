@@ -8,7 +8,6 @@
     android:fitsSystemWindows="true"
     tools:context=".ClassInformation">
 
-    <!-- HEADER -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -34,7 +33,6 @@
 
     </RelativeLayout>
 
-    <!-- BACK BUTTON -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -54,7 +52,6 @@
 
     </LinearLayout>
 
-    <!-- CONTENT -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -69,18 +66,15 @@
             android:paddingTop="20dp"
             android:paddingBottom="40dp">
 
-            <!-- TEACHER ATTENDANCE CARD (Hidden for students) -->
             <include
                 android:id="@+id/attendanceCard"
                 layout="@layout/attendance_card" />
 
-            <!-- STUDENT ATTENDANCE STATUS CARD (Hidden for teachers) -->
             <include
                 android:id="@+id/studentAttendanceCard"
                 layout="@layout/students_attendance_status_card"
                 android:visibility="gone" />
 
-            <!-- CLASS INFO CARD -->
             <include
                 android:id="@+id/classInfoCard"
                 layout="@layout/class_information_card"
@@ -88,7 +82,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp" />
 
-            <!-- ATTENDANCE STATS CARD (Hidden for students, only visible for teachers) -->
             <include
                 android:id="@+id/attendanceStatsCard"
                 layout="@layout/attendance_stats_card"
@@ -97,7 +90,6 @@
                 android:layout_marginBottom="20dp"
                 android:visibility="gone" />
 
-            <!-- ADD STUDENTS BUTTON (Hidden for students) -->
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/addStudentsButton"
                 android:text="Add Students"
@@ -113,7 +105,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp" />
 
-            <!-- STUDENTS ATTENDED SECTION (Only visible for teachers) -->
             <TextView
                 android:id="@+id/studentsAttendedHeader"
                 android:layout_width="wrap_content"
@@ -126,7 +117,6 @@
                 android:layout_marginBottom="16dp"
                 android:visibility="gone" />
 
-            <!-- Students RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/studentsRecyclerView"
                 android:layout_width="match_parent"
