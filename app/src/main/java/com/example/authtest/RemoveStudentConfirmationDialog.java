@@ -7,7 +7,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
-
 import androidx.appcompat.widget.AppCompatButton;
 
 public class RemoveStudentConfirmationDialog extends Dialog {
@@ -44,7 +43,6 @@ public class RemoveStudentConfirmationDialog extends Dialog {
         removeButton = findViewById(R.id.removeButton);
         AppCompatButton cancelButton = findViewById(R.id.cancelButton);
 
-        // Set the student name in the confirmation message
         messageText.setText("Are you sure you want to remove " + studentName + " from this class?");
 
         cancelButton.setOnClickListener(v -> {
