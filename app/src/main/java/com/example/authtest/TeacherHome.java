@@ -32,12 +32,10 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Setup RecyclerView
         binding.classesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         classAdapter = new ClassAdapter(this);
         binding.classesRecyclerView.setAdapter(classAdapter);
 
-        // Setup click listeners
         binding.createClassButton.setOnClickListener(v -> openCreateClass());
         binding.ctaButton.setOnClickListener(v -> openCreateClass());
 
