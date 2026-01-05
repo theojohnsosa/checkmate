@@ -2,16 +2,18 @@ package com.example.authtest;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.example.authtest.databinding.ActivityTeacherHomeBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +23,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     private ClassAdapter classAdapter;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private static final String TAG = "TeacherHome";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,21 +63,17 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         }
 
         String userId = currentUser.getUid();
-        Log.d(TAG, "Loading classes for user: " + userId);
 
         db.collection("users")
                 .document(userId)
                 .collection("classes")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    Log.d(TAG, "Classes loaded: " + queryDocumentSnapshots.size());
-
                     List<ClassModel> classes = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         ClassModel classModel = document.toObject(ClassModel.class);
                         classModel.setId(document.getId());
                         classes.add(classModel);
-                        Log.d(TAG, "Loaded class: " + classModel.getClassName());
                     }
 
                     if (classes.isEmpty()) {
@@ -86,7 +83,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading classes", e);
                     Toast.makeText(TeacherHome.this, "Error loading classes: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     showEmptyState();
                 });
