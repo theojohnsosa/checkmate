@@ -13,6 +13,7 @@ public class AttendanceCard {
     private CardView classCodeCard;
     private AppCompatButton attendanceButton;
     private TextView classCodeText;
+
     private boolean isSessionActive = false;
     private OnAttendanceSessionListener listener;
 
@@ -31,9 +32,13 @@ public class AttendanceCard {
             attendanceButton.setOnClickListener(v -> {
                 isSessionActive = !isSessionActive;
                 updateState();
+
                 if (listener != null) {
-                    if (isSessionActive) listener.onSessionStarted();
-                    else listener.onSessionEnded();
+                    if (isSessionActive) {
+                        listener.onSessionStarted();
+                    } else {
+                        listener.onSessionEnded();
+                    }
                 }
             });
         }
@@ -52,7 +57,9 @@ public class AttendanceCard {
     }
 
     private void updateState() {
-        if (attendanceButton == null || bellIcon == null || classCodeCard == null) return;
+        if (attendanceButton == null || bellIcon == null || classCodeCard == null) {
+            return;
+        }
 
         if (isSessionActive) {
             attendanceButton.setText("End Attendance Session");
