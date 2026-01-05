@@ -1,20 +1,20 @@
 package com.example.authtest;
 
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttendanceAdapter.StudentViewHolder> {
 
-    private static final String TAG = "StudentAdapter";
     private List<StudentAttendanceModel> studentList = new ArrayList<>();
     private OnStudentRemoveListener removeListener;
 
@@ -47,11 +47,9 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
 
     public void setStudents(List<StudentAttendanceModel> students) {
         if (students == null) {
-            Log.w(TAG, "Attempted to set null student list");
             this.studentList = new ArrayList<>();
         } else {
             this.studentList = students;
-            Log.d(TAG, "Updated adapter with " + students.size() + " students");
         }
         notifyDataSetChanged();
     }
@@ -60,7 +58,6 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         if (position >= 0 && position < studentList.size()) {
             studentList.remove(position);
             notifyItemRemoved(position);
-            Log.d(TAG, "Removed student at position " + position);
         }
     }
 
@@ -87,7 +84,6 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
 
         public void bind(StudentAttendanceModel student) {
             if (student == null) {
-                Log.e(TAG, "Attempted to bind null student");
                 return;
             }
 
@@ -108,8 +104,6 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
                 status = "Not Marked";
             }
             attendanceStatusText.setText(status);
-
-            Log.d(TAG, "Binding: " + fullName + " (" + email + ") - Status: " + status);
 
             switch (status) {
                 case "Present":
