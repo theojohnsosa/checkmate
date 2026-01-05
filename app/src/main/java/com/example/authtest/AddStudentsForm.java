@@ -1,7 +1,6 @@
 package com.example.authtest;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Patterns;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -17,7 +16,6 @@ import java.util.List;
 
 public class AddStudentsForm extends AppCompatActivity {
 
-    private static final String TAG = "AddStudentsForm";
     private AppCompatButton backButton;
     private AppCompatButton addStudentButton;
     private EditText studentEmailInput;
@@ -88,7 +86,6 @@ public class AddStudentsForm extends AppCompatActivity {
                         if (allowedEmails != null && allowedEmails.size() > 0) {
                             for (String email : allowedEmails) {
                                 if (email != null && email.equalsIgnoreCase(studentEmail)) {
-                                    Log.d(TAG, "Student already exists in class: " + studentEmail);
                                     studentEmailInput.setError("This student is already added to the class");
                                     Toast.makeText(
                                             AddStudentsForm.this,
@@ -102,17 +99,14 @@ public class AddStudentsForm extends AppCompatActivity {
                             }
                         }
 
-                        Log.d(TAG, "Student is new, proceeding with addition");
                         addStudentToClassFirebase(studentEmail, teacherId);
                     } else {
-                        Log.e(TAG, "Class document does not exist");
                         Toast.makeText(AddStudentsForm.this, "Error: Class not found", Toast.LENGTH_SHORT).show();
                         addStudentButton.setEnabled(true);
                         addStudentButton.setText("Add Student");
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to check if student exists", e);
                     Toast.makeText(
                             AddStudentsForm.this,
                             "Error checking student: " + e.getMessage(),
@@ -139,7 +133,6 @@ public class AddStudentsForm extends AppCompatActivity {
                                 incrementStudentCount(teacherId);
                             })
                             .addOnFailureListener(e -> {
-                                Log.e(TAG, "Failed to update allClasses", e);
                                 Toast.makeText(
                                         this,
                                         "Added to class but failed to sync globally",
@@ -150,7 +143,6 @@ public class AddStudentsForm extends AppCompatActivity {
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to add student", e);
                     Toast.makeText(
                             this,
                             "Failed to add student: " + e.getMessage(),
@@ -172,7 +164,6 @@ public class AddStudentsForm extends AppCompatActivity {
                             .document(classId)
                             .update("students", FieldValue.increment(1))
                             .addOnSuccessListener(unused2 -> {
-                                Log.d(TAG, "Student count incremented successfully");
                                 Toast.makeText(this, "Student added successfully!", Toast.LENGTH_SHORT).show();
                                 studentEmailInput.setText("");
                                 addStudentButton.setEnabled(true);
@@ -181,7 +172,6 @@ public class AddStudentsForm extends AppCompatActivity {
                                 setResult(RESULT_OK);
                             })
                             .addOnFailureListener(e -> {
-                                Log.e(TAG, "Failed to increment count in allClasses", e);
                                 Toast.makeText(
                                         this,
                                         "Student added but count not updated",
@@ -192,7 +182,6 @@ public class AddStudentsForm extends AppCompatActivity {
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to increment student count", e);
                     Toast.makeText(
                             this,
                             "Student added but count not updated",
