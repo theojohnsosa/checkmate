@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.EditText;
@@ -20,8 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class JoinClassDialog extends Dialog {
-
-    private static final String TAG = "JoinClassDialog";
 
     private final Runnable onSuccess;
     private AppCompatButton joinButton;
@@ -77,16 +74,11 @@ public class JoinClassDialog extends Dialog {
 
             joinButton.setEnabled(false);
 
-            Log.d(TAG, "Searching for class code: " + classCode);
-            Log.d(TAG, "Student email: " + studentEmail);
-
             db.collection("allClasses")
                     .whereEqualTo("classCode", classCode)
                     .limit(1)
                     .get()
                     .addOnSuccessListener(snapshot -> {
-
-                        Log.d(TAG, "Query result count: " + snapshot.size());
 
                         if (snapshot.isEmpty()) {
                             codeInput.setError("Invalid code");
@@ -105,8 +97,6 @@ public class JoinClassDialog extends Dialog {
 
                         String classId = doc.getId();
                         classModel.setId(classId);
-
-                        Log.d(TAG, "Class found: " + classModel.getClassName());
 
                         List<String> allowedEmails = classModel.getAllowedStudentEmails();
 
@@ -129,7 +119,6 @@ public class JoinClassDialog extends Dialog {
                         }
 
                         if (!isAllowed) {
-                            Log.d(TAG, "Student not authorized: " + studentEmail);
                             Toast.makeText(
                                     context,
                                     "You are not authorized to join this class. Contact your teacher.",
@@ -139,11 +128,9 @@ public class JoinClassDialog extends Dialog {
                             return;
                         }
 
-                        Log.d(TAG, "Student authorized, enrolling...");
                         addEnrolledClass(db, studentId, classId, classModel, context);
                     })
                     .addOnFailureListener(e -> {
-                        Log.e(TAG, "Error querying class", e);
                         Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         joinButton.setEnabled(true);
                     });
@@ -169,7 +156,6 @@ public class JoinClassDialog extends Dialog {
                 .document(classId)
                 .set(enrollmentData)
                 .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "Successfully joined class");
                     Toast.makeText(context, "Successfully joined class!", Toast.LENGTH_SHORT).show();
                     dismiss();
                     if (onSuccess != null) {
@@ -177,7 +163,6 @@ public class JoinClassDialog extends Dialog {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Enrollment failed", e);
                     Toast.makeText(context, "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     joinButton.setEnabled(true);
                 });
