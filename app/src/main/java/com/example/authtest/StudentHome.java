@@ -2,11 +2,9 @@ package com.example.authtest;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -24,7 +22,6 @@ public class StudentHome extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private ClassAdapter classAdapter;
     private List<ClassModel> classList = new ArrayList<>();
-    private static final String TAG = "StudentHome";
     private boolean isLoadingClasses = false;
 
     @Override
@@ -74,13 +71,11 @@ public class StudentHome extends AppCompatActivity {
 
     private void loadClasses() {
         if (isLoadingClasses) {
-            Log.d(TAG, "Already loading classes, skipping duplicate call");
             return;
         }
 
         isLoadingClasses = true;
         String studentId = mAuth.getCurrentUser().getUid();
-        Log.d(TAG, "Loading enrolled classes for student: " + studentId);
 
         classList.clear();
         classAdapter.notifyDataSetChanged();
@@ -90,8 +85,6 @@ public class StudentHome extends AppCompatActivity {
                 .collection("enrolledClasses")
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    Log.d(TAG, "Found " + querySnapshot.size() + " enrolled classes");
-
                     if (querySnapshot.isEmpty()) {
                         isLoadingClasses = false;
                         updateUI();
@@ -125,7 +118,6 @@ public class StudentHome extends AppCompatActivity {
                                         }
                                     })
                                     .addOnFailureListener(e -> {
-                                        Log.e(TAG, "Error loading class details", e);
                                         loadedClasses[0]++;
                                         if (loadedClasses[0] == totalClasses) {
                                             classAdapter.notifyDataSetChanged();
@@ -144,7 +136,6 @@ public class StudentHome extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading classes", e);
                     isLoadingClasses = false;
                     updateUI();
                 });
@@ -154,7 +145,5 @@ public class StudentHome extends AppCompatActivity {
         boolean isEmpty = classList.isEmpty();
         binding.emptyStateLayout.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         binding.classesRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
-
-        Log.d(TAG, "UI Updated - Total classes displayed: " + classList.size());
     }
 }
