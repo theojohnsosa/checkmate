@@ -1,7 +1,6 @@
 package com.example.authtest;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -23,7 +22,6 @@ import java.util.Locale;
 
 public class CreateClass extends AppCompatActivity {
 
-    private static final String TAG = "CreateClass";
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private EditText classNameInput;
@@ -84,6 +82,7 @@ public class CreateClass extends AppCompatActivity {
             }
         });
     }
+
     private void checkForDuplicateClasses(ClassModel classModel) {
         String teacherId = mAuth.getCurrentUser().getUid();
         String className = classModel.getClassName();
@@ -91,12 +90,6 @@ public class CreateClass extends AppCompatActivity {
         String endTime = classModel.getEndTime();
         String classDays = classModel.getClassDays();
         String room = classModel.getRoom();
-
-        Log.d(TAG, "Checking for duplicate classes...");
-        Log.d(TAG, "  Class name: " + className);
-        Log.d(TAG, "  Time: " + startTime + " - " + endTime);
-        Log.d(TAG, "  Days: " + classDays);
-        Log.d(TAG, "  Room: " + room);
 
         db.collection("users")
                 .document(teacherId)
@@ -113,7 +106,6 @@ public class CreateClass extends AppCompatActivity {
                         if (existing.getClassName() != null &&
                                 existing.getClassName().equalsIgnoreCase(className)) {
                             hasNameConflict = true;
-                            Log.d(TAG, "Name conflict found: " + existing.getClassName());
                             break;
                         }
 
@@ -127,7 +119,6 @@ public class CreateClass extends AppCompatActivity {
                                 if (timesOverlap(startTime, endTime, existing.getStartTime(), existing.getEndTime())) {
                                     hasScheduleConflict = true;
                                     conflictClassName = existing.getClassName();
-                                    Log.d(TAG, "Schedule conflict found with: " + conflictClassName);
                                     break;
                                 }
                             }
@@ -153,12 +144,10 @@ public class CreateClass extends AppCompatActivity {
                         createClassButton.setEnabled(true);
                         createClassButton.setText("Create Class");
                     } else {
-                        Log.d(TAG, "No conflicts found, proceeding with class creation");
                         createNewClass(classModel);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to check for duplicate classes", e);
                     Toast.makeText(
                             CreateClass.this,
                             "Error checking classes: " + e.getMessage(),
@@ -176,7 +165,6 @@ public class CreateClass extends AppCompatActivity {
         for (String day1 : daysArray1) {
             for (String day2 : daysArray2) {
                 if (day1.trim().equalsIgnoreCase(day2.trim())) {
-                    Log.d(TAG, "Days overlap: " + day1);
                     return true;
                 }
             }
@@ -197,15 +185,8 @@ public class CreateClass extends AppCompatActivity {
                 return false;
             }
 
-            boolean overlaps = start1.before(end2) && start2.before(end1);
-
-            if (overlaps) {
-                Log.d(TAG, "Times overlap: " + startTime1 + "-" + endTime1 + " conflicts with " + startTime2 + "-" + endTime2);
-            }
-
-            return overlaps;
+            return start1.before(end2) && start2.before(end1);
         } catch (ParseException e) {
-            Log.e(TAG, "Error parsing times", e);
             return false;
         }
     }
@@ -261,12 +242,10 @@ public class CreateClass extends AppCompatActivity {
                                             documentReference.update("id", classId);
                                             db.collection("allClasses").document(classId).update("id", classId);
 
-                                            Log.d(TAG, "Class created successfully with ID: " + classId);
                                             Toast.makeText(CreateClass.this, "Class created successfully!", Toast.LENGTH_SHORT).show();
                                             finish();
                                         })
                                         .addOnFailureListener(e -> {
-                                            Log.e(TAG, "Failed to sync class globally", e);
                                             Toast.makeText(CreateClass.this, "Class created but not searchable", Toast.LENGTH_SHORT).show();
                                             createClassButton.setEnabled(true);
                                             createClassButton.setText("Create Class");
@@ -274,14 +253,12 @@ public class CreateClass extends AppCompatActivity {
                                         });
                             })
                             .addOnFailureListener(e -> {
-                                Log.e(TAG, "Failed to create class", e);
                                 Toast.makeText(CreateClass.this, "Failed to create class: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                 createClassButton.setEnabled(true);
                                 createClassButton.setText("Create Class");
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to fetch teacher info", e);
                     Toast.makeText(CreateClass.this, "Failed to fetch teacher info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     createClassButton.setEnabled(true);
                     createClassButton.setText("Create Class");
