@@ -11,10 +11,13 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.authtest.databinding.ActivityClassInformationBinding;
 import com.example.authtest.databinding.AttendanceCardBinding;
 import com.example.authtest.databinding.StudentsAttendanceStatusCardBinding;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -64,15 +68,36 @@ public class ClassInformation extends AppCompatActivity {
     private StudentAttendanceAdapter studentAdapter;
     private List<StudentAttendanceModel> studentList = new ArrayList<>();
     private TextView studentsAttendedHeader;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = ActivityClassInformationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        // Initialize DrawerLayout and NavigationView using findViewById
+        drawerLayout = findViewById(R.id.main);
+        navigationView = findViewById(R.id.navigation_view);
+
+        // Hamburger icon click listener
+        binding.hamburgerIcon.setOnClickListener(v -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
+
+        // Setup navigation drawer menu items
+        setupNavigationDrawer();
+
+        // Load user info in drawer header
+        loadUserInfoInDrawer();
+
+        // Setup back press handler
+        setupBackPressHandler();
 
         binding.backButton.setOnClickListener(v -> finish());
 
@@ -132,11 +157,68 @@ public class ClassInformation extends AppCompatActivity {
         }
     }
 
-    private void diagnoseFirestoreStructure() {
-        Log.d(TAG, "==========================================");
-        Log.d(TAG, "DIAGNOSTIC: Starting Firestore Analysis");
-        Log.d(TAG, "==========================================");
+    private void setupBackPressHandler() {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
+    }
 
+    private void setupNavigationDrawer() {
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.menu_home) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            } else if (itemId == R.id.menu_profile) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_settings) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Settings feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_logout) {
+                logout();
+                return true;
+            }
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return false;
+        });
+    }
+
+    private void logout() {
+        mAuth.signOut();
+        Intent intent = new Intent(ClassInformation.this, SignIn.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void loadUserInfoInDrawer() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            View headerView = navigationView.getHeaderView(0);
+            TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
+            TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
+
+            userNameTextView.setText(currentUser.getDisplayName() != null ?
+                    currentUser.getDisplayName() : "User");
+            userEmailTextView.setText(currentUser.getEmail());
+        }
+    }
+
+    private void diagnoseFirestoreStructure() {
         db.collection("allClasses")
                 .document(classId)
                 .get()

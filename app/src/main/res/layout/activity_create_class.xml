@@ -273,4 +273,5 @@
         android:background="#1A1A1A"
         app:menu="@menu/menu_drawer"
         app:headerLayout="@layout/drawer_header"/>
+
 </androidx.drawerlayout.widget.DrawerLayout>
