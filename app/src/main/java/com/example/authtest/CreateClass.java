@@ -1,15 +1,23 @@
 package com.example.authtest;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -22,16 +30,16 @@ import java.util.Locale;
 
 public class CreateClass extends AppCompatActivity {
 
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private EditText classNameInput;
-    private EditText subjectCodeInput;
+
+    private EditText classNameInput, subjectCodeInput, roomInput;
     private ToggleButton monToggle, tueToggle, wedToggle, thuToggle, friToggle, satToggle;
-    private AutoCompleteTextView startTimeInput;
-    private AutoCompleteTextView endTimeInput;
-    private EditText roomInput;
-    private AppCompatButton createClassButton;
-    private AppCompatButton backButton;
+    private AutoCompleteTextView startTimeInput, endTimeInput;
+    private AppCompatButton createClassButton, backButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,249 +49,154 @@ public class CreateClass extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        classNameInput = findViewById(R.id.classNameInput);
-        subjectCodeInput = findViewById(R.id.subjectCodeInput);
-        monToggle = findViewById(R.id.monToggle);
-        tueToggle = findViewById(R.id.tueToggle);
-        wedToggle = findViewById(R.id.wedToggle);
-        thuToggle = findViewById(R.id.thuToggle);
-        friToggle = findViewById(R.id.friToggle);
-        satToggle = findViewById(R.id.satToggle);
-        startTimeInput = findViewById(R.id.startTimeInput);
-        endTimeInput = findViewById(R.id.endTimeInput);
-        roomInput = findViewById(R.id.roomInput);
-        createClassButton = findViewById(R.id.createClassButton);
-        backButton = findViewById(R.id.backButton);
+        drawerLayout = findViewById(R.id.main);
+        navigationView = findViewById(R.id.navigation_view);
 
+        ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
+        hamburgerIcon.setOnClickListener(v ->
+                drawerLayout.openDrawer(GravityCompat.START)
+        );
+
+        setupNavigationDrawer();
+        setupBackPressHandler();
+        loadUserInfoInDrawer();
+
+        bindViews();
         setupTimeDropdowns();
 
         backButton.setOnClickListener(v -> finish());
 
         createClassButton.setOnClickListener(v -> {
             if (validateInputs()) {
-                String classDays = getSelectedDays();
-
                 createClassButton.setEnabled(false);
                 createClassButton.setText("Checking...");
-
-                ClassModel classModel = new ClassModel(
-                        classNameInput.getText().toString().trim(),
-                        generateClassCode(),
-                        subjectCodeInput.getText().toString().trim(),
-                        classDays,
-                        startTimeInput.getText().toString().trim(),
-                        endTimeInput.getText().toString().trim(),
-                        roomInput.getText().toString().trim(),
-                        mAuth.getCurrentUser().getDisplayName(),
-                        0
-                );
-
-                checkForDuplicateClasses(classModel);
+                createClass(createClassModel());
             }
         });
     }
 
-    private void checkForDuplicateClasses(ClassModel classModel) {
+    private void bindViews() {
+        classNameInput = findViewById(R.id.classNameInput);
+        subjectCodeInput = findViewById(R.id.subjectCodeInput);
+        roomInput = findViewById(R.id.roomInput);
+
+        monToggle = findViewById(R.id.monToggle);
+        tueToggle = findViewById(R.id.tueToggle);
+        wedToggle = findViewById(R.id.wedToggle);
+        thuToggle = findViewById(R.id.thuToggle);
+        friToggle = findViewById(R.id.friToggle);
+        satToggle = findViewById(R.id.satToggle);
+
+        startTimeInput = findViewById(R.id.startTimeInput);
+        endTimeInput = findViewById(R.id.endTimeInput);
+
+        createClassButton = findViewById(R.id.createClassButton);
+        backButton = findViewById(R.id.backButton);
+    }
+
+    /* ---------------- Drawer ---------------- */
+
+    private void setupNavigationDrawer() {
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.menu_home) {
+                finish();
+            } else if (id == R.id.menu_profile) {
+                Toast.makeText(this, "Profile coming soon", Toast.LENGTH_SHORT).show();
+            } else if (id == R.id.menu_settings) {
+                Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show();
+            } else if (id == R.id.menu_logout) {
+                mAuth.signOut();
+                Intent intent = new Intent(this, SignIn.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
+    }
+
+    private void setupBackPressHandler() {
+        getOnBackPressedDispatcher().addCallback(this,
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                            drawerLayout.closeDrawer(GravityCompat.START);
+                        } else {
+                            setEnabled(false);
+                            getOnBackPressedDispatcher().onBackPressed();
+                        }
+                    }
+                });
+    }
+
+    private void loadUserInfoInDrawer() {
+        if (mAuth.getCurrentUser() == null) return;
+
+        View header = navigationView.getHeaderView(0);
+        ((TextView) header.findViewById(R.id.drawer_user_name))
+                .setText(mAuth.getCurrentUser().getDisplayName() != null
+                        ? mAuth.getCurrentUser().getDisplayName()
+                        : "User");
+
+        ((TextView) header.findViewById(R.id.drawer_user_email))
+                .setText(mAuth.getCurrentUser().getEmail());
+    }
+
+    /* ---------------- Logic ---------------- */
+
+    private ClassModel createClassModel() {
+        return new ClassModel(
+                classNameInput.getText().toString().trim(),
+                generateClassCode(),
+                subjectCodeInput.getText().toString().trim(),
+                getSelectedDays(),
+                startTimeInput.getText().toString().trim(),
+                endTimeInput.getText().toString().trim(),
+                roomInput.getText().toString().trim(),
+                mAuth.getCurrentUser().getDisplayName(),
+                0
+        );
+    }
+
+    private void createClass(ClassModel model) {
         String teacherId = mAuth.getCurrentUser().getUid();
-        String className = classModel.getClassName();
-        String startTime = classModel.getStartTime();
-        String endTime = classModel.getEndTime();
-        String classDays = classModel.getClassDays();
-        String room = classModel.getRoom();
 
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    List<ClassModel> existingClasses = querySnapshot.toObjects(ClassModel.class);
-
-                    boolean hasNameConflict = false;
-                    boolean hasScheduleConflict = false;
-                    String conflictClassName = "";
-
-                    for (ClassModel existing : existingClasses) {
-                        if (existing.getClassName() != null &&
-                                existing.getClassName().equalsIgnoreCase(className)) {
-                            hasNameConflict = true;
-                            break;
-                        }
-
-                        if (existing.getRoom() != null &&
-                                existing.getRoom().equalsIgnoreCase(room) &&
-                                existing.getStartTime() != null &&
-                                existing.getEndTime() != null &&
-                                existing.getClassDays() != null) {
-
-                            if (daysOverlap(classDays, existing.getClassDays())) {
-                                if (timesOverlap(startTime, endTime, existing.getStartTime(), existing.getEndTime())) {
-                                    hasScheduleConflict = true;
-                                    conflictClassName = existing.getClassName();
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (hasNameConflict) {
-                        classNameInput.setError("This class name already exists");
-                        Toast.makeText(
-                                CreateClass.this,
-                                "A class with this name already exists",
-                                Toast.LENGTH_SHORT
-                        ).show();
-                        createClassButton.setEnabled(true);
-                        createClassButton.setText("Create Class");
-                    } else if (hasScheduleConflict) {
-                        Toast.makeText(
-                                CreateClass.this,
-                                "You already have a class \"" + conflictClassName +
-                                        "\" that conflicts with this schedule in " + room,
-                                Toast.LENGTH_LONG
-                        ).show();
-                        createClassButton.setEnabled(true);
-                        createClassButton.setText("Create Class");
-                    } else {
-                        createNewClass(classModel);
-                    }
+                .add(model)
+                .addOnSuccessListener(ref -> {
+                    String classId = ref.getId();
+                    model.setId(classId);
+                    db.collection("allClasses").document(classId).set(model);
+                    Toast.makeText(this, "Class created successfully!", Toast.LENGTH_SHORT).show();
+                    finish();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(
-                            CreateClass.this,
-                            "Error checking classes: " + e.getMessage(),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(this, "Failed to create class", Toast.LENGTH_LONG).show();
                     createClassButton.setEnabled(true);
-                    createClassButton.setText("Create Class");
-                });
-    }
-
-    private boolean daysOverlap(String days1, String days2) {
-        String[] daysArray1 = days1.split("/");
-        String[] daysArray2 = days2.split("/");
-
-        for (String day1 : daysArray1) {
-            for (String day2 : daysArray2) {
-                if (day1.trim().equalsIgnoreCase(day2.trim())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean timesOverlap(String startTime1, String endTime1, String startTime2, String endTime2) {
-        try {
-            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
-
-            Date start1 = timeFormat.parse(startTime1);
-            Date end1 = timeFormat.parse(endTime1);
-            Date start2 = timeFormat.parse(startTime2);
-            Date end2 = timeFormat.parse(endTime2);
-
-            if (start1 == null || end1 == null || start2 == null || end2 == null) {
-                return false;
-            }
-
-            return start1.before(end2) && start2.before(end1);
-        } catch (ParseException e) {
-            return false;
-        }
-    }
-
-    private void createNewClass(ClassModel classModel) {
-        createClassButton.setText("Creating...");
-        String teacherId = mAuth.getCurrentUser().getUid();
-
-        db.collection("users")
-                .document(teacherId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    String teacherName = "Unknown";
-
-                    if (documentSnapshot.exists()) {
-                        String firstName = documentSnapshot.getString("firstName");
-                        String lastName = documentSnapshot.getString("lastName");
-                        if (firstName != null && lastName != null) {
-                            teacherName = firstName + " " + lastName;
-                        } else if (mAuth.getCurrentUser().getDisplayName() != null) {
-                            teacherName = mAuth.getCurrentUser().getDisplayName();
-                        }
-                    } else if (mAuth.getCurrentUser().getDisplayName() != null) {
-                        teacherName = mAuth.getCurrentUser().getDisplayName();
-                    }
-
-                    ClassModel newClassModel = new ClassModel(
-                            classModel.getClassName(),
-                            classModel.getClassCode(),
-                            classModel.getSubjectCode(),
-                            classModel.getClassDays(),
-                            classModel.getStartTime(),
-                            classModel.getEndTime(),
-                            classModel.getRoom(),
-                            teacherName,
-                            0
-                    );
-
-                    newClassModel.setAllowedStudentEmails(new ArrayList<>());
-                    newClassModel.setAttendanceActive(false);
-
-                    db.collection("users")
-                            .document(teacherId)
-                            .collection("classes")
-                            .add(newClassModel)
-                            .addOnSuccessListener(documentReference -> {
-                                String classId = documentReference.getId();
-
-                                db.collection("allClasses")
-                                        .document(classId)
-                                        .set(newClassModel)
-                                        .addOnSuccessListener(unused2 -> {
-                                            documentReference.update("id", classId);
-                                            db.collection("allClasses").document(classId).update("id", classId);
-
-                                            Toast.makeText(CreateClass.this, "Class created successfully!", Toast.LENGTH_SHORT).show();
-                                            finish();
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Toast.makeText(CreateClass.this, "Class created but not searchable", Toast.LENGTH_SHORT).show();
-                                            createClassButton.setEnabled(true);
-                                            createClassButton.setText("Create Class");
-                                            finish();
-                                        });
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(CreateClass.this, "Failed to create class: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                createClassButton.setEnabled(true);
-                                createClassButton.setText("Create Class");
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(CreateClass.this, "Failed to fetch teacher info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    createClassButton.setEnabled(true);
-                    createClassButton.setText("Create Class");
+                    createClassButton.setText("Create New Class");
                 });
     }
 
     private void setupTimeDropdowns() {
-        List<String> timeSlots = new ArrayList<>();
-
-        String[] periods = {"AM", "PM"};
-        for (String period : periods) {
-            int startHour = period.equals("AM") ? 6 : 1;
-            int endHour = period.equals("AM") ? 12 : 10;
-
-            for (int hour = startHour; hour <= endHour; hour++) {
-                timeSlots.add(String.format("%d:00 %s", hour, period));
-                timeSlots.add(String.format("%d:30 %s", hour, period));
-            }
+        List<String> times = new ArrayList<>();
+        for (int h = 6; h <= 12; h++) {
+            times.add(h + ":00 AM");
+            times.add(h + ":30 AM");
+        }
+        for (int h = 1; h <= 10; h++) {
+            times.add(h + ":00 PM");
+            times.add(h + ":30 PM");
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                timeSlots
-        );
+                this, android.R.layout.simple_dropdown_item_1line, times);
 
         startTimeInput.setAdapter(adapter);
         endTimeInput.setAdapter(adapter);
@@ -300,7 +213,6 @@ public class CreateClass extends AppCompatActivity {
         if (thuToggle.isChecked()) days.add("Thu");
         if (friToggle.isChecked()) days.add("Fri");
         if (satToggle.isChecked()) days.add("Sat");
-
         return String.join("/", days);
     }
 
@@ -323,7 +235,7 @@ public class CreateClass extends AppCompatActivity {
             return false;
         }
         if (getSelectedDays().isEmpty()) {
-            Toast.makeText(this, "Please select at least one day", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Select at least one day", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (startTimeInput.getText().toString().trim().isEmpty()) {
