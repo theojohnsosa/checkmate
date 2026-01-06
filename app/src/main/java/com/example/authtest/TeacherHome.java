@@ -3,12 +3,18 @@ package com.example.authtest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.authtest.databinding.ActivityTeacherHomeBinding;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -23,6 +29,8 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     private ClassAdapter classAdapter;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,14 +41,93 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
+        // Initialize DrawerLayout and NavigationView using findViewById
+        drawerLayout = findViewById(R.id.main);
+        navigationView = findViewById(R.id.navigation_view);
+
         binding.classesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         classAdapter = new ClassAdapter(this);
         binding.classesRecyclerView.setAdapter(classAdapter);
 
+        // Hamburger icon click listener
+        binding.hamburgerIcon.setOnClickListener(v -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
+
         binding.createClassButton.setOnClickListener(v -> openCreateClass());
         binding.ctaButton.setOnClickListener(v -> openCreateClass());
 
+        // Setup navigation drawer menu items
+        setupNavigationDrawer();
+
+        // Load user info in drawer header
+        loadUserInfoInDrawer();
+
+        // Setup back press handler
+        setupBackPressHandler();
+
         loadClasses();
+    }
+
+    private void setupBackPressHandler() {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
+    }
+
+    private void setupNavigationDrawer() {
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.menu_home) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            } else if (itemId == R.id.menu_profile) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_settings) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Settings feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_logout) {
+                logout();
+                return true;
+            }
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return false;
+        });
+    }
+
+    private void loadUserInfoInDrawer() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            View headerView = navigationView.getHeaderView(0);
+            TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
+            TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
+
+            userNameTextView.setText(currentUser.getDisplayName() != null ?
+                    currentUser.getDisplayName() : "User");
+            userEmailTextView.setText(currentUser.getEmail());
+        }
+    }
+
+    private void logout() {
+        mAuth.signOut();
+        Intent intent = new Intent(TeacherHome.this, SignIn.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     @Override

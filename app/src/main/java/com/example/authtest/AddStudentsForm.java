@@ -1,13 +1,21 @@
 package com.example.authtest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -15,6 +23,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 public class AddStudentsForm extends AppCompatActivity {
+
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     private AppCompatButton backButton;
     private AppCompatButton addStudentButton;
@@ -33,20 +44,86 @@ public class AddStudentsForm extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         classId = getIntent().getStringExtra("CLASS_ID");
-
         if (classId == null || classId.isEmpty()) {
             Toast.makeText(this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        drawerLayout = findViewById(R.id.main);
+        navigationView = findViewById(R.id.navigation_view);
+
+        ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
+        hamburgerIcon.setOnClickListener(v ->
+                drawerLayout.openDrawer(GravityCompat.START)
+        );
+
+        setupNavigationDrawer();
+        setupBackPressHandler();
+        loadUserInfoInDrawer();
+
         backButton = findViewById(R.id.backButton);
         addStudentButton = findViewById(R.id.addStudentToClassButton);
         studentEmailInput = findViewById(R.id.studentEmailInput);
 
         backButton.setOnClickListener(v -> finish());
-
         addStudentButton.setOnClickListener(v -> addStudentToClass());
+    }
+
+    private void setupNavigationDrawer() {
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.menu_home) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                finish();
+                return true;
+            } else if (itemId == R.id.menu_profile) {
+                Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show();
+            } else if (itemId == R.id.menu_settings) {
+                Toast.makeText(this, "Settings feature coming soon", Toast.LENGTH_SHORT).show();
+            } else if (itemId == R.id.menu_logout) {
+                mAuth.signOut();
+                Intent intent = new Intent(this, SignIn.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+                return true;
+            }
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
+    }
+
+    private void setupBackPressHandler() {
+        getOnBackPressedDispatcher().addCallback(this,
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                            drawerLayout.closeDrawer(GravityCompat.START);
+                        } else {
+                            setEnabled(false);
+                            getOnBackPressedDispatcher().onBackPressed();
+                        }
+                    }
+                });
+    }
+
+    private void loadUserInfoInDrawer() {
+        if (mAuth.getCurrentUser() == null) return;
+
+        View headerView = navigationView.getHeaderView(0);
+        TextView userName = headerView.findViewById(R.id.drawer_user_name);
+        TextView userEmail = headerView.findViewById(R.id.drawer_user_email);
+
+        userName.setText(
+                mAuth.getCurrentUser().getDisplayName() != null
+                        ? mAuth.getCurrentUser().getDisplayName()
+                        : "User"
+        );
+        userEmail.setText(mAuth.getCurrentUser().getEmail());
     }
 
     private void addStudentToClass() {
@@ -71,7 +148,6 @@ public class AddStudentsForm extends AppCompatActivity {
         addStudentButton.setText("Checking...");
 
         String teacherId = mAuth.getCurrentUser().getUid();
-
         checkIfStudentExists(studentEmail, teacherId);
     }
 
@@ -80,40 +156,26 @@ public class AddStudentsForm extends AppCompatActivity {
                 .document(classId)
                 .get()
                 .addOnSuccessListener(document -> {
-                    if (document.exists()) {
-                        List<String> allowedEmails = (List<String>) document.get("allowedStudentEmails");
-
-                        if (allowedEmails != null && allowedEmails.size() > 0) {
-                            for (String email : allowedEmails) {
-                                if (email != null && email.equalsIgnoreCase(studentEmail)) {
-                                    studentEmailInput.setError("This student is already added to the class");
-                                    Toast.makeText(
-                                            AddStudentsForm.this,
-                                            "Student already exists in this class",
-                                            Toast.LENGTH_SHORT
-                                    ).show();
-                                    addStudentButton.setEnabled(true);
-                                    addStudentButton.setText("Add Student");
-                                    return;
-                                }
-                            }
-                        }
-
-                        addStudentToClassFirebase(studentEmail, teacherId);
-                    } else {
-                        Toast.makeText(AddStudentsForm.this, "Error: Class not found", Toast.LENGTH_SHORT).show();
-                        addStudentButton.setEnabled(true);
-                        addStudentButton.setText("Add Student");
+                    if (!document.exists()) {
+                        resetButton();
+                        Toast.makeText(this, "Class not found", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+
+                    List<String> allowedEmails =
+                            (List<String>) document.get("allowedStudentEmails");
+
+                    if (allowedEmails != null && allowedEmails.contains(studentEmail)) {
+                        studentEmailInput.setError("Student already added");
+                        resetButton();
+                        return;
+                    }
+
+                    addStudentToClassFirebase(studentEmail, teacherId);
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(
-                            AddStudentsForm.this,
-                            "Error checking student: " + e.getMessage(),
-                            Toast.LENGTH_SHORT
-                    ).show();
-                    addStudentButton.setEnabled(true);
-                    addStudentButton.setText("Add Student");
+                    resetButton();
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -125,70 +187,23 @@ public class AddStudentsForm extends AppCompatActivity {
                 .collection("classes")
                 .document(classId)
                 .update("allowedStudentEmails", FieldValue.arrayUnion(studentEmail))
-                .addOnSuccessListener(unused -> {
-                    db.collection("allClasses")
-                            .document(classId)
-                            .update("allowedStudentEmails", FieldValue.arrayUnion(studentEmail))
-                            .addOnSuccessListener(unused2 -> {
-                                incrementStudentCount(teacherId);
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(
-                                        this,
-                                        "Added to class but failed to sync globally",
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                                addStudentButton.setEnabled(true);
-                                addStudentButton.setText("Add Student");
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(
-                            this,
-                            "Failed to add student: " + e.getMessage(),
-                            Toast.LENGTH_LONG
-                    ).show();
-                    addStudentButton.setEnabled(true);
-                    addStudentButton.setText("Add Student");
-                });
+                .addOnSuccessListener(unused ->
+                        db.collection("allClasses")
+                                .document(classId)
+                                .update("allowedStudentEmails", FieldValue.arrayUnion(studentEmail))
+                                .addOnSuccessListener(unused2 -> {
+                                    Toast.makeText(this, "Student added successfully!", Toast.LENGTH_SHORT).show();
+                                    studentEmailInput.setText("");
+                                    resetButton();
+                                    setResult(RESULT_OK);
+                                })
+                                .addOnFailureListener(e -> resetButton())
+                )
+                .addOnFailureListener(e -> resetButton());
     }
 
-    private void incrementStudentCount(String teacherId) {
-        db.collection("users")
-                .document(teacherId)
-                .collection("classes")
-                .document(classId)
-                .update("students", FieldValue.increment(1))
-                .addOnSuccessListener(unused -> {
-                    db.collection("allClasses")
-                            .document(classId)
-                            .update("students", FieldValue.increment(1))
-                            .addOnSuccessListener(unused2 -> {
-                                Toast.makeText(this, "Student added successfully!", Toast.LENGTH_SHORT).show();
-                                studentEmailInput.setText("");
-                                addStudentButton.setEnabled(true);
-                                addStudentButton.setText("Add Student");
-
-                                setResult(RESULT_OK);
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(
-                                        this,
-                                        "Student added but count not updated",
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                                addStudentButton.setEnabled(true);
-                                addStudentButton.setText("Add Student");
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(
-                            this,
-                            "Student added but count not updated",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                    addStudentButton.setEnabled(true);
-                    addStudentButton.setText("Add Student");
-                });
+    private void resetButton() {
+        addStudentButton.setEnabled(true);
+        addStudentButton.setText("Add Student");
     }
 }

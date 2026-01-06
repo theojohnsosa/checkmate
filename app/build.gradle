@@ -36,6 +36,13 @@ android {
     buildFeatures {
         viewBinding true
     }
+    sourceSets {
+        main {
+            res {
+                srcDirs 'src/main/res', 'src/main/res/menu'
+            }
+        }
+    }
 }
 
 dependencies {
@@ -52,4 +59,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.firebaseui:firebase-ui-auth:8.0.2'
     implementation 'com.google.firebase:firebase-firestore'
+
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:orientation="vertical"
+    android:gravity="bottom"
+    android:padding="20dp"
+    android:background="#0F0F0F">
+
+    <ImageView
+        android:id="@+id/drawer_user_avatar"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/default_avatar"
+        android:contentDescription="user_avatar"
+        android:layout_marginBottom="15dp" />
+
+    <TextView
+        android:id="@+id/drawer_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Name"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="5dp" />
+
+    <TextView
+        android:id="@+id/drawer_user_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="user@example.com"
+        android:textColor="#828282"
+        android:textSize="12sp" />
+
+</LinearLayout>
