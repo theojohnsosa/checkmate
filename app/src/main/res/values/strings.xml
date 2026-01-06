@@ -8,10 +8,10 @@
     <string name="complete_the_form_to_login">Complete the form to login</string>
     <string name="first_name">First name</string>
     <string name="last_name">Last name</string>
-    <string name="school_email">Student email</string>
+    <string name="school_email">School email</string>
     <string name="department">Department</string>
     <string name="user_type">User type</string>
-    <string name="school_number">Student number</string>
+    <string name="school_number">School number</string>
     <string name="complete_the_form_to_begin">Complete the form to begin</string>
     <string name="first_name_hint">First name</string>
     <string name="last_name_hint">Last name</string>

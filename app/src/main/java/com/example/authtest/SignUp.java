@@ -79,18 +79,6 @@ public class SignUp extends AppCompatActivity {
 
         userTypeInput.setOnItemClickListener((parent, view, position, id) -> {
             String selectedType = (String) parent.getItemAtPosition(position);
-
-            if ("Teacher".equals(selectedType)) {
-                schoolEmailInput.setHint("Teacher email");
-                schoolNumberInput.setHint("Teacher number");
-                schoolEmailInput.setText("");
-                schoolNumberInput.setText("");
-            } else {
-                schoolEmailInput.setHint("Student email");
-                schoolNumberInput.setHint("Student number");
-                schoolEmailInput.setText("");
-                schoolNumberInput.setText("");
-            }
         });
 
         String[] departments = {
@@ -101,13 +89,15 @@ public class SignUp extends AppCompatActivity {
                 "Bachelor of Science in Information Technology",
                 "Bachelor of Science in Psychology"
         };
-        ArrayAdapter<String> departmentAdapter = new ArrayAdapter<>(
+
+        ArrayAdapter<String> departmentAdapter = new ArrayAdapter<String>(
                 this,
-                android.R.layout.simple_dropdown_item_1line,
+                R.layout.dropdown_item,
+                R.id.dropdown_text,
                 departments
         );
-        departmentInput.setAdapter(departmentAdapter);
 
+        departmentInput.setAdapter(departmentAdapter);
         departmentInput.setOnClickListener(v -> {
             departmentInput.showDropDown();
         });
