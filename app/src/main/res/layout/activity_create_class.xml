@@ -72,6 +72,7 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:gravity="center_horizontal">
 
                 <!-- Title -->
@@ -82,8 +83,7 @@
                     android:textStyle="bold"
                     android:textSize="30sp"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_height="wrap_content" />
 
                 <!-- Description -->
                 <TextView
@@ -100,6 +100,7 @@
                     android:id="@+id/classNameInput"
                     android:hint="Class name"
                     android:textColor="#FFFFFF"
+                    android:textSize="16sp"
                     android:textColorHint="#6F6F6F"
                     android:background="@drawable/form_border"
                     android:padding="20dp"
@@ -113,6 +114,7 @@
                     android:id="@+id/subjectCodeInput"
                     android:hint="Subject code"
                     android:textColor="#FFFFFF"
+                    android:textSize="16sp"
                     android:textColorHint="#6F6F6F"
                     android:background="@drawable/form_border"
                     android:padding="20dp"
@@ -213,6 +215,7 @@
                         android:id="@+id/startTimeInput"
                         android:hint="Start time"
                         android:textColor="#FFFFFF"
+                        android:textSize="16sp"
                         android:textColorHint="#6F6F6F"
                         android:background="@drawable/form_border"
                         android:padding="20dp"
@@ -225,6 +228,7 @@
                         android:id="@+id/endTimeInput"
                         android:hint="End time"
                         android:textColor="#FFFFFF"
+                        android:textSize="16sp"
                         android:textColorHint="#6F6F6F"
                         android:background="@drawable/form_border"
                         android:padding="20dp"
@@ -240,6 +244,7 @@
                     android:id="@+id/roomInput"
                     android:hint="Room"
                     android:textColor="#FFFFFF"
+                    android:textSize="16sp"
                     android:textColorHint="#6F6F6F"
                     android:background="@drawable/form_border"
                     android:padding="20dp"
