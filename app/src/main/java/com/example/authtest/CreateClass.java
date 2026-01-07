@@ -19,14 +19,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class CreateClass extends AppCompatActivity {
 
@@ -139,9 +136,7 @@ public class CreateClass extends AppCompatActivity {
 
         View header = navigationView.getHeaderView(0);
         ((TextView) header.findViewById(R.id.drawer_user_name))
-                .setText(mAuth.getCurrentUser().getDisplayName() != null
-                        ? mAuth.getCurrentUser().getDisplayName()
-                        : "User");
+                .setText(resolveTeacherName(mAuth.getCurrentUser()));
 
         ((TextView) header.findViewById(R.id.drawer_user_email))
                 .setText(mAuth.getCurrentUser().getEmail());
@@ -150,6 +145,9 @@ public class CreateClass extends AppCompatActivity {
     /* ---------------- Logic ---------------- */
 
     private ClassModel createClassModel() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String teacherId = user != null ? user.getUid() : null;
+
         return new ClassModel(
                 classNameInput.getText().toString().trim(),
                 generateClassCode(),
@@ -158,10 +156,32 @@ public class CreateClass extends AppCompatActivity {
                 startTimeInput.getText().toString().trim(),
                 endTimeInput.getText().toString().trim(),
                 roomInput.getText().toString().trim(),
-                mAuth.getCurrentUser().getDisplayName(),
-                0
+                resolveTeacherName(user),
+                0,
+                teacherId
         );
     }
+
+    private String resolveTeacherName(FirebaseUser user) {
+        if (user == null) return "Instructor";
+
+        String displayName = user.getDisplayName();
+
+        if (displayName == null || displayName.trim().isEmpty()) {
+            return "Instructor";
+        }
+
+        String[] parts = displayName.trim().split("\\s+");
+
+        if (parts.length >= 2) {
+            // First name + last name only
+            return parts[0] + " " + parts[parts.length - 1];
+        }
+
+        // Single-word name (still better than email)
+        return parts[0];
+    }
+
 
     private void createClass(ClassModel model) {
         String teacherId = mAuth.getCurrentUser().getUid();
@@ -186,22 +206,11 @@ public class CreateClass extends AppCompatActivity {
 
     private void setupTimeDropdowns() {
         List<String> times = new ArrayList<>();
-        times.add("7:00 AM");
-        times.add("8:00 AM");
-        times.add("9:00 AM");
-        times.add("10:00 AM");
-        times.add("11:00 AM");
-        times.add("12:00 PM");
-        times.add("1:00 PM");
-        times.add("2:00 PM");
-        times.add("3:00 PM");
-        times.add("4:00 PM");
-        times.add("5:00 PM");
-        times.add("6:00 PM");
-        times.add("7:00 PM");
-        times.add("8:00 PM");
-        times.add("9:00 PM");
-
+        for (int i = 7; i <= 21; i++) {
+            int hour = i % 12 == 0 ? 12 : i % 12;
+            String period = i < 12 ? "AM" : "PM";
+            times.add(hour + ":00 " + period);
+        }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, times);

@@ -18,6 +18,7 @@ public class ClassModel implements Serializable {
     private int students;
     private List<String> allowedStudentEmails;
     private boolean isAttendanceActive = false;
+    private String teacherId;
 
     public ClassModel() {
         this.allowedStudentEmails = new ArrayList<>();
@@ -26,7 +27,7 @@ public class ClassModel implements Serializable {
 
     public ClassModel(String className, String classCode, String subjectCode,
                       String classDays, String startTime, String endTime,
-                      String room, String teacher, int students) {
+                      String room, String teacher, int students, String teacherId) {
         this.className = className;
         this.classCode = classCode;
         this.subjectCode = subjectCode;
@@ -36,9 +37,11 @@ public class ClassModel implements Serializable {
         this.room = room;
         this.teacher = teacher;
         this.students = students;
+        this.teacherId = teacherId;
         this.allowedStudentEmails = new ArrayList<>();
         this.isAttendanceActive = false;
     }
+
 
     public String getId() {
         return id;
@@ -76,8 +79,8 @@ public class ClassModel implements Serializable {
         return room;
     }
 
-    public String getTeacher() {
-        return teacher;
+    public String getTeacherId() {
+        return teacherId;
     }
 
     public int getStudents() {

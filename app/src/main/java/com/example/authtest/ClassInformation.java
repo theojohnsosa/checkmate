@@ -925,13 +925,6 @@ public class ClassInformation extends AppCompatActivity {
                                 // Fallback to original value from ClassModel
                                 Log.d(TAG, "Keeping original student count from ClassModel");
                             }
-
-                            // Also update teacher name if available
-                            String teacherName = snapshot.getString("teacher");
-                            if (teacherName != null && !teacherName.isEmpty()) {
-                                binding.classInfoCard.infoTeacher.setText(teacherName);
-                                Log.d(TAG, "✓ Teacher updated: " + teacherName);
-                            }
                         } else {
                             Log.e(TAG, "✗ Snapshot exists but document is empty");
                         }
@@ -1234,55 +1227,39 @@ public class ClassInformation extends AppCompatActivity {
             binding.classInfoCard.infoClassDays.setText("N/A");
         }
 
-        // Set teacher name from ClassModel initially
-        String teacherName = classModel.getTeacher();
-        if (teacherName != null && !teacherName.isEmpty()) {
-            binding.classInfoCard.infoTeacher.setText(teacherName);
-            Log.d(TAG, "Initial teacher name set to: " + teacherName);
-        } else {
-            // If ClassModel doesn't have teacher name, try to get from current user
-            loadTeacherName();
-        }
+        loadTeacherNameFromClassCreator(classModel.getTeacherId());
     }
 
-    private void loadTeacherName() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
+    private void loadTeacherNameFromClassCreator(String teacherId) {
+        if (teacherId == null || teacherId.isEmpty()) {
             binding.classInfoCard.infoTeacher.setText("N/A");
             return;
         }
 
-        String userId = currentUser.getUid();
-
         db.collection("users")
-                .document(userId)
+                .document(teacherId)
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         String firstName = doc.getString("firstName");
                         String lastName = doc.getString("lastName");
-                        String displayName = doc.getString("displayName");
 
                         String fullName = "N/A";
-
-                        if (displayName != null && !displayName.isEmpty()) {
-                            fullName = displayName;
-                        } else if (firstName != null && lastName != null) {
+                        if (firstName != null && lastName != null) {
                             fullName = firstName + " " + lastName;
                         } else if (firstName != null) {
                             fullName = firstName;
                         }
 
                         binding.classInfoCard.infoTeacher.setText(fullName);
-                        Log.d(TAG, "✓ Teacher name loaded from user profile: " + fullName);
+                        Log.d(TAG, "✓ Teacher name loaded: " + fullName);
                     } else {
-                        Log.w(TAG, "User document not found");
                         binding.classInfoCard.infoTeacher.setText("N/A");
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading teacher name", e);
                     binding.classInfoCard.infoTeacher.setText("N/A");
+                    Log.e(TAG, "Error loading teacher", e);
                 });
     }
 

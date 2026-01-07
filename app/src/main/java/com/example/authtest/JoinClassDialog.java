@@ -128,13 +128,45 @@ public class JoinClassDialog extends Dialog {
                             return;
                         }
 
-                        addEnrolledClass(db, studentId, classId, classModel, context);
+                        checkIfAlreadyEnrolled(db, studentId, classId, classModel, context);
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         joinButton.setEnabled(true);
                     });
         });
+    }
+
+    private void checkIfAlreadyEnrolled(
+            FirebaseFirestore db,
+            String studentId,
+            String classId,
+            ClassModel classModel,
+            Context context
+    ) {
+        db.collection("users")
+                .document(studentId)
+                .collection("enrolledClasses")
+                .document(classId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        // Student has already enrolled in this class
+                        Toast.makeText(
+                                context,
+                                "You have already joined this class.",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        joinButton.setEnabled(true);
+                    } else {
+                        // Student hasn't enrolled yet, proceed with enrollment
+                        addEnrolledClass(db, studentId, classId, classModel, context);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(context, "Error checking enrollment: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    joinButton.setEnabled(true);
+                });
     }
 
     private void addEnrolledClass(
