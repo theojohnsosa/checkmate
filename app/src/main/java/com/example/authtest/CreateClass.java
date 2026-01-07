@@ -186,14 +186,22 @@ public class CreateClass extends AppCompatActivity {
 
     private void setupTimeDropdowns() {
         List<String> times = new ArrayList<>();
-        for (int h = 6; h <= 12; h++) {
-            times.add(h + ":00 AM");
-            times.add(h + ":30 AM");
-        }
-        for (int h = 1; h <= 10; h++) {
-            times.add(h + ":00 PM");
-            times.add(h + ":30 PM");
-        }
+        times.add("7:00 AM");
+        times.add("8:00 AM");
+        times.add("9:00 AM");
+        times.add("10:00 AM");
+        times.add("11:00 AM");
+        times.add("12:00 PM");
+        times.add("1:00 PM");
+        times.add("2:00 PM");
+        times.add("3:00 PM");
+        times.add("4:00 PM");
+        times.add("5:00 PM");
+        times.add("6:00 PM");
+        times.add("7:00 PM");
+        times.add("8:00 PM");
+        times.add("9:00 PM");
+
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, times);

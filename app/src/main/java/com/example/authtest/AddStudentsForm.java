@@ -182,24 +182,38 @@ public class AddStudentsForm extends AppCompatActivity {
     private void addStudentToClassFirebase(String studentEmail, String teacherId) {
         addStudentButton.setText("Adding...");
 
+        // Update user's classes collection
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
                 .document(classId)
-                .update("allowedStudentEmails", FieldValue.arrayUnion(studentEmail))
-                .addOnSuccessListener(unused ->
-                        db.collection("allClasses")
-                                .document(classId)
-                                .update("allowedStudentEmails", FieldValue.arrayUnion(studentEmail))
-                                .addOnSuccessListener(unused2 -> {
-                                    Toast.makeText(this, "Student added successfully!", Toast.LENGTH_SHORT).show();
-                                    studentEmailInput.setText("");
-                                    resetButton();
-                                    setResult(RESULT_OK);
-                                })
-                                .addOnFailureListener(e -> resetButton())
+                .update(
+                        "allowedStudentEmails", FieldValue.arrayUnion(studentEmail),
+                        "students", FieldValue.increment(1)  // ← ADD THIS LINE
                 )
-                .addOnFailureListener(e -> resetButton());
+                .addOnSuccessListener(unused -> {
+                    // Update allClasses collection
+                    db.collection("allClasses")
+                            .document(classId)
+                            .update(
+                                    "allowedStudentEmails", FieldValue.arrayUnion(studentEmail),
+                                    "students", FieldValue.increment(1)  // ← ADD THIS LINE
+                            )
+                            .addOnSuccessListener(unused2 -> {
+                                Toast.makeText(this, "Student added successfully!", Toast.LENGTH_SHORT).show();
+                                studentEmailInput.setText("");
+                                resetButton();
+                                setResult(RESULT_OK);
+                            })
+                            .addOnFailureListener(e -> {
+                                resetButton();
+                                Toast.makeText(this, "Failed to update allClasses: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    resetButton();
+                    Toast.makeText(this, "Failed to add student: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void resetButton() {

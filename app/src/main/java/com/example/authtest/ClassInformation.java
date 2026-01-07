@@ -867,23 +867,80 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void setupClassInfoListener() {
-        if (classId == null || classId.isEmpty()) return;
+        if (classId == null || classId.isEmpty()) {
+            Log.e(TAG, "Cannot setup listener - classId is null");
+            return;
+        }
+
+        Log.d(TAG, "=== SETTING UP CLASS INFO LISTENER ===");
+        Log.d(TAG, "Class ID: " + classId);
+
+        // Remove old listener if exists
+        if (classInfoListener != null) {
+            classInfoListener.remove();
+            Log.d(TAG, "Removed old listener");
+        }
 
         classInfoListener = db.collection("allClasses")
                 .document(classId)
                 .addSnapshotListener((snapshot, error) -> {
+                    Log.d(TAG, "🔔 CLASS INFO LISTENER FIRED");
+
                     if (error != null) {
-                        Log.e("ClassInformation", "Error listening to class info", error);
+                        Log.e(TAG, "ERROR in classInfoListener:", error);
                         return;
                     }
 
-                    if (snapshot != null && snapshot.exists()) {
-                        Long studentCount = snapshot.getLong("students");
-                        if (studentCount != null) {
-                            binding.classInfoCard.infoStudents.setText(String.valueOf(studentCount));
+                    if (snapshot != null) {
+                        Log.d(TAG, "Snapshot exists: " + snapshot.exists());
+
+                        if (snapshot.exists()) {
+                            Log.d(TAG, "========== SNAPSHOT DATA ==========");
+                            Log.d(TAG, "All fields: " + snapshot.getData().keySet());
+
+                            // Try different possible field names
+                            Long studentCount = snapshot.getLong("students");
+                            Log.d(TAG, "  students (Long): " + studentCount);
+
+                            if (studentCount == null) {
+                                Object studentsObj = snapshot.get("students");
+                                Log.d(TAG, "  students (Object): " + studentsObj + " (class: " +
+                                        (studentsObj != null ? studentsObj.getClass().getSimpleName() : "null") + ")");
+
+                                // Try converting if it's a different type
+                                if (studentsObj instanceof Number) {
+                                    studentCount = ((Number) studentsObj).longValue();
+                                }
+                            }
+
+                            Log.d(TAG, "==================================");
+
+                            if (studentCount != null) {
+                                String countText = String.valueOf(studentCount);
+                                binding.classInfoCard.infoStudents.setText(countText);
+                                Log.d(TAG, "✓✓✓ STUDENT COUNT UPDATED TO: " + countText);
+                            } else {
+                                Log.e(TAG, "✗✗✗ 'students' field is NULL or MISSING");
+                                Log.e(TAG, "Check Firestore - field might be named differently");
+                                // Fallback to original value from ClassModel
+                                Log.d(TAG, "Keeping original student count from ClassModel");
+                            }
+
+                            // Also update teacher name if available
+                            String teacherName = snapshot.getString("teacher");
+                            if (teacherName != null && !teacherName.isEmpty()) {
+                                binding.classInfoCard.infoTeacher.setText(teacherName);
+                                Log.d(TAG, "✓ Teacher updated: " + teacherName);
+                            }
+                        } else {
+                            Log.e(TAG, "✗ Snapshot exists but document is empty");
                         }
+                    } else {
+                        Log.e(TAG, "✗ Snapshot is NULL");
                     }
                 });
+
+        Log.d(TAG, "=== LISTENER ATTACHED ===");
     }
 
     private void calculateAttendanceStats(java.util.List<com.google.firebase.firestore.DocumentSnapshot> documents) {
@@ -1165,7 +1222,10 @@ public class ClassInformation extends AppCompatActivity {
         binding.classInfoCard.infoStartTime.setText(classModel.getStartTime() != null ? classModel.getStartTime() : "N/A");
         binding.classInfoCard.infoEndTime.setText(classModel.getEndTime() != null ? classModel.getEndTime() : "N/A");
         binding.classInfoCard.infoRoom.setText(classModel.getRoom() != null ? classModel.getRoom() : "N/A");
+
+        // Set initial student count
         binding.classInfoCard.infoStudents.setText(String.valueOf(classModel.getStudents()));
+        Log.d(TAG, "Initial student count set to: " + classModel.getStudents());
 
         String classDays = classModel.getClassDays();
         if (classDays != null && !classDays.isEmpty()) {
@@ -1174,8 +1234,79 @@ public class ClassInformation extends AppCompatActivity {
             binding.classInfoCard.infoClassDays.setText("N/A");
         }
 
+        // Set teacher name from ClassModel initially
         String teacherName = classModel.getTeacher();
-        binding.classInfoCard.infoTeacher.setText(teacherName != null && !teacherName.isEmpty() ? teacherName : "N/A");
+        if (teacherName != null && !teacherName.isEmpty()) {
+            binding.classInfoCard.infoTeacher.setText(teacherName);
+            Log.d(TAG, "Initial teacher name set to: " + teacherName);
+        } else {
+            // If ClassModel doesn't have teacher name, try to get from current user
+            loadTeacherName();
+        }
+    }
+
+    private void loadTeacherName() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            binding.classInfoCard.infoTeacher.setText("N/A");
+            return;
+        }
+
+        String userId = currentUser.getUid();
+
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String firstName = doc.getString("firstName");
+                        String lastName = doc.getString("lastName");
+                        String displayName = doc.getString("displayName");
+
+                        String fullName = "N/A";
+
+                        if (displayName != null && !displayName.isEmpty()) {
+                            fullName = displayName;
+                        } else if (firstName != null && lastName != null) {
+                            fullName = firstName + " " + lastName;
+                        } else if (firstName != null) {
+                            fullName = firstName;
+                        }
+
+                        binding.classInfoCard.infoTeacher.setText(fullName);
+                        Log.d(TAG, "✓ Teacher name loaded from user profile: " + fullName);
+                    } else {
+                        Log.w(TAG, "User document not found");
+                        binding.classInfoCard.infoTeacher.setText("N/A");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading teacher name", e);
+                    binding.classInfoCard.infoTeacher.setText("N/A");
+                });
+    }
+
+    private void incrementStudentCount(String teacherId) {
+        db.collection("users")
+                .document(teacherId)
+                .collection("classes")
+                .document(classId)
+                .update("students", FieldValue.increment(1))
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "✓ Incremented student count in user's classes");
+                    db.collection("allClasses")
+                            .document(classId)
+                            .update("students", FieldValue.increment(1))
+                            .addOnSuccessListener(unused2 -> {
+                                Log.d(TAG, "✓ Incremented student count in allClasses");
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Failed to increment count in allClasses", e);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to increment student count", e);
+                });
     }
 
     private void checkUserTypeAndSetupUI() {
