@@ -187,9 +187,33 @@ public class StudentHome extends AppCompatActivity {
             TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
             TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
 
-            userNameTextView.setText(currentUser.getDisplayName() != null ?
-                    currentUser.getDisplayName() : "User");
-            userEmailTextView.setText(currentUser.getEmail());
+            // Fetch user details from Firestore
+            db.collection("users")
+                    .document(currentUser.getUid())
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String firstName = documentSnapshot.getString("firstName");
+                            String lastName = documentSnapshot.getString("lastName");
+
+                            String fullName = "";
+                            if (firstName != null && !firstName.isEmpty()) {
+                                fullName = firstName;
+                            }
+                            if (lastName != null && !lastName.isEmpty()) {
+                                fullName += (fullName.isEmpty() ? "" : " ") + lastName;
+                            }
+
+                            userNameTextView.setText(fullName.isEmpty() ? "User" : fullName);
+                        } else {
+                            userNameTextView.setText("User");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        userNameTextView.setText("User");
+                    });
+
+            userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
         }
     }
 

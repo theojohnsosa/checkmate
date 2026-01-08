@@ -157,18 +157,40 @@ public class AddStudentsForm extends AppCompatActivity {
     }
 
     private void loadUserInfoInDrawer() {
-        if (mAuth.getCurrentUser() == null) return;
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            View headerView = navigationView.getHeaderView(0);
+            TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
+            TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
 
-        View headerView = navigationView.getHeaderView(0);
-        TextView userName = headerView.findViewById(R.id.drawer_user_name);
-        TextView userEmail = headerView.findViewById(R.id.drawer_user_email);
+            // Fetch user details from Firestore
+            db.collection("users")
+                    .document(currentUser.getUid())
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String firstName = documentSnapshot.getString("firstName");
+                            String lastName = documentSnapshot.getString("lastName");
 
-        userName.setText(
-                mAuth.getCurrentUser().getDisplayName() != null
-                        ? mAuth.getCurrentUser().getDisplayName()
-                        : "User"
-        );
-        userEmail.setText(mAuth.getCurrentUser().getEmail());
+                            String fullName = "";
+                            if (firstName != null && !firstName.isEmpty()) {
+                                fullName = firstName;
+                            }
+                            if (lastName != null && !lastName.isEmpty()) {
+                                fullName += (fullName.isEmpty() ? "" : " ") + lastName;
+                            }
+
+                            userNameTextView.setText(fullName.isEmpty() ? "User" : fullName);
+                        } else {
+                            userNameTextView.setText("User");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        userNameTextView.setText("User");
+                    });
+
+            userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
+        }
     }
 
     private void addStudentToClass() {
