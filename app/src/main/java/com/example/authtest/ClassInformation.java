@@ -177,7 +177,7 @@ public class ClassInformation extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.menu_home) {
-                drawerLayout.closeDrawer(GravityCompat.START);
+                navigateToUserHome();
                 return true;
             } else if (itemId == R.id.menu_profile) {
                 drawerLayout.closeDrawer(GravityCompat.START);
@@ -195,6 +195,43 @@ public class ClassInformation extends AppCompatActivity {
             drawerLayout.closeDrawer(GravityCompat.START);
             return false;
         });
+    }
+
+    private void navigateToUserHome() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        if (userType != null) {
+                            if ("Student".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(ClassInformation.this, StudentHome.class));
+                            } else if ("Teacher".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(ClassInformation.this, TeacherHome.class));
+                            } else {
+                                Toast.makeText(ClassInformation.this, "Unknown user type: " + userType, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(ClassInformation.this, "User type not found in document", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(ClassInformation.this, "User document not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Toast.makeText(ClassInformation.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void logout() {
