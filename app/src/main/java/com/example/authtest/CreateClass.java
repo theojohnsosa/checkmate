@@ -92,7 +92,6 @@ public class CreateClass extends AppCompatActivity {
     }
 
     /* ---------------- Drawer ---------------- */
-
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
