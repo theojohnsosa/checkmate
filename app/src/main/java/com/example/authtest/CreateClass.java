@@ -95,25 +95,72 @@ public class CreateClass extends AppCompatActivity {
 
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
+            int itemId = item.getItemId();
 
-            if (id == R.id.menu_home) {
-                finish();
-            } else if (id == R.id.menu_profile) {
-                Toast.makeText(this, "Profile coming soon", Toast.LENGTH_SHORT).show();
-            } else if (id == R.id.menu_settings) {
-                Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show();
-            } else if (id == R.id.menu_logout) {
-                mAuth.signOut();
-                Intent intent = new Intent(this, SignIn.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+            if (itemId == R.id.menu_home) {
+                navigateToUserHome();
+                return true;
+            } else if (itemId == R.id.menu_profile) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_settings) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Settings feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_logout) {
+                logout();
+                return true;
             }
 
             drawerLayout.closeDrawer(GravityCompat.START);
-            return true;
+            return false;
         });
+    }
+
+    private void navigateToUserHome() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        if (userType != null) {
+                            if ("Student".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(CreateClass.this, StudentHome.class));
+                            } else if ("Teacher".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(CreateClass.this, TeacherHome.class));
+                            } else {
+                                Toast.makeText(CreateClass.this, "Unknown user type: " + userType, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(CreateClass.this, "User type not found in document", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(CreateClass.this, "User document not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Toast.makeText(CreateClass.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void logout() {
+        mAuth.signOut();
+        Intent intent = new Intent(CreateClass.this, SignIn.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void setupBackPressHandler() {
@@ -147,7 +194,6 @@ public class CreateClass extends AppCompatActivity {
     private ClassModel createClassModel() {
         FirebaseUser user = mAuth.getCurrentUser();
         String teacherId = user != null ? user.getUid() : null;
-
         return new ClassModel(
                 classNameInput.getText().toString().trim(),
                 generateClassCode(),
