@@ -41,7 +41,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Initialize DrawerLayout and NavigationView using findViewById
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
 
@@ -49,7 +48,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         classAdapter = new ClassAdapter(this);
         binding.classesRecyclerView.setAdapter(classAdapter);
 
-        // Hamburger icon click listener
         binding.hamburgerIcon.setOnClickListener(v -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
@@ -57,13 +55,8 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         binding.createClassButton.setOnClickListener(v -> openCreateClass());
         binding.ctaButton.setOnClickListener(v -> openCreateClass());
 
-        // Setup navigation drawer menu items
         setupNavigationDrawer();
-
-        // Load user info in drawer header
         loadUserInfoInDrawer();
-
-        // Setup back press handler
         setupBackPressHandler();
 
         loadClasses();
@@ -89,7 +82,7 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
             int itemId = item.getItemId();
 
             if (itemId == R.id.menu_home) {
-                drawerLayout.closeDrawer(GravityCompat.START);
+                navigateToUserHome();
                 return true;
             } else if (itemId == R.id.menu_profile) {
                 drawerLayout.closeDrawer(GravityCompat.START);
@@ -107,6 +100,43 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
             drawerLayout.closeDrawer(GravityCompat.START);
             return false;
         });
+    }
+
+    private void navigateToUserHome() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        if (userType != null) {
+                            if ("Student".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(TeacherHome.this, StudentHome.class));
+                            } else if ("Teacher".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(TeacherHome.this, TeacherHome.class));
+                            } else {
+                                Toast.makeText(TeacherHome.this, "Unknown user type: " + userType, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(TeacherHome.this, "User type not found in document", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(TeacherHome.this, "User document not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Toast.makeText(TeacherHome.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void loadUserInfoInDrawer() {
