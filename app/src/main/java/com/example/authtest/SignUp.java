@@ -217,8 +217,11 @@ public class SignUp extends AppCompatActivity {
             return false;
         }
 
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(schoolEmail).matches()) {
-            schoolEmailInput.setError("Please enter valid email");
+        if (!isValidNUMOAEmail(schoolEmail, userType)) {
+            schoolEmailInput.setError("Please enter a valid NU MOA email\n" +
+                    "Student: name@students.nu-moa.edu.ph\n" +
+                    "Teacher: name@nu-moa.edu.ph\n" +
+                    "(name must contain only letters)");
             schoolEmailInput.requestFocus();
             return false;
         }
@@ -255,6 +258,14 @@ public class SignUp extends AppCompatActivity {
             return false;
         }
 
+        if (!isValidSchoolNumber(schoolNumber)) {
+            schoolNumberInput.setError("Invalid school number format\n" +
+                    "Format: YYYY-0000000\n" +
+                    "Year: 2019-2025, Digits: 1-9 only (7 digits)");
+            schoolNumberInput.requestFocus();
+            return false;
+        }
+
         if (yearLevel.isEmpty()) {
             yearLevelInput.setError("Year level is required");
             yearLevelInput.requestFocus();
@@ -263,6 +274,59 @@ public class SignUp extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    private boolean isValidNUMOAEmail(String email, String userType) {
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+
+        // Check email format and extract the name part
+        String emailPattern;
+        String requiredDomain;
+
+        if (userType.equals("Student")) {
+            emailPattern = "^[a-zA-Z]+@students\\.nu-moa\\.edu\\.ph$";
+            requiredDomain = "@students.nu-moa.edu.ph";
+        } else if (userType.equals("Teacher")) {
+            emailPattern = "^[a-zA-Z]+@nu-moa\\.edu\\.ph$";
+            requiredDomain = "@nu-moa.edu.ph";
+        } else {
+            return false;
+        }
+
+        // Validate email format (letters only before @)
+        if (!email.matches(emailPattern)) {
+            return false;
+        }
+
+        // Extract and validate the name part (before @)
+        String namePart = email.substring(0, email.indexOf("@"));
+
+        // Check if name part contains only letters (no numbers or special characters)
+        if (!namePart.matches("^[a-zA-Z]+$")) {
+            return false;
+        }
+
+        // Ensure the domain is correct
+        if (!email.endsWith(requiredDomain)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isValidSchoolNumber(String schoolNumber) {
+        if (schoolNumber == null || schoolNumber.isEmpty()) {
+            return false;
+        }
+
+        // Pattern: YYYY-0000000
+        // Year: 2019-2025
+        // Digits: 7 digits, each digit must be 1-9 (no zeros)
+        String pattern = "^(201[9]|202[0-5])-[1-9]{7}$";
+
+        return schoolNumber.matches(pattern);
     }
 
     private void saveUserToFirestore(
@@ -315,5 +379,4 @@ public class SignUp extends AppCompatActivity {
                     }
                 });
     }
-
 }
