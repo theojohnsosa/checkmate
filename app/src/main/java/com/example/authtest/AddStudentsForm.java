@@ -17,6 +17,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -75,25 +76,69 @@ public class AddStudentsForm extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.menu_home) {
-                drawerLayout.closeDrawer(GravityCompat.START);
-                finish();
+                navigateToUserHome();
                 return true;
             } else if (itemId == R.id.menu_profile) {
+                drawerLayout.closeDrawer(GravityCompat.START);
                 Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
             } else if (itemId == R.id.menu_settings) {
+                drawerLayout.closeDrawer(GravityCompat.START);
                 Toast.makeText(this, "Settings feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
             } else if (itemId == R.id.menu_logout) {
-                mAuth.signOut();
-                Intent intent = new Intent(this, SignIn.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                logout();
                 return true;
             }
 
             drawerLayout.closeDrawer(GravityCompat.START);
-            return true;
+            return false;
         });
+    }
+
+    private void navigateToUserHome() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        if (userType != null) {
+                            if ("Student".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(AddStudentsForm.this, StudentHome.class));
+                            } else if ("Teacher".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(AddStudentsForm.this, TeacherHome.class));
+                            } else {
+                                Toast.makeText(AddStudentsForm.this, "Unknown user type: " + userType, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(AddStudentsForm.this, "User type not found in document", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(AddStudentsForm.this, "User document not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Toast.makeText(AddStudentsForm.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void logout() {
+        mAuth.signOut();
+        Intent intent = new Intent(AddStudentsForm.this, SignIn.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void setupBackPressHandler() {
