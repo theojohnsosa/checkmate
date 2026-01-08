@@ -47,6 +47,13 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         notifyDataSetChanged();
     }
 
+    public ClassModel getClassAt(int position) {
+        if (position >= 0 && position < classList.size()) {
+            return classList.get(position);
+        }
+        return null;
+    }
+
     static class ClassViewHolder extends RecyclerView.ViewHolder {
         private CardView cardView;
         private TextView classNameText;
