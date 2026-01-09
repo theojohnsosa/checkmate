@@ -8,6 +8,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,6 +72,9 @@ public class ClassInformation extends AppCompatActivity {
     private TextView studentsAttendedHeader;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
+    private EditText studentSearchBar;
+    private ImageView clearSearchButton;
+    private List<StudentAttendanceModel> filteredStudentList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +94,11 @@ public class ClassInformation extends AppCompatActivity {
         binding.hamburgerIcon.setOnClickListener(v -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
+
+        studentSearchBar = findViewById(R.id.studentSearchBar);
+        clearSearchButton = findViewById(R.id.clearSearchButton);
+
+        setupStudentSearch();
 
         // Setup navigation drawer menu items
         setupNavigationDrawer();
@@ -155,6 +165,64 @@ public class ClassInformation extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void setupStudentSearch() {
+        studentSearchBar.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String searchQuery = s.toString().trim().toLowerCase();
+                filterStudents(searchQuery);
+
+                // Show/hide clear button
+                if (searchQuery.isEmpty()) {
+                    clearSearchButton.setVisibility(View.GONE);
+                } else {
+                    clearSearchButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        // Clear button click listener
+        clearSearchButton.setOnClickListener(v -> {
+            studentSearchBar.setText("");
+            filteredStudentList.clear();
+            studentAdapter.setStudents(new ArrayList<>(studentList));
+        });
+    }
+
+    private void filterStudents(String searchQuery) {
+        filteredStudentList.clear();
+
+        if (searchQuery.isEmpty()) {
+            // Show all students if search is empty
+            studentAdapter.setStudents(new ArrayList<>(studentList));
+            return;
+        }
+
+        // Filter students by first name or last name
+        for (StudentAttendanceModel student : studentList) {
+            String fullName = student.getFullName().toLowerCase();
+            String firstName = (student.getFirstName() != null ? student.getFirstName() : "").toLowerCase();
+            String lastName = (student.getLastName() != null ? student.getLastName() : "").toLowerCase();
+
+            if (fullName.contains(searchQuery) ||
+                    firstName.contains(searchQuery) ||
+                    lastName.contains(searchQuery)) {
+                filteredStudentList.add(student);
+            }
+        }
+
+        // Update adapter with filtered results
+        studentAdapter.setStudents(new ArrayList<>(filteredStudentList));
+
+        Log.d(TAG, "Search for '" + searchQuery + "' returned " + filteredStudentList.size() + " results");
     }
 
     private void setupBackPressHandler() {
@@ -608,6 +676,13 @@ public class ClassInformation extends AppCompatActivity {
 
             sortStudentsByLastName();
 
+            // Initialize filtered list with all students
+            filteredStudentList.clear();
+            filteredStudentList.addAll(studentList);
+
+            // Clear search bar
+            studentSearchBar.setText("");
+
             studentAdapter.setStudents(new ArrayList<>(studentList));
             updateStudentsHeaderVisibility();
             setupStudentsListener();
@@ -781,6 +856,15 @@ public class ClassInformation extends AppCompatActivity {
             Log.d(TAG, "Header visibility set to: " + (hasStudents ? "VISIBLE" : "GONE"));
         } else {
             Log.e(TAG, "studentsAttendedHeader is null!");
+        }
+
+        // Show/hide search bar with header
+        View searchBarContainer = findViewById(R.id.searchBarContainer);
+        if (searchBarContainer != null) {
+            searchBarContainer.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "Search bar visibility set to: " + (hasStudents ? "VISIBLE" : "GONE"));
+        } else {
+            Log.e(TAG, "searchBarContainer is null!");
         }
 
         if (studentsRecyclerView != null) {

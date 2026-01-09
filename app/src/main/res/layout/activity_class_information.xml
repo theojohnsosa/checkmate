@@ -124,6 +124,55 @@
                     android:layout_marginBottom="16dp"
                     android:visibility="gone" />
 
+                <!-- Search Bar Container - NEW -->
+                <LinearLayout
+                    android:id="@+id/searchBarContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp"
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="8dp"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/rounded_search_bg"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_search"
+                        android:contentDescription="Search"
+                        android:layout_marginStart="12dp"
+                        app:tint="#828282" />
+
+                    <EditText
+                        android:id="@+id/studentSearchBar"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent"
+                        android:hint="Search by student name..."
+                        android:textColorHint="#828282"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:inputType="text"
+                        android:imeOptions="actionSearch"
+                        android:maxLines="1" />
+
+                    <ImageView
+                        android:id="@+id/clearSearchButton"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_close"
+                        android:contentDescription="Clear search"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#828282"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/studentsRecyclerView"
                     android:layout_width="match_parent"
