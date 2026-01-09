@@ -89,6 +89,27 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp" />
 
+                <!-- Recent Sessions Section - NEW -->
+                <TextView
+                    android:id="@+id/recentSessionsHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Recent Sessions"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recentSessionsRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:layout_marginBottom="20dp"
+                    android:visibility="gone" />
+
                 <include
                     android:id="@+id/attendanceStatsCard"
                     layout="@layout/attendance_stats_card"
@@ -124,7 +145,7 @@
                     android:layout_marginBottom="16dp"
                     android:visibility="gone" />
 
-                <!-- Search Bar Container - NEW -->
+                <!-- Search Bar Container -->
                 <LinearLayout
                     android:id="@+id/searchBarContainer"
                     android:layout_width="match_parent"
@@ -154,7 +175,7 @@
                         android:hint="Search by student name..."
                         android:textColorHint="#828282"
                         android:textColor="#FFFFFF"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
                         android:inputType="text"

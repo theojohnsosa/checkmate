@@ -75,6 +75,11 @@ public class ClassInformation extends AppCompatActivity {
     private EditText studentSearchBar;
     private ImageView clearSearchButton;
     private List<StudentAttendanceModel> filteredStudentList = new ArrayList<>();
+    private RecyclerView recentSessionsRecyclerView;
+    private RecentSessionAdapter recentSessionAdapter;
+    private List<RecentSession> recentSessionList = new ArrayList<>();
+    private ListenerRegistration recentSessionsListener;
+    private long attendanceSessionStartTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +126,10 @@ public class ClassInformation extends AppCompatActivity {
 
         studentsRecyclerView = findViewById(R.id.studentsRecyclerView);
         studentsAttendedHeader = findViewById(R.id.studentsAttendedHeader);
+        recentSessionsRecyclerView = findViewById(R.id.recentSessionsRecyclerView);
+
+        // Initialize recent sessions for BOTH teachers and students
+        setupRecentSessionsRecyclerView();
 
         checkUserTypeAndSetupUI();
 
@@ -137,6 +146,7 @@ public class ClassInformation extends AppCompatActivity {
                     setupAttendanceStatsListener();
                     setupClassInfoListener();
                     setupStudentListRecyclerView();
+                    loadRecentSessions();
                     diagnoseFirestoreStructure();
                     loadStudentList();
                 } else {
@@ -164,6 +174,185 @@ public class ClassInformation extends AppCompatActivity {
                     Toast.makeText(this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
                 }
             });
+        }
+    }
+
+    private void setupRecentSessionsRecyclerView() {
+        if (recentSessionsRecyclerView == null) {
+            recentSessionsRecyclerView = findViewById(R.id.recentSessionsRecyclerView);
+        }
+
+        Log.d(TAG, "Setting up recent sessions RecyclerView");
+        recentSessionAdapter = new RecentSessionAdapter();
+        recentSessionsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recentSessionsRecyclerView.setAdapter(recentSessionAdapter);
+        recentSessionsRecyclerView.setNestedScrollingEnabled(false);
+        Log.d(TAG, "✓ Recent sessions adapter initialized");
+    }
+    private void saveRecentSession(long endTime) {
+        if (classId == null || classId.isEmpty()) {
+            Log.e(TAG, "Cannot save session - classId is null");
+            return;
+        }
+
+        long startTime = attendanceSessionStartTime > 0 ? attendanceSessionStartTime : (endTime - 3600000);
+        String sessionId = String.valueOf(System.currentTimeMillis());
+
+        Map<String, Object> sessionData = new HashMap<>();
+        sessionData.put("sessionId", sessionId);
+        sessionData.put("classId", classId);
+        sessionData.put("sessionStartTime", startTime);
+        sessionData.put("sessionEndTime", endTime);
+        sessionData.put("timestamp", endTime);
+
+        db.collection("allClasses")
+                .document(classId)
+                .collection("recentSessions")
+                .document(sessionId)
+                .set(sessionData)
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "✓ Session saved successfully: " + sessionId);
+
+                    String teacherId = mAuth.getCurrentUser().getUid();
+                    db.collection("users")
+                            .document(teacherId)
+                            .collection("classes")
+                            .document(classId)
+                            .collection("recentSessions")
+                            .document(sessionId)
+                            .set(sessionData)
+                            .addOnSuccessListener(unused2 -> {
+                                Log.d(TAG, "✓ Session also saved to teacher's classes");
+                                // Reload sessions to refresh UI immediately
+                                loadRecentSessions();
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Failed to save session to teacher's classes", e);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to save session", e);
+                });
+    }
+
+    private void loadRecentSessions() {
+        if (classId == null || classId.isEmpty()) {
+            Log.e(TAG, "Cannot load sessions - classId is null");
+            return;
+        }
+
+        Log.d(TAG, "🔄 Loading recent sessions for class: " + classId);
+
+        db.collection("allClasses")
+                .document(classId)
+                .collection("recentSessions")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(10)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    recentSessionList.clear();
+
+                    Log.d(TAG, "📦 QuerySnapshot returned: " + querySnapshot.size() + " sessions");
+
+                    for (var doc : querySnapshot.getDocuments()) {
+                        long startTime = doc.getLong("sessionStartTime") != null ? doc.getLong("sessionStartTime") : 0;
+                        long endTime = doc.getLong("sessionEndTime") != null ? doc.getLong("sessionEndTime") : 0;
+                        String sessionId = doc.getString("sessionId");
+
+                        RecentSession session = new RecentSession(sessionId, classId, startTime, endTime);
+                        recentSessionList.add(session);
+
+                        Log.d(TAG, "  ✓ Loaded session: " + session.getDate() + " " + session.getSessionTimeRange());
+                    }
+
+                    Log.d(TAG, "📊 Total sessions loaded: " + recentSessionList.size());
+
+                    if (recentSessionAdapter != null) {
+                        recentSessionAdapter.setSessions(new ArrayList<>(recentSessionList));
+                        Log.d(TAG, "✓ Adapter updated with sessions");
+                    } else {
+                        Log.e(TAG, "✗ recentSessionAdapter is NULL - cannot update!");
+                    }
+
+                    updateRecentSessionsVisibility();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading recent sessions", e);
+                });
+    }
+
+    private void setupRecentSessionsListener() {
+        if (classId == null || classId.isEmpty()) {
+            Log.e(TAG, "Cannot setup listener - classId is null");
+            return;
+        }
+
+        Log.d(TAG, "🔌 Setting up real-time recent sessions listener for class: " + classId);
+
+        if (recentSessionsListener != null) {
+            recentSessionsListener.remove();
+        }
+
+        recentSessionsListener = db.collection("allClasses")
+                .document(classId)
+                .collection("recentSessions")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(10)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to recent sessions", error);
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        Log.d(TAG, "🔔 Recent sessions updated! Total: " + snapshots.size());
+
+                        recentSessionList.clear();
+
+                        for (var doc : snapshots.getDocuments()) {
+                            long startTime = doc.getLong("sessionStartTime") != null ? doc.getLong("sessionStartTime") : 0;
+                            long endTime = doc.getLong("sessionEndTime") != null ? doc.getLong("sessionEndTime") : 0;
+                            String sessionId = doc.getString("sessionId");
+
+                            RecentSession session = new RecentSession(sessionId, classId, startTime, endTime);
+                            recentSessionList.add(session);
+
+                            Log.d(TAG, "  ✓ Session: " + session.getDate() + " " + session.getSessionTimeRange());
+                        }
+
+                        if (recentSessionAdapter != null) {
+                            recentSessionAdapter.setSessions(new ArrayList<>(recentSessionList));
+                            Log.d(TAG, "✓ Adapter updated with " + recentSessionList.size() + " sessions");
+                        } else {
+                            Log.e(TAG, "✗ recentSessionAdapter is NULL!");
+                        }
+
+                        updateRecentSessionsVisibility();
+                    }
+                });
+
+        Log.d(TAG, "✓ Listener attached successfully");
+    }
+
+    private void updateRecentSessionsVisibility() {
+        boolean hasSessions = !recentSessionList.isEmpty();
+        Log.d(TAG, "Updating recent sessions visibility. Has sessions: " + hasSessions + " Count: " + recentSessionList.size());
+
+        View recentSessionsHeader = findViewById(R.id.recentSessionsHeader);
+        View recentSessionsRecycler = findViewById(R.id.recentSessionsRecyclerView);
+
+        if (recentSessionsHeader != null) {
+            recentSessionsHeader.setVisibility(hasSessions ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "✓ Header visibility set to: " + (hasSessions ? "VISIBLE" : "GONE"));
+        } else {
+            Log.e(TAG, "✗ recentSessionsHeader is NULL");
+        }
+
+        if (recentSessionsRecycler != null) {
+            recentSessionsRecycler.setVisibility(hasSessions ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "✓ RecyclerView visibility set to: " + (hasSessions ? "VISIBLE" : "GONE"));
+        } else {
+            Log.e(TAG, "✗ recentSessionsRecyclerView is NULL");
         }
     }
 
@@ -990,6 +1179,8 @@ public class ClassInformation extends AppCompatActivity {
                     }
                 }
             });
+
+            loadRecentSessions();
         }
     }
 
@@ -1009,6 +1200,8 @@ public class ClassInformation extends AppCompatActivity {
                         calculateAttendanceStats(snapshots.getDocuments());
                     }
                 });
+
+        setupRecentSessionsListener();
     }
 
     private void setupClassInfoListener() {
@@ -1301,6 +1494,11 @@ public class ClassInformation extends AppCompatActivity {
 
         String teacherId = mAuth.getCurrentUser().getUid();
 
+        // Track session start time
+        if (isActive) {
+            attendanceSessionStartTime = System.currentTimeMillis();
+        }
+
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
@@ -1315,6 +1513,8 @@ public class ClassInformation extends AppCompatActivity {
                                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 
                                 if (!isActive) {
+                                    // Save the session when ending
+                                    saveRecentSession(System.currentTimeMillis());
                                     clearAllAttendanceRecords();
                                 }
                             })
@@ -1478,6 +1678,9 @@ public class ClassInformation extends AppCompatActivity {
         }
         if (studentsListener != null) {
             studentsListener.remove();
+        }
+        if (recentSessionsListener != null) {
+            recentSessionsListener.remove();
         }
     }
 }
