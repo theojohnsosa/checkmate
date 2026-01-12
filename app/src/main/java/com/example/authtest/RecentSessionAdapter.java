@@ -15,8 +15,26 @@ import java.util.List;
 public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdapter.SessionViewHolder> {
 
     private List<RecentSession> sessionList = new ArrayList<>();
+    private OnSessionClickListener clickListener;
+    private OnSessionRemoveListener removeListener;
+
+    public interface OnSessionClickListener {
+        void onSessionClick(RecentSession session);
+    }
+
+    public interface OnSessionRemoveListener {
+        void onSessionRemove(RecentSession session, int position);
+    }
 
     public RecentSessionAdapter() {
+    }
+
+    public void setClickListener(OnSessionClickListener listener) {
+        this.clickListener = listener;
+    }
+
+    public void setRemoveListener(OnSessionRemoveListener listener) {
+        this.removeListener = listener;
     }
 
     @NonNull
@@ -30,7 +48,7 @@ public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdap
     @Override
     public void onBindViewHolder(@NonNull SessionViewHolder holder, int position) {
         RecentSession session = sessionList.get(position);
-        holder.bind(session);
+        holder.bind(session, clickListener);
     }
 
     @Override
@@ -49,8 +67,28 @@ public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdap
 
     public void addSession(RecentSession session) {
         if (session != null) {
-            this.sessionList.add(0, session); // Add to beginning to show newest first
+            this.sessionList.add(0, session);
             notifyItemInserted(0);
+        }
+    }
+
+    public void removeSession(int position) {
+        if (position >= 0 && position < sessionList.size()) {
+            sessionList.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    public RecentSession getSessionAt(int position) {
+        if (position >= 0 && position < sessionList.size()) {
+            return sessionList.get(position);
+        }
+        return null;
+    }
+
+    public void triggerRemoval(RecentSession session, int position) {
+        if (removeListener != null) {
+            removeListener.onSessionRemove(session, position);
         }
     }
 
@@ -66,13 +104,20 @@ public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdap
             timeRangeText = itemView.findViewById(R.id.timeRangeText);
         }
 
-        public void bind(RecentSession session) {
+        public void bind(RecentSession session, OnSessionClickListener clickListener) {
             if (session == null) {
                 return;
             }
 
             dateText.setText(session.getDate() != null ? session.getDate() : "N/A");
             timeRangeText.setText(session.getSessionTimeRange() != null ? session.getSessionTimeRange() : "N/A");
+
+            // Add click listener to the item view
+            itemView.setOnClickListener(v -> {
+                if (clickListener != null) {
+                    clickListener.onSessionClick(session);
+                }
+            });
         }
     }
 }

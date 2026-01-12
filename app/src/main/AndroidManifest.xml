@@ -20,9 +20,6 @@
             android:name=".AddStudentsForm"
             android:exported="false" />
         <activity
-            android:name=".AttendanceCard"
-            android:exported="false" />
-        <activity
             android:name=".ClassInformation"
             android:exported="false" />
         <activity
@@ -45,6 +42,9 @@
         </activity>
         <activity
             android:name=".SignUp"
+            android:exported="false" />
+        <activity
+            android:name=".SessionDetailsActivity"
             android:exported="false" />
     </application>
 

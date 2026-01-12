@@ -45,6 +45,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+ import androidx.core.content.ContextCompat;
+ import android.graphics.drawable.Drawable;
+ import android.graphics.Canvas;
+ import android.graphics.drawable.ColorDrawable;
+ import androidx.annotation.NonNull;
+
 public class ClassInformation extends AppCompatActivity {
 
     private static final String TAG = "ClassInformation";
@@ -146,13 +152,13 @@ public class ClassInformation extends AppCompatActivity {
                     setupAttendanceStatsListener();
                     setupClassInfoListener();
                     setupStudentListRecyclerView();
-                    loadRecentSessions();
                     diagnoseFirestoreStructure();
                     loadStudentList();
                 } else {
                     setupStudentView(classModel);
                 }
 
+                loadRecentSessions();
                 setupClassInfo(classModel);
 
             } else {
@@ -187,17 +193,199 @@ public class ClassInformation extends AppCompatActivity {
         recentSessionsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         recentSessionsRecyclerView.setAdapter(recentSessionAdapter);
         recentSessionsRecyclerView.setNestedScrollingEnabled(false);
+
+        // ADD THESE LINES:
+        recentSessionAdapter.setClickListener(session -> {
+            navigateToSessionDetails(session);
+        });
+
+        recentSessionAdapter.setRemoveListener((session, position) -> {
+            removeSessionFromClass(session, position);
+        });
+
+        setupSwipeToDeleteSessions();
+
         Log.d(TAG, "✓ Recent sessions adapter initialized");
     }
+
+    private void setupSwipeToDeleteSessions() {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            private final ColorDrawable background = new ColorDrawable(Color.parseColor("#C92A2A"));
+            private final Drawable deleteIcon = ContextCompat.getDrawable(ClassInformation.this, android.R.drawable.ic_menu_delete);
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
+                                  @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                RecentSession session = recentSessionAdapter.getSessionAt(position);
+
+                if (session != null) {
+                    RemoveSessionConfirmationDialog confirmDialog = new RemoveSessionConfirmationDialog(
+                            ClassInformation.this,
+                            session.getDate(),
+                            () -> {
+                                recentSessionAdapter.triggerRemoval(session, position);
+                            },
+                            () -> {
+                                recentSessionAdapter.notifyItemChanged(position);
+                            }
+                    );
+                    confirmDialog.show();
+                } else {
+                    recentSessionAdapter.notifyItemChanged(position);
+                }
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
+                                    @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY,
+                                    int actionState, boolean isCurrentlyActive) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+                View itemView = viewHolder.itemView;
+                int backgroundCornerOffset = 20;
+
+                if (dX < 0) {
+                    int iconMargin = (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
+                    int iconTop = itemView.getTop() + (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
+                    int iconBottom = iconTop + deleteIcon.getIntrinsicHeight();
+                    int iconLeft = itemView.getRight() - iconMargin - deleteIcon.getIntrinsicWidth();
+                    int iconRight = itemView.getRight() - iconMargin;
+
+                    deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+
+                    background.setBounds(
+                            itemView.getRight() + ((int) dX) - backgroundCornerOffset,
+                            itemView.getTop(),
+                            itemView.getRight(),
+                            itemView.getBottom()
+                    );
+
+                    background.draw(c);
+                    deleteIcon.draw(c);
+                }
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(recentSessionsRecyclerView);
+    }
+
+    private void navigateToSessionDetails(RecentSession session) {
+        Intent intent = new Intent(ClassInformation.this, SessionDetailsActivity.class);
+        intent.putExtra("CLASS_ID", classId);
+        intent.putExtra("SESSION_ID", session.getSessionId());
+        intent.putExtra("SESSION_START_TIME", session.getSessionStartTime());
+        intent.putExtra("SESSION_END_TIME", session.getSessionEndTime());
+        intent.putExtra("CLASS_START_TIME", classStartTime);
+        startActivity(intent);
+    }
+
+    private void removeSessionFromClass(RecentSession session, int position) {
+        if (classId == null || session.getSessionId() == null) {
+            Log.e(TAG, "Cannot delete session - classId or sessionId is null");
+            return;
+        }
+
+        String sessionId = session.getSessionId();
+        String teacherId = mAuth.getCurrentUser().getUid();
+
+        Log.d(TAG, "Starting removal of session: " + sessionId);
+
+        // Delete from allClasses/classId/recentSessions
+        db.collection("allClasses")
+                .document(classId)
+                .collection("recentSessions")
+                .document(sessionId)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "✓ Removed from allClasses recentSessions");
+
+                    // Delete from users/teacherId/classes/classId/recentSessions
+                    db.collection("users")
+                            .document(teacherId)
+                            .collection("classes")
+                            .document(classId)
+                            .collection("recentSessions")
+                            .document(sessionId)
+                            .delete()
+                            .addOnSuccessListener(unused2 -> {
+                                Log.d(TAG, "✓ Removed from teacher's recentSessions");
+
+                                try {
+                                    if (position >= 0 && position < recentSessionList.size()) {
+                                        recentSessionList.remove(position);
+                                        recentSessionAdapter.notifyItemRemoved(position);
+                                        recentSessionAdapter.notifyItemRangeChanged(position, recentSessionList.size());
+                                        Log.d(TAG, "✓ Updated adapter at position " + position);
+                                    } else {
+                                        Log.w(TAG, "Position no longer valid, reloading sessions");
+                                        loadRecentSessions();
+                                        return;
+                                    }
+
+                                    if (recentSessionList.isEmpty()) {
+                                        updateRecentSessionsVisibility();
+                                    }
+
+                                    Toast.makeText(ClassInformation.this, "Session deleted successfully", Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "✓ Session deleted successfully");
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error updating adapter", e);
+                                    loadRecentSessions();
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Failed to remove from teacher's recentSessions", e);
+                                Toast.makeText(ClassInformation.this, "Failed to delete session", Toast.LENGTH_SHORT).show();
+                                try {
+                                    if (position >= 0 && position < recentSessionList.size()) {
+                                        recentSessionAdapter.notifyItemChanged(position);
+                                    }
+                                } catch (Exception ex) {
+                                    Log.e(TAG, "Error notifying adapter", ex);
+                                }
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to remove session", e);
+                    Toast.makeText(ClassInformation.this, "Failed to delete session", Toast.LENGTH_SHORT).show();
+                    try {
+                        if (position >= 0 && position < recentSessionList.size()) {
+                            recentSessionAdapter.notifyItemChanged(position);
+                        }
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error notifying adapter", ex);
+                    }
+                });
+    }
+
     private void saveRecentSession(long endTime) {
         if (classId == null || classId.isEmpty()) {
-            Log.e(TAG, "Cannot save session - classId is null");
+            Log.e(TAG, "❌ CRITICAL ERROR: Cannot save session - classId is null");
             return;
         }
 
         long startTime = attendanceSessionStartTime > 0 ? attendanceSessionStartTime : (endTime - 3600000);
         String sessionId = String.valueOf(System.currentTimeMillis());
 
+        Log.d(TAG, "");
+        Log.d(TAG, "╔════════════════════════════════════════╗");
+        Log.d(TAG, "║    SAVING SESSION TO FIRESTORE         ║");
+        Log.d(TAG, "╚════════════════════════════════════════╝");
+        Log.d(TAG, "sessionId: " + sessionId);
+        Log.d(TAG, "classId: " + classId);
+        Log.d(TAG, "startTime: " + startTime);
+        Log.d(TAG, "endTime: " + endTime);
+        Log.d(TAG, "Duration: " + ((endTime - startTime) / 1000 / 60) + " minutes");
+        Log.d(TAG, "");
+
+        // Create session document
         Map<String, Object> sessionData = new HashMap<>();
         sessionData.put("sessionId", sessionId);
         sessionData.put("classId", classId);
@@ -205,14 +393,21 @@ public class ClassInformation extends AppCompatActivity {
         sessionData.put("sessionEndTime", endTime);
         sessionData.put("timestamp", endTime);
 
+        Log.d(TAG, "Creating session document at: allClasses/" + classId + "/recentSessions/" + sessionId);
+
         db.collection("allClasses")
                 .document(classId)
                 .collection("recentSessions")
                 .document(sessionId)
                 .set(sessionData)
                 .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "✓ Session saved successfully: " + sessionId);
+                    Log.d(TAG, "✅ SUCCESS: Session document created!");
+                    Log.d(TAG, "→ Now copying attendance records...");
 
+                    // Step 2: Copy attendance records to the session
+                    saveAttendanceRecordsToSession(sessionId, startTime, endTime);
+
+                    // Step 3: Also save to teacher's classes
                     String teacherId = mAuth.getCurrentUser().getUid();
                     db.collection("users")
                             .document(teacherId)
@@ -222,17 +417,112 @@ public class ClassInformation extends AppCompatActivity {
                             .document(sessionId)
                             .set(sessionData)
                             .addOnSuccessListener(unused2 -> {
-                                Log.d(TAG, "✓ Session also saved to teacher's classes");
-                                // Reload sessions to refresh UI immediately
-                                loadRecentSessions();
+                                Log.d(TAG, "✅ Session also saved to teacher's personal classes");
                             })
                             .addOnFailureListener(e -> {
-                                Log.e(TAG, "Failed to save session to teacher's classes", e);
+                                Log.e(TAG, "⚠ Warning: Failed to save session to teacher's classes: " + e.getMessage());
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to save session", e);
+                    Log.e(TAG, "❌ CRITICAL ERROR: Failed to create session document");
+                    Log.e(TAG, "Error message: " + e.getMessage());
+                    Log.e(TAG, "Error code: " + (e.getCause() != null ? e.getCause().toString() : "Unknown"));
+                    Toast.makeText(ClassInformation.this, "Failed to save session: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
+    }
+
+    private void saveAttendanceRecordsToSession(String sessionId, long startTime, long endTime) {
+        Log.d(TAG, "Step 2: Copying attendance records to session...");
+
+        db.collection("allClasses")
+                .document(classId)
+                .collection("attendanceRecords")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    int recordCount = querySnapshot.size();
+                    Log.d(TAG, "Found " + recordCount + " attendance records at class level");
+
+                    if (recordCount == 0) {
+                        Log.d(TAG, "⚠ No students marked attendance (empty session)");
+                        // Clear records and refresh anyway
+                        clearAllAttendanceRecords();
+                        return;
+                    }
+
+                    final int[] savedCount = {0};
+                    final int[] failedCount = {0};
+
+                    for (var doc : querySnapshot.getDocuments()) {
+                        String studentId = doc.getId();
+                        Long timestamp = doc.getLong("timestamp");
+                        Boolean marked = doc.getBoolean("marked");
+
+                        Log.d(TAG, "  Processing: studentId=" + studentId + ", marked=" + marked);
+
+                        if (marked != null && marked && timestamp != null) {
+                            Map<String, Object> recordData = new HashMap<>();
+                            recordData.put("studentId", studentId);
+                            recordData.put("timestamp", timestamp);
+                            recordData.put("marked", true);
+
+                            db.collection("allClasses")
+                                    .document(classId)
+                                    .collection("recentSessions")
+                                    .document(sessionId)
+                                    .collection("attendanceRecords")
+                                    .document(studentId)
+                                    .set(recordData)
+                                    .addOnSuccessListener(unused -> {
+                                        savedCount[0]++;
+                                        Log.d(TAG, "  ✅ Copied record " + savedCount[0] + "/" + recordCount);
+
+                                        checkIfAllRecordsCopied(savedCount[0], failedCount[0], recordCount);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        failedCount[0]++;
+                                        Log.e(TAG, "  ❌ Failed to copy record for " + studentId + ": " + e.getMessage());
+
+                                        checkIfAllRecordsCopied(savedCount[0], failedCount[0], recordCount);
+                                    });
+                        } else {
+                            savedCount[0]++;
+                            Log.d(TAG, "  ⊘ Skipped unmarked record for " + studentId);
+                            checkIfAllRecordsCopied(savedCount[0], failedCount[0], recordCount);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "❌ CRITICAL ERROR: Failed to query attendance records: " + e.getMessage());
+                });
+    }
+
+    private void checkIfAllRecordsCopied(int savedCount, int failedCount, int totalCount) {
+        int processedCount = savedCount + failedCount;
+
+        if (processedCount >= totalCount) {
+            Log.d(TAG, "");
+            Log.d(TAG, "╔════════════════════════════════════════╗");
+            Log.d(TAG, "║  ATTENDANCE RECORDS COPY COMPLETE      ║");
+            Log.d(TAG, "╚════════════════════════════════════════╝");
+            Log.d(TAG, "Saved: " + savedCount);
+            Log.d(TAG, "Failed: " + failedCount);
+            Log.d(TAG, "Total: " + totalCount);
+            Log.d(TAG, "");
+
+            // Now clear the class-level records
+            clearAllAttendanceRecords();
+        }
+    }
+
+    private void onAttendanceRecordsCopied(int savedCount, int failedCount) {
+        int totalProcessed = savedCount + failedCount;
+        Log.d(TAG, "✓ Step 2 Complete: Copied " + savedCount + " records (Failed: " + failedCount + ")");
+
+        if (savedCount > 0) {
+            Log.d(TAG, "✓✓✓ Attendance records successfully copied to session");
+        } else {
+            Log.d(TAG, "⚠ No marked attendance records were copied (session is empty)");
+        }
     }
 
     private void loadRecentSessions() {
@@ -645,7 +935,7 @@ public class ClassInformation extends AppCompatActivity {
 
     private void setupStudentListRecyclerView() {
         Log.d(TAG, "Setting up student list RecyclerView");
-        studentAdapter = new StudentAttendanceAdapter(this::removeStudentFromClass);
+        studentAdapter = new StudentAttendanceAdapter(classId, this::removeStudentFromClass);
         studentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         studentsRecyclerView.setAdapter(studentAdapter);
         studentsRecyclerView.setNestedScrollingEnabled(false);
@@ -1137,15 +1427,30 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void setupTeacherView(ClassModel classModel) {
+        Log.d(TAG, "Setting up teacher view for class: " + classModel.getClassName());
+
         AttendanceCardBinding attendanceBinding = binding.attendanceCard;
         attendanceBinding.classCodeText.setText(classModel.getClassCode() != null ? classModel.getClassCode() : "N/A");
 
         isSessionActive = classModel.isAttendanceActive();
         updateTeacherAttendanceUI(attendanceBinding);
+        Log.d(TAG, "Initial session state: " + (isSessionActive ? "ACTIVE" : "INACTIVE"));
 
+        // THIS IS THE CRITICAL PART - Make sure the button click works
         attendanceBinding.attendanceButton.setOnClickListener(v -> {
+            Log.d(TAG, "📱 Attendance button clicked!");
+            Log.d(TAG, "Current session state before toggle: " + (isSessionActive ? "ACTIVE" : "INACTIVE"));
+
+            // Toggle the session state
             isSessionActive = !isSessionActive;
+
+            Log.d(TAG, "Session state after toggle: " + (isSessionActive ? "ACTIVE" : "INACTIVE"));
+
+            // Update the UI
             updateTeacherAttendanceUI(attendanceBinding);
+
+            // Update Firebase
+            Log.d(TAG, "Calling updateAttendanceStatusInFirestore with isActive=" + isSessionActive);
             updateAttendanceStatusInFirestore(isSessionActive);
         });
     }
@@ -1430,16 +1735,22 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void updateTeacherAttendanceUI(AttendanceCardBinding attendanceBinding) {
+        Log.d(TAG, "Updating teacher attendance UI - isSessionActive: " + isSessionActive);
+
         if (isSessionActive) {
             attendanceBinding.attendanceButton.setText("End Attendance Session");
             attendanceBinding.attendanceButton.setBackgroundResource(R.drawable.alt_attendance_button);
             attendanceBinding.bellIcon.setBackgroundResource(R.drawable.alt_attendance_button);
             attendanceBinding.classCodeCard.setCardBackgroundColor(0xFFFF5252);
+
+            Log.d(TAG, "UI updated: Session is ACTIVE (End button shown)");
         } else {
             attendanceBinding.attendanceButton.setText("Start Attendance Session");
             attendanceBinding.attendanceButton.setBackgroundResource(R.drawable.attendance_button);
             attendanceBinding.bellIcon.setBackgroundResource(R.drawable.attendance_button);
             attendanceBinding.classCodeCard.setCardBackgroundColor(0xFF2EAD00);
+
+            Log.d(TAG, "UI updated: Session is INACTIVE (Start button shown)");
         }
     }
 
@@ -1494,36 +1805,56 @@ public class ClassInformation extends AppCompatActivity {
 
         String teacherId = mAuth.getCurrentUser().getUid();
 
+        Log.d(TAG, "=== UPDATING ATTENDANCE STATUS ===");
+        Log.d(TAG, "isActive: " + isActive);
+
         // Track session start time
         if (isActive) {
             attendanceSessionStartTime = System.currentTimeMillis();
+            Log.d(TAG, "Session start time recorded: " + attendanceSessionStartTime);
         }
 
+        // Update in user's classes collection
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
                 .document(classId)
                 .update("attendanceActive", isActive)
                 .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "✓ Updated attendanceActive in user's classes");
+
+                    // Update in allClasses collection
                     db.collection("allClasses")
                             .document(classId)
                             .update("attendanceActive", isActive)
                             .addOnSuccessListener(unused2 -> {
                                 String message = isActive ? "Attendance session started!" : "Attendance session ended!";
-                                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ClassInformation.this, message, Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "✓ Updated attendanceActive in allClasses");
 
+                                // CRITICAL: Only save/clear if ENDING session
                                 if (!isActive) {
-                                    // Save the session when ending
+                                    Log.d(TAG, "SESSION ENDING - saving and clearing records");
+
+                                    // IMPORTANT: Save FIRST, then clear AFTER
                                     saveRecentSession(System.currentTimeMillis());
-                                    clearAllAttendanceRecords();
+
+                                    // Add a small delay to ensure save completes before clearing
+                                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
+                                            this::clearAllAttendanceRecords,
+                                            500  // 500ms delay
+                                    );
+                                } else {
+                                    Log.d(TAG, "SESSION STARTING - records will accumulate");
                                 }
                             })
                             .addOnFailureListener(e -> {
-                                Log.e("ClassInformation", "Failed to update allClasses", e);
+                                Log.e(TAG, "Failed to update allClasses", e);
+                                Toast.makeText(ClassInformation.this, "Failed to update status", Toast.LENGTH_SHORT).show();
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("ClassInformation", "Failed to update attendance status", e);
+                    Log.e(TAG, "Failed to update attendance status in user's classes", e);
                     Toast.makeText(this, "Failed to update status", Toast.LENGTH_SHORT).show();
                 });
     }
@@ -1531,25 +1862,63 @@ public class ClassInformation extends AppCompatActivity {
     private void clearAllAttendanceRecords() {
         if (classId == null || classId.isEmpty()) return;
 
+        Log.d(TAG, "Step 3: Clearing class-level attendance records...");
+
         db.collection("allClasses")
                 .document(classId)
                 .collection("attendanceRecords")
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    for (var doc : querySnapshot.getDocuments()) {
-                        doc.getReference().delete();
-                    }
-                    Log.d("ClassInformation", "All attendance records cleared");
+                    int deleteCount = querySnapshot.size();
+                    Log.d(TAG, "Found " + deleteCount + " records to clear");
 
-                    for (StudentAttendanceModel student : studentList) {
-                        student.setAttendanceStatus("Not Marked");
-                        student.setMarked(false);
-                        student.setTimestamp(null);
+                    if (deleteCount == 0) {
+                        Log.d(TAG, "✅ No records to clear - refreshing sessions");
+                        loadRecentSessions();
+                        return;
                     }
-                    studentAdapter.notifyDataSetChanged();
+
+                    final int[] deletedCount = {0};
+
+                    for (var doc : querySnapshot.getDocuments()) {
+                        doc.getReference().delete()
+                                .addOnSuccessListener(unused -> {
+                                    deletedCount[0]++;
+                                    Log.d(TAG, "  ✓ Deleted record " + deletedCount[0] + "/" + deleteCount);
+
+                                    if (deletedCount[0] == deleteCount) {
+                                        Log.d(TAG, "✅ All class-level records cleared");
+                                        Log.d(TAG, "");
+                                        Log.d(TAG, "╔════════════════════════════════════════╗");
+                                        Log.d(TAG, "║    SESSION SAVE COMPLETE                ║");
+                                        Log.d(TAG, "╚════════════════════════════════════════╝");
+                                        Log.d(TAG, "");
+
+                                        // Reset student UI
+                                        for (StudentAttendanceModel student : studentList) {
+                                            student.setAttendanceStatus("Not Marked");
+                                            student.setMarked(false);
+                                            student.setTimestamp(null);
+                                        }
+                                        studentAdapter.notifyDataSetChanged();
+
+                                        // Reload sessions to show the new one
+                                        loadRecentSessions();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Error deleting record: " + e.getMessage());
+                                    deletedCount[0]++;
+
+                                    if (deletedCount[0] == deleteCount) {
+                                        Log.d(TAG, "Clearing completed (some deletes may have failed)");
+                                        loadRecentSessions();
+                                    }
+                                });
+                    }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("ClassInformation", "Error clearing attendance records", e);
+                    Log.e(TAG, "❌ CRITICAL ERROR: Failed to clear attendance records: " + e.getMessage());
                 });
     }
 
