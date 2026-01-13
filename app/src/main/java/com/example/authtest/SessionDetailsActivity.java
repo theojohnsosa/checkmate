@@ -83,8 +83,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
         sessionEndTime = intent.getLongExtra("SESSION_END_TIME", 0);
         classStartTime = intent.getStringExtra("CLASS_START_TIME");
 
-        loadSessionAttendanceData();
-
         Log.d(TAG, "=== SessionDetailsActivity Started ===");
         Log.d(TAG, "classId: " + classId);
         Log.d(TAG, "sessionId: " + sessionId);
@@ -627,10 +625,10 @@ public class SessionDetailsActivity extends AppCompatActivity {
         }
 
         // Control search bar visibility
-        View searchBarContainer = findViewById(R.id.searchBarContainer);
-        if (searchBarContainer != null) {
-            searchBarContainer.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
-            Log.d(TAG, "Search bar container visibility: " + (hasStudents ? "VISIBLE" : "GONE"));
+        View statsCard = findViewById(R.id.attendanceStatsCard);
+        if (statsCard != null) {
+            statsCard.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "Stats card visibility: " + (hasStudents ? "VISIBLE" : "GONE"));
         }
 
         // Control recycler view visibility
@@ -638,5 +636,65 @@ public class SessionDetailsActivity extends AppCompatActivity {
             studentsRecyclerView.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
             Log.d(TAG, "Students recycler view visibility: " + (hasStudents ? "VISIBLE" : "GONE"));
         }
+    }
+
+    private void debugAttendanceRecords() {
+        Log.d(TAG, "");
+        Log.d(TAG, "╔═══════════════════════════════════════╗");
+        Log.d(TAG, "║   DEBUGGING ATTENDANCE RECORDS        ║");
+        Log.d(TAG, "╚═══════════════════════════════════════╝");
+
+        // Check class-level records BEFORE clearing
+        db.collection("allClasses")
+                .document(classId)
+                .collection("attendanceRecords")
+                .get()
+                .addOnSuccessListener(classSnapshot -> {
+                    Log.d(TAG, "📊 CLASS-LEVEL records: " + classSnapshot.size());
+                    for (var doc : classSnapshot.getDocuments()) {
+                        Log.d(TAG, "  - " + doc.getId() + ": marked=" + doc.getBoolean("marked") +
+                                ", timestamp=" + doc.getLong("timestamp"));
+                    }
+
+                    // Get the most recent session
+                    db.collection("allClasses")
+                            .document(classId)
+                            .collection("recentSessions")
+                            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                            .limit(1)
+                            .get()
+                            .addOnSuccessListener(sessionSnapshot -> {
+                                if (sessionSnapshot.isEmpty()) {
+                                    Log.e(TAG, "❌ No session found!");
+                                    return;
+                                }
+
+                                String sessionId = sessionSnapshot.getDocuments().get(0).getString("sessionId");
+                                Log.d(TAG, "🔍 Checking SESSION records for: " + sessionId);
+
+                                db.collection("allClasses")
+                                        .document(classId)
+                                        .collection("recentSessions")
+                                        .document(sessionId)
+                                        .collection("attendanceRecords")
+                                        .get()
+                                        .addOnSuccessListener(recordSnapshot -> {
+                                            Log.d(TAG, "📋 SESSION-LEVEL records: " + recordSnapshot.size());
+                                            for (var doc : recordSnapshot.getDocuments()) {
+                                                Log.d(TAG, "  - " + doc.getId() + ": marked=" + doc.getBoolean("marked") +
+                                                        ", timestamp=" + doc.getLong("timestamp"));
+                                            }
+
+                                            Log.d(TAG, "");
+                                            if (recordSnapshot.size() == classSnapshot.size()) {
+                                                Log.d(TAG, "✅ SUCCESS: All records copied!");
+                                            } else {
+                                                Log.e(TAG, "❌ MISMATCH: " + classSnapshot.size() + " class records, " +
+                                                        recordSnapshot.size() + " session records");
+                                            }
+                                            Log.d(TAG, "");
+                                        });
+                            });
+                });
     }
 }

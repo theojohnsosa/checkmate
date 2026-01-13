@@ -442,12 +442,12 @@ public class ClassInformation extends AppCompatActivity {
 
                     if (recordCount == 0) {
                         Log.d(TAG, "⚠ No students marked attendance (empty session)");
-                        // Clear records and refresh anyway
                         clearAllAttendanceRecords();
                         return;
                     }
 
                     final int[] savedCount = {0};
+                    final int[] skippedCount = {0};
                     final int[] failedCount = {0};
 
                     for (var doc : querySnapshot.getDocuments()) {
@@ -455,13 +455,19 @@ public class ClassInformation extends AppCompatActivity {
                         Long timestamp = doc.getLong("timestamp");
                         Boolean marked = doc.getBoolean("marked");
 
-                        Log.d(TAG, "  Processing: studentId=" + studentId + ", marked=" + marked);
+                        Log.d(TAG, "Processing record - studentId: " + studentId + ", marked: " + marked + ", timestamp: " + timestamp);
 
-                        if (marked != null && marked && timestamp != null) {
+                        // FIX: Copy ALL records that have a timestamp, regardless of marked status
+                        if (timestamp != null) {
+                            // If marked is null, default to true (student who marked attendance)
+                            boolean isMarked = marked != null ? marked : true;
+
                             Map<String, Object> recordData = new HashMap<>();
                             recordData.put("studentId", studentId);
                             recordData.put("timestamp", timestamp);
-                            recordData.put("marked", true);
+                            recordData.put("marked", isMarked);
+
+                            Log.d(TAG, "  → Copying record for " + studentId + " (marked=" + isMarked + ")");
 
                             db.collection("allClasses")
                                     .document(classId)
@@ -474,28 +480,31 @@ public class ClassInformation extends AppCompatActivity {
                                         savedCount[0]++;
                                         Log.d(TAG, "  ✅ Copied record " + savedCount[0] + "/" + recordCount);
 
-                                        checkIfAllRecordsCopied(savedCount[0], failedCount[0], recordCount);
+                                        checkIfAllRecordsCopied(savedCount[0], skippedCount[0], failedCount[0], recordCount);
                                     })
                                     .addOnFailureListener(e -> {
                                         failedCount[0]++;
                                         Log.e(TAG, "  ❌ Failed to copy record for " + studentId + ": " + e.getMessage());
 
-                                        checkIfAllRecordsCopied(savedCount[0], failedCount[0], recordCount);
+                                        checkIfAllRecordsCopied(savedCount[0], skippedCount[0], failedCount[0], recordCount);
                                     });
                         } else {
-                            savedCount[0]++;
-                            Log.d(TAG, "  ⊘ Skipped unmarked record for " + studentId);
-                            checkIfAllRecordsCopied(savedCount[0], failedCount[0], recordCount);
+                            skippedCount[0]++;
+                            Log.d(TAG, "  ⊘ Skipped record for " + studentId + " (no timestamp)");
+                            checkIfAllRecordsCopied(savedCount[0], skippedCount[0], failedCount[0], recordCount);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "❌ CRITICAL ERROR: Failed to query attendance records: " + e.getMessage());
+                    Toast.makeText(ClassInformation.this, "Failed to save session: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
-    private void checkIfAllRecordsCopied(int savedCount, int failedCount, int totalCount) {
-        int processedCount = savedCount + failedCount;
+    private void checkIfAllRecordsCopied(int savedCount, int skippedCount, int failedCount, int totalCount) {
+        int processedCount = savedCount + skippedCount + failedCount;
+
+        Log.d(TAG, "Progress: " + processedCount + "/" + totalCount + " (Saved: " + savedCount + ", Skipped: " + skippedCount + ", Failed: " + failedCount + ")");
 
         if (processedCount >= totalCount) {
             Log.d(TAG, "");
@@ -503,6 +512,7 @@ public class ClassInformation extends AppCompatActivity {
             Log.d(TAG, "║  ATTENDANCE RECORDS COPY COMPLETE      ║");
             Log.d(TAG, "╚════════════════════════════════════════╝");
             Log.d(TAG, "Saved: " + savedCount);
+            Log.d(TAG, "Skipped: " + skippedCount);
             Log.d(TAG, "Failed: " + failedCount);
             Log.d(TAG, "Total: " + totalCount);
             Log.d(TAG, "");
@@ -2029,6 +2039,73 @@ public class ClassInformation extends AppCompatActivity {
                 Log.d("ClassInformation", "Teacher user detected - showing all features");
             }
         }
+    }
+
+    private void checkIfAllRecordsCopied(int savedCount, int failedCount, int totalCount) {
+        int processedCount = savedCount + failedCount;
+
+        if (processedCount >= totalCount) {
+            Log.d(TAG, "");
+            Log.d(TAG, "╔════════════════════════════════════════╗");
+            Log.d(TAG, "║  ATTENDANCE RECORDS COPY COMPLETE      ║");
+            Log.d(TAG, "╚════════════════════════════════════════╝");
+            Log.d(TAG, "Saved: " + savedCount);
+            Log.d(TAG, "Failed: " + failedCount);
+            Log.d(TAG, "Total: " + totalCount);
+            Log.d(TAG, "");
+
+            // ✅ IMPORTANT: Verify records were copied BEFORE clearing
+            verifyRecordsCopiedThenClear();
+        }
+    }
+
+    private void verifyRecordsCopiedThenClear() {
+        String sessionId = String.valueOf(System.currentTimeMillis());
+
+        // Get the session ID from the most recent session
+        db.collection("allClasses")
+                .document(classId)
+                .collection("recentSessions")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.isEmpty()) {
+                        Log.e(TAG, "❌ No recent session found - cannot verify!");
+                        clearAllAttendanceRecords();
+                        return;
+                    }
+
+                    String actualSessionId = snapshot.getDocuments().get(0).getString("sessionId");
+                    Log.d(TAG, "Verifying records for session: " + actualSessionId);
+
+                    // Check how many records were copied
+                    db.collection("allClasses")
+                            .document(classId)
+                            .collection("recentSessions")
+                            .document(actualSessionId)
+                            .collection("attendanceRecords")
+                            .get()
+                            .addOnSuccessListener(recordSnapshot -> {
+                                Log.d(TAG, "✓ Verification: Found " + recordSnapshot.size() + " records in session");
+
+                                if (recordSnapshot.size() > 0) {
+                                    Log.d(TAG, "✅ Records successfully copied - now clearing class-level records");
+                                    clearAllAttendanceRecords();
+                                } else {
+                                    Log.w(TAG, "⚠ No records copied - session might be empty");
+                                    clearAllAttendanceRecords();
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error verifying records: " + e.getMessage());
+                                clearAllAttendanceRecords(); // Clear anyway
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting session: " + e.getMessage());
+                    clearAllAttendanceRecords();
+                });
     }
 
     @Override
