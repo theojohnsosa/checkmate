@@ -58,113 +58,108 @@
                 android:textColor="#FFFFFF" />
         </LinearLayout>
 
-        <!-- Scrollable Main Content -->
-        <ScrollView
+        <!-- Main Content - FIX: Use LinearLayout instead of ScrollView for top content -->
+        <LinearLayout
+            android:id="@+id/mainContent"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="40dp">
 
-            <LinearLayout
-                android:id="@+id/mainContent"
+            <!-- Session Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Session Details"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp" />
+
+            <!-- Attendance Stats Card -->
+            <include
+                android:id="@+id/attendanceStatsCard"
+                layout="@layout/attendance_stats_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="40dp">
+                android:layout_marginBottom="20dp"
+                android:visibility="visible" />
 
-                <!-- Session Header -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Session Details"
+            <!-- Students Attended Header -->
+            <TextView
+                android:id="@+id/studentsAttendedHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Students Attended"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="visible" />
+
+            <!-- Search Bar Container -->
+            <LinearLayout
+                android:id="@+id/searchBarContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp"
+                android:paddingHorizontal="4dp"
+                android:paddingVertical="8dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/rounded_search_bg"
+                android:visibility="visible">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_search"
+                    android:contentDescription="Search"
+                    android:layout_marginStart="12dp"
+                    app:tint="#828282" />
+
+                <EditText
+                    android:id="@+id/studentSearchBar"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Search by student name..."
+                    android:textColorHint="#828282"
                     android:textColor="#FFFFFF"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="20dp" />
+                    android:textSize="14sp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:maxLines="1" />
 
-                <!-- Attendance Stats Card -->
-                <include
-                    android:id="@+id/attendanceStatsCard"
-                    layout="@layout/attendance_stats_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:visibility="visible" />
-
-                <!-- Students Attended Header -->
-                <TextView
-                    android:id="@+id/studentsAttendedHeader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Students Attended"
-                    android:textColor="#FFFFFF"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="16dp"
-                    android:visibility="visible" />
-
-                <!-- Search Bar Container -->
-                <LinearLayout
-                    android:id="@+id/searchBarContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="16dp"
-                    android:paddingHorizontal="4dp"
-                    android:paddingVertical="8dp"
-                    android:gravity="center_vertical"
-                    android:background="@drawable/rounded_search_bg"
-                    android:visibility="visible">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_search"
-                        android:contentDescription="Search"
-                        android:layout_marginStart="12dp"
-                        app:tint="#828282" />
-
-                    <EditText
-                        android:id="@+id/studentSearchBar"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:background="@android:color/transparent"
-                        android:hint="Search by student name..."
-                        android:textColorHint="#828282"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:inputType="text"
-                        android:imeOptions="actionSearch"
-                        android:maxLines="1" />
-
-                    <ImageView
-                        android:id="@+id/clearSearchButton"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_close"
-                        android:contentDescription="Clear search"
-                        android:layout_marginEnd="12dp"
-                        app:tint="#828282"
-                        android:visibility="gone" />
-
-                </LinearLayout>
-
-                <!-- Students RecyclerView -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/studentsRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
+                <ImageView
+                    android:id="@+id/clearSearchButton"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_close"
+                    android:contentDescription="Clear search"
+                    android:layout_marginEnd="12dp"
+                    app:tint="#828282"
                     android:visibility="gone" />
 
             </LinearLayout>
 
-        </ScrollView>
+            <!-- Students RecyclerView - FIX: Enable nested scrolling and use layout_weight -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/studentsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:nestedScrollingEnabled="true"
+                android:visibility="gone" />
+
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Navigation Drawer -->

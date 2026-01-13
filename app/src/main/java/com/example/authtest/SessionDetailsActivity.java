@@ -265,7 +265,7 @@ public class SessionDetailsActivity extends AppCompatActivity {
         studentAdapter = new StudentAttendanceAdapter(sessionId, this::removeStudentFromSession);
         studentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         studentsRecyclerView.setAdapter(studentAdapter);
-        studentsRecyclerView.setNestedScrollingEnabled(false);
+        studentsRecyclerView.setNestedScrollingEnabled(true);
     }
 
     private void setupStudentSearch() {
