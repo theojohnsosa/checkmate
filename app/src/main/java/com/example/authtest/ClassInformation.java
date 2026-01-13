@@ -194,11 +194,9 @@ public class ClassInformation extends AppCompatActivity {
         recentSessionsRecyclerView.setAdapter(recentSessionAdapter);
         recentSessionsRecyclerView.setNestedScrollingEnabled(false);
 
-        // ADD THESE LINES:
         recentSessionAdapter.setClickListener(session -> {
             navigateToSessionDetails(session);
         });
-
         recentSessionAdapter.setRemoveListener((session, position) -> {
             removeSessionFromClass(session, position);
         });

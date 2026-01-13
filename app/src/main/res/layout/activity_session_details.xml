@@ -89,7 +89,8 @@
                     layout="@layout/attendance_stats_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp" />
+                    android:layout_marginBottom="20dp"
+                    android:visibility="visible" />
 
                 <!-- Students Attended Header -->
                 <TextView
@@ -102,7 +103,7 @@
                     android:textStyle="bold"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="16dp"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
 
                 <!-- Search Bar Container -->
                 <LinearLayout
@@ -115,7 +116,7 @@
                     android:paddingVertical="8dp"
                     android:gravity="center_vertical"
                     android:background="@drawable/rounded_search_bg"
-                    android:visibility="gone">
+                    android:visibility="visible">
 
                     <ImageView
                         android:layout_width="24dp"

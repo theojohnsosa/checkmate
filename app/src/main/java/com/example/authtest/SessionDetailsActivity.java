@@ -70,16 +70,20 @@ public class SessionDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session_details);
 
+        Log.d("SessionDetailsActivity", "=== ACTIVITY CREATED ===");
+        Log.d("SessionDetailsActivity", "Intent extras: " + getIntent().getExtras());
+
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Get data from intent
         Intent intent = getIntent();
         classId = intent.getStringExtra("CLASS_ID");
         sessionId = intent.getStringExtra("SESSION_ID");
         sessionStartTime = intent.getLongExtra("SESSION_START_TIME", 0);
         sessionEndTime = intent.getLongExtra("SESSION_END_TIME", 0);
         classStartTime = intent.getStringExtra("CLASS_START_TIME");
+
+        loadSessionAttendanceData();
 
         Log.d(TAG, "=== SessionDetailsActivity Started ===");
         Log.d(TAG, "classId: " + classId);
@@ -481,17 +485,13 @@ public class SessionDetailsActivity extends AppCompatActivity {
         Log.d(TAG, "=== All students loaded ===");
         Log.d(TAG, "Total students: " + studentList.size());
 
-        for (StudentAttendanceModel s : studentList) {
-            Log.d(TAG, "  - " + s.getFullName() + " (" + s.getEmail() + ") Status: " + s.getAttendanceStatus());
-        }
-
         sortStudentsByLastName();
         filteredStudentList.clear();
         filteredStudentList.addAll(studentList);
         studentSearchBar.setText("");
         studentAdapter.setStudents(new ArrayList<>(studentList));
-        calculateAndUpdateStats();
-        updateUI();  // FIX #2: This now controls ALL visibility
+        calculateAndUpdateStats();  // ← CRITICAL - Updates stats display
+        updateUI();
     }
 
     private void sortStudentsByLastName() {
@@ -513,17 +513,14 @@ public class SessionDetailsActivity extends AppCompatActivity {
     }
 
     private void calculateAndUpdateStats() {
-        // FIX #7: Add null checks
         if (totalStudentsCount == null || presentCount == null ||
                 lateCount == null || absentCount == null) {
-            Log.e(TAG, "ERROR: Stats views not initialized - cannot update stats");
+            Log.e(TAG, "ERROR: Stats views not initialized");
             return;
         }
 
         int total = studentList.size();
-        int present = 0;
-        int late = 0;
-        int absent = 0;
+        int present = 0, late = 0, absent = 0;
 
         for (StudentAttendanceModel student : studentList) {
             switch (student.getAttendanceStatus()) {
@@ -539,8 +536,7 @@ public class SessionDetailsActivity extends AppCompatActivity {
             }
         }
 
-        Log.d(TAG, "Stats - Total: " + total + ", Present: " + present + ", Late: " + late + ", Absent: " + absent);
-
+        // Update TextViews
         totalStudentsCount.setText(String.valueOf(total));
         presentCount.setText(String.valueOf(present));
         lateCount.setText(String.valueOf(late));
