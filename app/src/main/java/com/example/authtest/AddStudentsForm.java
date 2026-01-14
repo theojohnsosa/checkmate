@@ -70,12 +70,21 @@ public class AddStudentsForm extends AppCompatActivity {
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
+
             if (itemId == R.id.menu_home) {
                 navigateToUserHome();
                 return true;
             } else if (itemId == R.id.menu_profile) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_streak) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_archive) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Archive feature coming soon", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
