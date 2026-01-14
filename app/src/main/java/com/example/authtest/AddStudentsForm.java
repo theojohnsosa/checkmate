@@ -8,30 +8,25 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.List;
 
 public class AddStudentsForm extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-
     private AppCompatButton backButton;
     private AppCompatButton addStudentButton;
     private EditText studentEmailInput;
-
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String classId;
@@ -45,6 +40,7 @@ public class AddStudentsForm extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         classId = getIntent().getStringExtra("CLASS_ID");
+        
         if (classId == null || classId.isEmpty()) {
             Toast.makeText(this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
             finish();
@@ -74,7 +70,6 @@ public class AddStudentsForm extends AppCompatActivity {
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
-
             if (itemId == R.id.menu_home) {
                 navigateToUserHome();
                 return true;
@@ -108,7 +103,6 @@ public class AddStudentsForm extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     drawerLayout.closeDrawer(GravityCompat.START);
-
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
 
@@ -163,7 +157,6 @@ public class AddStudentsForm extends AppCompatActivity {
             TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
             TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
 
-            // Fetch user details from Firestore
             db.collection("users")
                     .document(currentUser.getUid())
                     .get()
@@ -171,11 +164,12 @@ public class AddStudentsForm extends AppCompatActivity {
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
                             String lastName = documentSnapshot.getString("lastName");
-
                             String fullName = "";
+
                             if (firstName != null && !firstName.isEmpty()) {
                                 fullName = firstName;
                             }
+
                             if (lastName != null && !lastName.isEmpty()) {
                                 fullName += (fullName.isEmpty() ? "" : " ") + lastName;
                             }
