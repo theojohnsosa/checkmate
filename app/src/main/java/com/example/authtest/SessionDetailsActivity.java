@@ -607,31 +607,32 @@ public class SessionDetailsActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        // FIX #2: Complete visibility control for ALL elements
-        boolean hasStudents = !studentList.isEmpty();
+        // FIX: ALWAYS show stats card and header, regardless of student count
+        // The stats will show 0 values if no students marked attendance
 
-        Log.d(TAG, "updateUI() called - hasStudents: " + hasStudents + ", studentCount: " + studentList.size());
+        Log.d(TAG, "updateUI() called - studentCount: " + studentList.size());
 
-        // Control stats card visibility
+        // ALWAYS show stats card
         if (statsCard != null) {
-            statsCard.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
-            Log.d(TAG, "Stats card visibility: " + (hasStudents ? "VISIBLE" : "GONE"));
+            statsCard.setVisibility(View.VISIBLE);
+            Log.d(TAG, "Stats card visibility: VISIBLE");
         }
 
-        // Control header visibility
+        // ALWAYS show header
         if (studentsAttendedHeader != null) {
-            studentsAttendedHeader.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
-            Log.d(TAG, "Students attended header visibility: " + (hasStudents ? "VISIBLE" : "GONE"));
+            studentsAttendedHeader.setVisibility(View.VISIBLE);
+            Log.d(TAG, "Students attended header visibility: VISIBLE");
         }
 
-        // Control search bar visibility
-        View statsCard = findViewById(R.id.attendanceStatsCard);
-        if (statsCard != null) {
-            statsCard.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
-            Log.d(TAG, "Stats card visibility: " + (hasStudents ? "VISIBLE" : "GONE"));
+        // ALWAYS show search bar container
+        View searchBarContainer = findViewById(R.id.searchBarContainer);
+        if (searchBarContainer != null) {
+            searchBarContainer.setVisibility(View.VISIBLE);
+            Log.d(TAG, "Search bar container visibility: VISIBLE");
         }
 
-        // Control recycler view visibility
+        // Show/hide recycler view based on whether students exist
+        boolean hasStudents = !studentList.isEmpty();
         if (studentsRecyclerView != null) {
             studentsRecyclerView.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
             Log.d(TAG, "Students recycler view visibility: " + (hasStudents ? "VISIBLE" : "GONE"));
