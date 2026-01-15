@@ -295,7 +295,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
 
         Log.d(TAG, "Unarchiving class: " + classItem.getClassName());
 
-        // Update in teacher's classes collection
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
@@ -304,7 +303,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 .addOnSuccessListener(unused -> {
                     Log.d(TAG, "✓ Updated teacher's classes");
 
-                    // Update in allClasses collection
                     db.collection("allClasses")
                             .document(classId)
                             .update("isArchived", false)

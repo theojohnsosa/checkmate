@@ -599,7 +599,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
             return;
         }
 
-        // Validate position
         if (position < 0 || position >= classList.size()) {
             Log.e(TAG, "Invalid position: " + position + ", list size: " + classList.size());
             Toast.makeText(TeacherHome.this, "Error: Invalid position", Toast.LENGTH_SHORT).show();
