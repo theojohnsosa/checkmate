@@ -19,10 +19,12 @@ public class ClassModel implements Serializable {
     private List<String> allowedStudentEmails;
     private boolean isAttendanceActive = false;
     private String teacherId;
+    private boolean isArchived = false;  // NEW FIELD
 
     public ClassModel() {
         this.allowedStudentEmails = new ArrayList<>();
         this.isAttendanceActive = false;
+        this.isArchived = false;
     }
 
     public ClassModel(String className, String classCode, String subjectCode,
@@ -40,8 +42,8 @@ public class ClassModel implements Serializable {
         this.teacherId = teacherId;
         this.allowedStudentEmails = new ArrayList<>();
         this.isAttendanceActive = false;
+        this.isArchived = false;
     }
-
 
     public String getId() {
         return id;
@@ -105,5 +107,13 @@ public class ClassModel implements Serializable {
 
     public void setAttendanceActive(boolean attendanceActive) {
         isAttendanceActive = attendanceActive;
+    }
+
+    public boolean isArchived() {
+        return isArchived;
+    }
+
+    public void setArchived(boolean archived) {
+        isArchived = archived;
     }
 }

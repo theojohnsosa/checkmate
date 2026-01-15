@@ -1,16 +1,24 @@
 package com.example.authtest;
 
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.authtest.databinding.ActivityStudentHomeBinding;
 import com.google.android.material.navigation.NavigationView;
@@ -92,7 +100,132 @@ public class StudentHome extends AppCompatActivity {
         binding.classesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.classesRecyclerView.setAdapter(classAdapter);
 
+        // Setup swipe to archive
+        setupSwipeToArchiveClass();
+
         classAdapter.setClasses(classList);
+    }
+
+    private void setupSwipeToArchiveClass() {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            private final ColorDrawable archiveBackground = new ColorDrawable(Color.parseColor("#FF8C00"));
+            private final Drawable archiveIcon = ContextCompat.getDrawable(StudentHome.this, R.drawable.ic_archive);
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
+                                  @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                ClassModel classItem = classAdapter.getClassAt(position);
+
+                if (classItem != null) {
+                    ArchiveClassConfirmationDialog confirmDialog = new ArchiveClassConfirmationDialog(
+                            StudentHome.this,
+                            classItem.getClassName(),
+                            () -> {
+                                archiveClass(classItem, position);
+                            },
+                            () -> {
+                                classAdapter.notifyItemChanged(position);
+                            }
+                    );
+                    confirmDialog.show();
+                } else {
+                    classAdapter.notifyItemChanged(position);
+                }
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
+                                    @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY,
+                                    int actionState, boolean isCurrentlyActive) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+                View itemView = viewHolder.itemView;
+                int backgroundCornerOffset = 20;
+
+                if (dX > 0) {
+                    int iconMargin = (itemView.getHeight() - (archiveIcon != null ? archiveIcon.getIntrinsicHeight() : 0)) / 2;
+                    int iconTop = itemView.getTop() + (itemView.getHeight() - (archiveIcon != null ? archiveIcon.getIntrinsicHeight() : 0)) / 2;
+                    int iconBottom = iconTop + (archiveIcon != null ? archiveIcon.getIntrinsicHeight() : 0);
+                    int iconLeft = itemView.getLeft() + iconMargin;
+                    int iconRight = iconLeft + (archiveIcon != null ? archiveIcon.getIntrinsicWidth() : 0);
+
+                    if (archiveIcon != null) {
+                        archiveIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                    }
+
+                    archiveBackground.setBounds(
+                            itemView.getLeft(),
+                            itemView.getTop(),
+                            itemView.getLeft() + ((int) dX) + backgroundCornerOffset,
+                            itemView.getBottom()
+                    );
+
+                    archiveBackground.draw(c);
+                    if (archiveIcon != null) {
+                        archiveIcon.draw(c);
+                    }
+                }
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(binding.classesRecyclerView);
+    }
+
+    private void archiveClass(ClassModel classItem, int position) {
+        if (classItem == null || classItem.getId() == null) {
+            Toast.makeText(StudentHome.this, "Error: Invalid class data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (position < 0 || position >= classList.size()) {
+            Toast.makeText(StudentHome.this, "Error: Invalid position", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String studentId = mAuth.getCurrentUser().getUid();
+        String classId = classItem.getId();
+
+        // Update in student's enrolledClasses collection
+        db.collection("users")
+                .document(studentId)
+                .collection("enrolledClasses")
+                .document(classId)
+                .update("isArchived", true)
+                .addOnSuccessListener(unused -> {
+                    try {
+                        if (position >= 0 && position < classList.size()) {
+                            classList.remove(position);
+                            classAdapter.notifyItemRemoved(position);
+                            classAdapter.notifyItemRangeChanged(position, classList.size());
+                        } else {
+                            loadClasses();
+                            return;
+                        }
+                    } catch (Exception e) {
+                        loadClasses();
+                        return;
+                    }
+
+                    updateUI();
+                    Toast.makeText(StudentHome.this, "Class archived successfully", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(StudentHome.this, "Failed to archive class: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    try {
+                        if (position >= 0 && position < classList.size()) {
+                            classAdapter.notifyItemChanged(position);
+                        }
+                    } catch (Exception ex) {
+                        // Ignore
+                    }
+                });
     }
 
     private void setupBackPressHandler() {
@@ -127,7 +260,7 @@ public class StudentHome extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Archive feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(StudentHome.this, ArchiveActivity.class));
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
@@ -239,6 +372,7 @@ public class StudentHome extends AppCompatActivity {
         db.collection("users")
                 .document(studentId)
                 .collection("enrolledClasses")
+                .whereEqualTo("isArchived", false)  // Only load non-archived classes
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     if (querySnapshot.isEmpty()) {

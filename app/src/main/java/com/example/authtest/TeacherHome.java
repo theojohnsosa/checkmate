@@ -30,7 +30,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnClassClickListener {
 
@@ -109,7 +111,7 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                 return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Archive feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(TeacherHome.this, ArchiveActivity.class));
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
@@ -228,17 +230,41 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
 
         String userId = currentUser.getUid();
 
+        Log.d(TAG, "Loading classes for user: " + userId);
+
         db.collection("users")
                 .document(userId)
                 .collection("classes")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     classList.clear();
+                    int archivedCount = 0;
+
+                    Log.d(TAG, "Total classes found: " + queryDocumentSnapshots.size());
+
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         ClassModel classModel = document.toObject(ClassModel.class);
                         classModel.setId(document.getId());
-                        classList.add(classModel);
+
+                        // Get the isArchived field directly from Firestore document
+                        Boolean isArchived = document.getBoolean("isArchived");
+
+                        Log.d(TAG, "Class: " + classModel.getClassName() +
+                                ", ID: " + document.getId() +
+                                ", isArchived (from doc): " + isArchived);
+
+                        // Only include classes that are NOT archived
+                        // isArchived should be false or null (missing)
+                        if (isArchived == null || !isArchived) {
+                            classList.add(classModel);
+                            Log.d(TAG, "  → Added to display list");
+                        } else {
+                            archivedCount++;
+                            Log.d(TAG, "  → FILTERED OUT (archived)");
+                        }
                     }
+
+                    Log.d(TAG, "Final result: " + classList.size() + " active classes, " + archivedCount + " archived");
 
                     if (classList.isEmpty()) {
                         showEmptyState();
@@ -247,8 +273,104 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                     }
                 })
                 .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading classes: " + e.getMessage());
                     Toast.makeText(TeacherHome.this, "Error loading classes: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     showEmptyState();
+                });
+    }
+
+    private void fixMissingFields() {
+        String teacherId = mAuth.getCurrentUser().getUid();
+
+        Log.d(TAG, "Checking for classes with missing fields");
+
+        db.collection("users")
+                .document(teacherId)
+                .collection("classes")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (var doc : querySnapshot) {
+                        String classId = doc.getId();
+
+                        db.collection("allClasses")
+                                .document(classId)
+                                .get()
+                                .addOnSuccessListener(classDoc -> {
+                                    if (classDoc.exists()) {
+                                        Object teacherIdField = classDoc.get("teacherId");
+                                        Object isArchivedField = classDoc.get("isArchived");
+
+                                        Map<String, Object> updates = new HashMap<>();
+                                        boolean needsUpdate = false;
+
+                                        // Fix missing teacherId
+                                        if (teacherIdField == null || teacherIdField.toString().isEmpty()) {
+                                            Log.d(TAG, "Adding missing teacherId for class: " + classId);
+                                            updates.put("teacherId", teacherId);
+                                            needsUpdate = true;
+                                        }
+
+                                        // Fix missing isArchived - set to false for existing classes
+                                        if (isArchivedField == null) {
+                                            Log.d(TAG, "Adding missing isArchived for class: " + classId);
+                                            updates.put("isArchived", false);
+                                            needsUpdate = true;
+                                        }
+
+                                        // Perform the update if needed
+                                        if (needsUpdate) {
+                                            db.collection("allClasses")
+                                                    .document(classId)
+                                                    .update(updates)
+                                                    .addOnSuccessListener(unused -> {
+                                                        Log.d(TAG, "✓ Fixed fields for class: " + classId);
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e(TAG, "Failed to fix fields for class: " + classId, e);
+                                                    });
+                                        }
+                                    }
+                                });
+                    }
+                });
+    }
+
+    private void fixMissingTeacherIds() {
+        String teacherId = mAuth.getCurrentUser().getUid();
+
+        Log.d(TAG, "Checking for classes with missing teacherId");
+
+        db.collection("users")
+                .document(teacherId)
+                .collection("classes")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (var doc : querySnapshot) {
+                        String classId = doc.getId();
+
+                        db.collection("allClasses")
+                                .document(classId)
+                                .get()
+                                .addOnSuccessListener(classDoc -> {
+                                    if (classDoc.exists()) {
+                                        Object teacherIdField = classDoc.get("teacherId");
+
+                                        if (teacherIdField == null || teacherIdField.toString().isEmpty()) {
+                                            Log.d(TAG, "Fixing missing teacherId for class: " + classId);
+
+                                            db.collection("allClasses")
+                                                    .document(classId)
+                                                    .update("teacherId", teacherId)
+                                                    .addOnSuccessListener(unused -> {
+                                                        Log.d(TAG, "✓ Fixed teacherId for class: " + classId);
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e(TAG, "Failed to fix teacherId for class: " + classId, e);
+                                                    });
+                                        }
+                                    }
+                                });
+                    }
                 });
     }
 
@@ -271,9 +393,11 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     }
 
     private void setupSwipeToDeleteClass() {
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            private final ColorDrawable background = new ColorDrawable(Color.parseColor("#C92A2A"));
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            private final ColorDrawable deleteBackground = new ColorDrawable(Color.parseColor("#C92A2A"));
+            private final ColorDrawable archiveBackground = new ColorDrawable(Color.parseColor("#FF8C00"));
             private final Drawable deleteIcon = ContextCompat.getDrawable(TeacherHome.this, android.R.drawable.ic_menu_delete);
+            private final Drawable archiveIcon = ContextCompat.getDrawable(TeacherHome.this, R.drawable.ic_archive);
 
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
@@ -286,7 +410,27 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                 int position = viewHolder.getAdapterPosition();
                 ClassModel classItem = classAdapter.getClassAt(position);
 
-                if (classItem != null) {
+                if (classItem == null) {
+                    classAdapter.notifyItemChanged(position);
+                    return;
+                }
+
+                // SWIPE RIGHT = Archive
+                if (direction == ItemTouchHelper.RIGHT) {
+                    ArchiveClassConfirmationDialog confirmDialog = new ArchiveClassConfirmationDialog(
+                            TeacherHome.this,
+                            classItem.getClassName(),
+                            () -> {
+                                archiveClass(classItem, position);
+                            },
+                            () -> {
+                                classAdapter.notifyItemChanged(position);
+                            }
+                    );
+                    confirmDialog.show();
+                }
+                // SWIPE LEFT = Delete
+                else if (direction == ItemTouchHelper.LEFT) {
                     RemoveClassConfirmationDialog confirmDialog = new RemoveClassConfirmationDialog(
                             TeacherHome.this,
                             classItem.getClassName(),
@@ -298,8 +442,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                             }
                     );
                     confirmDialog.show();
-                } else {
-                    classAdapter.notifyItemChanged(position);
                 }
             }
 
@@ -312,30 +454,142 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                 View itemView = viewHolder.itemView;
                 int backgroundCornerOffset = 20;
 
-                if (dX < 0) {
-                    int iconMargin = (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
-                    int iconTop = itemView.getTop() + (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
-                    int iconBottom = iconTop + deleteIcon.getIntrinsicHeight();
-                    int iconLeft = itemView.getRight() - iconMargin - deleteIcon.getIntrinsicWidth();
+                // Swipe RIGHT = Archive (Orange background)
+                if (dX > 0) {
+                    int iconMargin = (itemView.getHeight() - (archiveIcon != null ? archiveIcon.getIntrinsicHeight() : 0)) / 2;
+                    int iconTop = itemView.getTop() + (itemView.getHeight() - (archiveIcon != null ? archiveIcon.getIntrinsicHeight() : 0)) / 2;
+                    int iconBottom = iconTop + (archiveIcon != null ? archiveIcon.getIntrinsicHeight() : 0);
+                    int iconLeft = itemView.getLeft() + iconMargin;
+                    int iconRight = iconLeft + (archiveIcon != null ? archiveIcon.getIntrinsicWidth() : 0);
+
+                    if (archiveIcon != null) {
+                        archiveIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                    }
+
+                    archiveBackground.setBounds(
+                            itemView.getLeft(),
+                            itemView.getTop(),
+                            itemView.getLeft() + ((int) dX) + backgroundCornerOffset,
+                            itemView.getBottom()
+                    );
+
+                    archiveBackground.draw(c);
+                    if (archiveIcon != null) {
+                        archiveIcon.draw(c);
+                    }
+                }
+                // Swipe LEFT = Delete (Red background)
+                else if (dX < 0) {
+                    int iconMargin = (itemView.getHeight() - (deleteIcon != null ? deleteIcon.getIntrinsicHeight() : 0)) / 2;
+                    int iconTop = itemView.getTop() + (itemView.getHeight() - (deleteIcon != null ? deleteIcon.getIntrinsicHeight() : 0)) / 2;
+                    int iconBottom = iconTop + (deleteIcon != null ? deleteIcon.getIntrinsicHeight() : 0);
+                    int iconLeft = itemView.getRight() - iconMargin - (deleteIcon != null ? deleteIcon.getIntrinsicWidth() : 0);
                     int iconRight = itemView.getRight() - iconMargin;
 
-                    deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                    if (deleteIcon != null) {
+                        deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                    }
 
-                    background.setBounds(
+                    deleteBackground.setBounds(
                             itemView.getRight() + ((int) dX) - backgroundCornerOffset,
                             itemView.getTop(),
                             itemView.getRight(),
                             itemView.getBottom()
                     );
 
-                    background.draw(c);
-                    deleteIcon.draw(c);
+                    deleteBackground.draw(c);
+                    if (deleteIcon != null) {
+                        deleteIcon.draw(c);
+                    }
                 }
             }
         };
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(binding.classesRecyclerView);
+    }
+
+    private void archiveClass(ClassModel classItem, int position) {
+        if (classItem == null || classItem.getId() == null) {
+            Log.e(TAG, "Class item or ID is null");
+            Toast.makeText(TeacherHome.this, "Error: Invalid class data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (position < 0 || position >= classList.size()) {
+            Log.e(TAG, "Invalid position: " + position + ", list size: " + classList.size());
+            Toast.makeText(TeacherHome.this, "Error: Invalid position", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String teacherId = mAuth.getCurrentUser().getUid();
+        String classId = classItem.getId();
+
+        Log.d(TAG, "Archiving class: " + classItem.getClassName() + " (ID: " + classId + ")");
+
+        // Step 1: Update in teacher's personal classes collection
+        db.collection("users")
+                .document(teacherId)
+                .collection("classes")
+                .document(classId)
+                .update("isArchived", true)
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "✓ Updated isArchived in user's classes");
+
+                    // Step 2: Update in allClasses collection
+                    db.collection("allClasses")
+                            .document(classId)
+                            .update("isArchived", true)
+                            .addOnSuccessListener(unused2 -> {
+                                Log.d(TAG, "✓ Updated isArchived in allClasses");
+
+                                // Step 3: Remove from local list and refresh UI
+                                try {
+                                    if (position >= 0 && position < classList.size()) {
+                                        classList.remove(position);
+                                        classAdapter.notifyItemRemoved(position);
+                                        classAdapter.notifyItemRangeChanged(position, classList.size());
+                                        Log.d(TAG, "✓ Removed from adapter at position " + position);
+                                    } else {
+                                        Log.w(TAG, "Position invalid after archive, reloading");
+                                        loadClasses();
+                                        return;
+                                    }
+
+                                    if (classList.isEmpty()) {
+                                        showEmptyState();
+                                    }
+
+                                    Toast.makeText(TeacherHome.this, "Class archived successfully", Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "✓ Class archived successfully");
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error updating UI after archive", e);
+                                    loadClasses();
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Failed to update isArchived in allClasses: " + e.getMessage(), e);
+                                Toast.makeText(TeacherHome.this, "Failed to archive class: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                try {
+                                    if (position >= 0 && position < classList.size()) {
+                                        classAdapter.notifyItemChanged(position);
+                                    }
+                                } catch (Exception ex) {
+                                    Log.e(TAG, "Error notifying adapter", ex);
+                                }
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to update isArchived in user's classes: " + e.getMessage(), e);
+                    Toast.makeText(TeacherHome.this, "Failed to archive class: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    try {
+                        if (position >= 0 && position < classList.size()) {
+                            classAdapter.notifyItemChanged(position);
+                        }
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error notifying adapter", ex);
+                    }
+                });
     }
 
     private void removeClassFromUser(ClassModel classItem, int position) {

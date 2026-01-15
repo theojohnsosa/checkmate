@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/dialog_rounded_background">
+
+    <TextView
+        android:text="Archive Class"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/messageText"
+        android:text="Are you sure you want to archive this class?"
+        android:textSize="16sp"
+        android:textColor="#828282"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="3"
+        android:ellipsize="end" />
+
+    <LinearLayout
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cancelButton"
+            android:text="Cancel"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/dialog_cancel_button"
+            android:layout_width="115dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/archiveButton"
+            android:text="Archive"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/dialog_remove_button"
+            android:layout_width="115dp"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+</LinearLayout>

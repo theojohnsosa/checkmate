@@ -46,6 +46,9 @@
         <activity
             android:name=".SessionDetailsActivity"
             android:exported="false" />
+        <activity
+            android:name=".ArchiveActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
