@@ -53,7 +53,7 @@
                 android:background="@android:color/transparent"
                 android:drawableStart="@drawable/left_arrow"
                 android:drawablePadding="10dp"
-                android:text="Back to Class"
+                android:text="Back"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF" />
         </LinearLayout>

@@ -1,5 +1,6 @@
 package com.example.authtest;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,12 +40,15 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
     @Override
     public int getItemCount() {
+        Log.d("ClassAdapter", "getItemCount() called - returning: " + classList.size());
         return classList.size();
     }
 
     public void setClasses(List<ClassModel> classes) {
+        Log.d("ClassAdapter", "setClasses() called with " + (classes != null ? classes.size() : 0) + " items");
         this.classList = classes;
         notifyDataSetChanged();
+        Log.d("ClassAdapter", "notifyDataSetChanged() called");
     }
 
     public ClassModel getClassAt(int position) {

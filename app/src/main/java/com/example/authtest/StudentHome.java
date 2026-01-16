@@ -358,6 +358,8 @@ public class StudentHome extends AppCompatActivity {
         }
     }
 
+    // Replace the loadClasses() method in StudentHome.java
+
     private void loadClasses() {
         if (isLoadingClasses) {
             return;
@@ -369,10 +371,10 @@ public class StudentHome extends AppCompatActivity {
         classList.clear();
         classAdapter.notifyDataSetChanged();
 
+        // Load ALL classes first (don't filter by isArchived in query)
         db.collection("users")
                 .document(studentId)
                 .collection("enrolledClasses")
-                .whereEqualTo("isArchived", false)  // Only load non-archived classes
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     if (querySnapshot.isEmpty()) {
@@ -386,6 +388,22 @@ public class StudentHome extends AppCompatActivity {
 
                     for (var doc : querySnapshot) {
                         String classId = doc.getString("classId");
+
+                        // Get the isArchived field from the enrolledClasses document
+                        Boolean isArchived = doc.getBoolean("isArchived");
+
+                        // Skip if archived (isArchived == true)
+                        // Include if not archived (isArchived == false or null/missing)
+                        if (isArchived != null && isArchived) {
+                            // This class is archived, skip it
+                            loadedClasses[0]++;
+                            if (loadedClasses[0] == totalClasses) {
+                                classAdapter.notifyDataSetChanged();
+                                updateUI();
+                                isLoadingClasses = false;
+                            }
+                            continue;
+                        }
 
                         if (classId != null) {
                             db.collection("allClasses")

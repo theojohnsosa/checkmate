@@ -51,7 +51,7 @@
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/backButton"
-                android:text="Back to Home"
+                android:text="Back"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
                 android:background="@android:color/transparent"

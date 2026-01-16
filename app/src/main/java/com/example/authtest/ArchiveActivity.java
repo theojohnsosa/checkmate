@@ -65,6 +65,15 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         setupBackPressHandler();
         setupRecyclerView();
         setupSwipeToUnarchive();
+
+        Log.d(TAG, "onCreate completed, calling loadArchivedClasses()");
+        loadArchivedClasses();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume called, reloading archived classes");
         loadArchivedClasses();
     }
 
@@ -182,7 +191,9 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         classAdapter = new ClassAdapter(this);
         binding.archivedClassesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.archivedClassesRecyclerView.setAdapter(classAdapter);
-        classAdapter.setClasses(archivedClasses);
+        binding.archivedClassesRecyclerView.setNestedScrollingEnabled(false);
+
+        Log.d(TAG, "RecyclerView setup complete");
     }
 
     private void setupSwipeToUnarchive() {
@@ -247,54 +258,134 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         itemTouchHelper.attachToRecyclerView(binding.archivedClassesRecyclerView);
     }
 
-    private void loadArchivedClasses() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
-            showEmptyState();
-            return;
-        }
-
-        String userId = currentUser.getUid();
-
-        Log.d(TAG, "Loading archived classes for user: " + userId);
+    private void loadArchivedStudentClasses(String userId) {
+        Log.d(TAG, "Loading archived STUDENT classes");
 
         db.collection("users")
                 .document(userId)
-                .collection("classes")
+                .collection("enrolledClasses")
                 .whereEqualTo("isArchived", true)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     archivedClasses.clear();
-                    Log.d(TAG, "Found " + queryDocumentSnapshots.size() + " archived classes");
 
-                    for (var document : queryDocumentSnapshots) {
-                        ClassModel classModel = document.toObject(ClassModel.class);
-                        classModel.setId(document.getId());
-                        archivedClasses.add(classModel);
-                        Log.d(TAG, "Added archived class: " + classModel.getClassName());
+                    Log.d(TAG, "Query returned: " + queryDocumentSnapshots.size() + " documents");
+
+                    final int totalClasses = queryDocumentSnapshots.size();
+                    final int[] loadedClasses = {0};
+
+                    if (totalClasses == 0) {
+                        Log.d(TAG, "No archived classes found");
+                        classAdapter.setClasses(archivedClasses);
+                        classAdapter.notifyDataSetChanged();
+                        updateUI();
+                        return;
                     }
 
-                    classAdapter.setClasses(archivedClasses);
-                    updateUI();
+                    // Use a temporary list to avoid duplicates
+                    List<ClassModel> tempClasses = new ArrayList<>();
 
-                    if (!archivedClasses.isEmpty()) {
-                        Log.d(TAG, "✓ Loaded " + archivedClasses.size() + " archived classes");
+                    for (var document : queryDocumentSnapshots) {
+                        String classId = document.getString("classId");
+
+                        if (classId != null) {
+                            // Load the actual class details from allClasses
+                            db.collection("allClasses")
+                                    .document(classId)
+                                    .get()
+                                    .addOnSuccessListener(classDoc -> {
+                                        if (classDoc.exists()) {
+                                            ClassModel classModel = classDoc.toObject(ClassModel.class);
+                                            if (classModel != null) {
+                                                classModel.setId(classDoc.getId());
+                                                tempClasses.add(classModel);
+                                                Log.d(TAG, "  Added: " + classModel.getClassName() + " (ID: " + classDoc.getId() + ")");
+                                            }
+                                        }
+
+                                        loadedClasses[0]++;
+                                        if (loadedClasses[0] == totalClasses) {
+                                            // All classes loaded, update the main list once
+                                            archivedClasses.clear();
+                                            archivedClasses.addAll(tempClasses);
+
+                                            Log.d(TAG, "Total archived classes: " + archivedClasses.size());
+                                            Log.d(TAG, "Updating adapter with " + archivedClasses.size() + " classes");
+
+                                            classAdapter.setClasses(archivedClasses);
+                                            classAdapter.notifyDataSetChanged();
+
+                                            updateUI();
+
+                                            Log.d(TAG, "=== LOAD COMPLETE ===");
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "Error loading class details for: " + classId, e);
+
+                                        loadedClasses[0]++;
+                                        if (loadedClasses[0] == totalClasses) {
+                                            // All classes processed (some may have failed)
+                                            archivedClasses.clear();
+                                            archivedClasses.addAll(tempClasses);
+
+                                            Log.d(TAG, "Total archived classes: " + archivedClasses.size());
+                                            classAdapter.setClasses(archivedClasses);
+                                            classAdapter.notifyDataSetChanged();
+                                            updateUI();
+                                            Log.d(TAG, "=== LOAD COMPLETE ===");
+                                        }
+                                    });
+                        } else {
+                            loadedClasses[0]++;
+                            if (loadedClasses[0] == totalClasses) {
+                                archivedClasses.clear();
+                                archivedClasses.addAll(tempClasses);
+                                classAdapter.setClasses(archivedClasses);
+                                classAdapter.notifyDataSetChanged();
+                                updateUI();
+                                Log.d(TAG, "=== LOAD COMPLETE ===");
+                            }
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading archived classes", e);
-                    Toast.makeText(ArchiveActivity.this, "Error loading archived classes: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error loading archived student classes: " + e.getMessage(), e);
+                    Toast.makeText(ArchiveActivity.this, "Error loading archived classes", Toast.LENGTH_SHORT).show();
                     showEmptyState();
                 });
     }
 
     private void unarchiveClass(ClassModel classItem, int position) {
-        String teacherId = mAuth.getCurrentUser().getUid();
+        String userId = mAuth.getCurrentUser().getUid();
         String classId = classItem.getId();
 
         Log.d(TAG, "Unarchiving class: " + classItem.getClassName());
 
+        // Determine if user is teacher or student and update appropriate collection
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    if (userDoc.exists()) {
+                        String userType = userDoc.getString("userType");
+
+                        if ("Teacher".equalsIgnoreCase(userType)) {
+                            unarchiveTeacherClass(userId, classId, position);
+                        } else if ("Student".equalsIgnoreCase(userType)) {
+                            unarchiveStudentClass(userId, classId, position);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting user type", e);
+                    classAdapter.notifyItemChanged(position);
+                    Toast.makeText(ArchiveActivity.this, "Failed to unarchive class", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void unarchiveTeacherClass(String teacherId, String classId, int position) {
+        // Update in teacher's classes collection
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
@@ -303,6 +394,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 .addOnSuccessListener(unused -> {
                     Log.d(TAG, "✓ Updated teacher's classes");
 
+                    // Update in allClasses collection
                     db.collection("allClasses")
                             .document(classId)
                             .update("isArchived", false)
@@ -329,8 +421,114 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 });
     }
 
+    private void unarchiveStudentClass(String studentId, String classId, int position) {
+        // Update in student's enrolledClasses collection
+        db.collection("users")
+                .document(studentId)
+                .collection("enrolledClasses")
+                .document(classId)
+                .update("isArchived", false)
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "✓ Updated student's enrolledClasses");
+
+                    archivedClasses.remove(position);
+                    classAdapter.notifyItemRemoved(position);
+                    classAdapter.notifyItemRangeChanged(position, archivedClasses.size());
+
+                    updateUI();
+                    Toast.makeText(ArchiveActivity.this, "Class unarchived successfully", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to unarchive student class", e);
+                    classAdapter.notifyItemChanged(position);
+                    Toast.makeText(ArchiveActivity.this, "Failed to unarchive class", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void loadArchivedClasses() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Log.e(TAG, "User not authenticated");
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            showEmptyState();
+            return;
+        }
+
+        String userId = currentUser.getUid();
+
+        Log.d(TAG, "=== LOADING ARCHIVED CLASSES ===");
+        Log.d(TAG, "User ID: " + userId);
+
+        // First, determine if user is a teacher or student
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    if (userDoc.exists()) {
+                        String userType = userDoc.getString("userType");
+                        Log.d(TAG, "User type: " + userType);
+
+                        // Load from appropriate collection based on user type
+                        if ("Teacher".equalsIgnoreCase(userType)) {
+                            loadArchivedTeacherClasses(userId);
+                        } else if ("Student".equalsIgnoreCase(userType)) {
+                            loadArchivedStudentClasses(userId);
+                        } else {
+                            Log.w(TAG, "Unknown user type: " + userType);
+                            showEmptyState();
+                        }
+                    } else {
+                        Log.e(TAG, "User document not found");
+                        showEmptyState();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting user type: " + e.getMessage());
+                    showEmptyState();
+                });
+    }
+
+    private void loadArchivedTeacherClasses(String userId) {
+        Log.d(TAG, "Loading archived TEACHER classes");
+
+        db.collection("users")
+                .document(userId)
+                .collection("classes")
+                .whereEqualTo("isArchived", true)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    archivedClasses.clear();
+
+                    Log.d(TAG, "Query returned: " + queryDocumentSnapshots.size() + " documents");
+
+                    for (var document : queryDocumentSnapshots) {
+                        ClassModel classModel = document.toObject(ClassModel.class);
+                        classModel.setId(document.getId());
+                        archivedClasses.add(classModel);
+                        Log.d(TAG, "  Added: " + classModel.getClassName() + " (ID: " + document.getId() + ")");
+                    }
+
+                    Log.d(TAG, "Total archived classes: " + archivedClasses.size());
+                    Log.d(TAG, "Updating adapter with " + archivedClasses.size() + " classes");
+
+                    classAdapter.setClasses(archivedClasses);
+                    classAdapter.notifyDataSetChanged();
+
+                    updateUI();
+
+                    Log.d(TAG, "=== LOAD COMPLETE ===");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading archived teacher classes: " + e.getMessage(), e);
+                    Toast.makeText(ArchiveActivity.this, "Error loading archived classes", Toast.LENGTH_SHORT).show();
+                    showEmptyState();
+                });
+    }
+
     private void updateUI() {
         boolean isEmpty = archivedClasses.isEmpty();
+        Log.d(TAG, "updateUI() - isEmpty: " + isEmpty + ", classCount: " + archivedClasses.size());
+
         binding.emptyStateLayout.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         binding.archivedClassesRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
@@ -342,7 +540,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
 
     @Override
     public void onClassClick(ClassModel classModel) {
-        // Allow viewing archived class details
         Intent intent = new Intent(ArchiveActivity.this, ClassInformation.class);
         intent.putExtra("CLASS_MODEL", classModel);
         startActivity(intent);
