@@ -68,7 +68,6 @@
             android:textSize="28sp"
             android:textStyle="bold"
             android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
             android:layout_marginBottom="24dp" />
 
         <!-- Empty State -->
@@ -108,12 +107,11 @@
 
         </LinearLayout>
 
-        <!-- Archived Classes RecyclerView - NO ScrollView, RecyclerView handles scrolling -->
+        <!-- Archived Classes RecyclerView - width changed to match_parent -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/archivedClassesRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingHorizontal="20dp"
             android:paddingTop="0dp"
             android:paddingBottom="40dp"
             android:clipToPadding="false"
