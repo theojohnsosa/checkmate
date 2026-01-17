@@ -77,7 +77,6 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingVertical="60dp"
             android:visibility="gone">
 
             <TextView

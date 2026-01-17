@@ -364,6 +364,8 @@ public class SessionDetailsActivity extends AppCompatActivity {
             return;
         }
 
+        Log.d(TAG, "Loading attendance for Session: " + sessionId + ", Class: " + classId);
+
         db.collection("allClasses")
                 .document(classId)
                 .collection("recentSessions")
@@ -372,10 +374,13 @@ public class SessionDetailsActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(attendanceSnapshot -> {
                     studentList.clear();
+                    Log.d(TAG, "Found " + attendanceSnapshot.size() + " attendance records");
+
                     final int[] loadedCount = {0};
                     final int totalRecords = attendanceSnapshot.size();
 
                     if (totalRecords == 0) {
+                        Log.d(TAG, "No students in this session");
                         onAllStudentsLoaded();
                         return;
                     }
@@ -385,7 +390,10 @@ public class SessionDetailsActivity extends AppCompatActivity {
                         Long timestamp = doc.getLong("timestamp");
                         Boolean marked = doc.getBoolean("marked");
 
-                        if (marked != null && marked && timestamp != null) {
+                        Log.d(TAG, "Processing record - studentId: " + studentId + ", marked: " + marked + ", timestamp: " + timestamp);
+
+                        // ✅ FIXED: Check if marked is true (or null which defaults to true)
+                        if ((marked == null || marked) && timestamp != null) {
                             db.collection("users")
                                     .document(studentId)
                                     .get()
@@ -408,40 +416,66 @@ public class SessionDetailsActivity extends AppCompatActivity {
                                             student.setTimestamp(timestamp);
 
                                             studentList.add(student);
+                                            Log.d(TAG, "✓ Added student: " + student.getFullName() + " - Status: " + status);
                                         }
 
                                         loadedCount[0]++;
                                         checkIfAllLoaded(loadedCount[0], totalRecords);
                                     })
                                     .addOnFailureListener(e -> {
+                                        Log.e(TAG, "Error loading user " + studentId, e);
                                         loadedCount[0]++;
                                         checkIfAllLoaded(loadedCount[0], totalRecords);
                                     });
                         } else {
+                            Log.d(TAG, "Skipped - marked is false or timestamp is null");
                             loadedCount[0]++;
                             checkIfAllLoaded(loadedCount[0], totalRecords);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading attendance records", e);
                     Toast.makeText(this, "Error: Failed to load attendance data - " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
     private void checkIfAllLoaded(int loadedCount, int totalRecords) {
+        Log.d(TAG, "Progress: " + loadedCount + "/" + totalRecords + " students loaded");
+
         if (loadedCount == totalRecords) {
+            Log.d(TAG, "All students loaded! Total: " + studentList.size());
             onAllStudentsLoaded();
         }
     }
 
     private void onAllStudentsLoaded() {
+        Log.d(TAG, "=== ALL STUDENTS LOADED ===");
+        Log.d(TAG, "Total students: " + studentList.size());
+
         sortStudentsByLastName();
+
+        for (StudentAttendanceModel s : studentList) {
+            Log.d(TAG, "  - " + s.getFullName() + " (" + s.getEmail() + ") Status: " + s.getAttendanceStatus());
+        }
+
         filteredStudentList.clear();
         filteredStudentList.addAll(studentList);
         studentSearchBar.setText("");
+
+        // ✅ CRITICAL: Update adapter with students
         studentAdapter.setStudents(new ArrayList<>(studentList));
+        Log.d(TAG, "Adapter updated with " + studentList.size() + " students");
+
+        // ✅ CRITICAL: Calculate stats
         calculateAndUpdateStats();
+        Log.d(TAG, "Stats calculated and updated");
+
+        // ✅ CRITICAL: Update UI visibility
         updateUI();
+        Log.d(TAG, "UI updated");
+
+        Log.d(TAG, "=== LOAD COMPLETE ===");
     }
 
     private void sortStudentsByLastName() {
@@ -461,16 +495,28 @@ public class SessionDetailsActivity extends AppCompatActivity {
     }
 
     private void calculateAndUpdateStats() {
+        Log.d(TAG, "=== CALCULATING STATS ===");
+
         if (totalStudentsCount == null || presentCount == null ||
                 lateCount == null || absentCount == null) {
+            Log.e(TAG, "❌ ERROR: Stats TextViews are NULL!");
+            Log.e(TAG, "  totalStudentsCount: " + (totalStudentsCount != null ? "OK" : "NULL"));
+            Log.e(TAG, "  presentCount: " + (presentCount != null ? "OK" : "NULL"));
+            Log.e(TAG, "  lateCount: " + (lateCount != null ? "OK" : "NULL"));
+            Log.e(TAG, "  absentCount: " + (absentCount != null ? "OK" : "NULL"));
             return;
         }
 
         int total = studentList.size();
         int present = 0, late = 0, absent = 0;
 
+        Log.d(TAG, "Total students: " + total);
+
         for (StudentAttendanceModel student : studentList) {
-            switch (student.getAttendanceStatus()) {
+            String status = student.getAttendanceStatus();
+            Log.d(TAG, "  " + student.getFullName() + ": " + status);
+
+            switch (status) {
                 case "Present":
                     present++;
                     break;
@@ -483,10 +529,14 @@ public class SessionDetailsActivity extends AppCompatActivity {
             }
         }
 
+        Log.d(TAG, "Breakdown: Present=" + present + ", Late=" + late + ", Absent=" + absent);
+
         totalStudentsCount.setText(String.valueOf(total));
         presentCount.setText(String.valueOf(present));
         lateCount.setText(String.valueOf(late));
         absentCount.setText(String.valueOf(absent));
+
+        Log.d(TAG, "✓ Stats updated on UI");
     }
 
     private String getAttendanceStatus(long markedTimestamp) {
@@ -550,23 +600,43 @@ public class SessionDetailsActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
+        Log.d(TAG, "Updating UI visibility");
+
+        // ✅ Show stats card
         if (statsCard != null) {
             statsCard.setVisibility(View.VISIBLE);
+            Log.d(TAG, "✓ Stats card visibility: VISIBLE");
+        } else {
+            Log.e(TAG, "✗ statsCard is NULL!");
         }
 
+        // ✅ Show students header
         if (studentsAttendedHeader != null) {
             studentsAttendedHeader.setVisibility(View.VISIBLE);
+            Log.d(TAG, "✓ Students header visibility: VISIBLE");
+        } else {
+            Log.e(TAG, "✗ studentsAttendedHeader is NULL!");
         }
 
+        // ✅ Show search bar
         View searchBarContainer = findViewById(R.id.searchBarContainer);
         if (searchBarContainer != null) {
             searchBarContainer.setVisibility(View.VISIBLE);
+            Log.d(TAG, "✓ Search bar visibility: VISIBLE");
+        } else {
+            Log.e(TAG, "✗ searchBarContainer is NULL!");
         }
 
+        // ✅ Show/hide RecyclerView based on student list
         boolean hasStudents = !studentList.isEmpty();
         if (studentsRecyclerView != null) {
             studentsRecyclerView.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "✓ RecyclerView visibility: " + (hasStudents ? "VISIBLE" : "GONE"));
+        } else {
+            Log.e(TAG, "✗ studentsRecyclerView is NULL!");
         }
+
+        Log.d(TAG, "UI update complete");
     }
 
     private void debugAttendanceRecords() {

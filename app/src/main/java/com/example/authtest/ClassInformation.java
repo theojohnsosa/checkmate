@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -703,7 +702,6 @@ public class ClassInformation extends AppCompatActivity {
 
                         if (allowedEmails != null && !allowedEmails.isEmpty()) {
                             String targetEmail = allowedEmails.get(0);
-                            Log.d(TAG, "DIAGNOSTIC: Target email = '" + targetEmail + "'");
 
                             db.collection("users")
                                     .get()
@@ -971,10 +969,6 @@ public class ClassInformation extends AppCompatActivity {
 
             return lastNameComparison;
         });
-
-        for (StudentAttendanceModel s : studentList) {
-            Log.d(TAG, "  - " + s.getFullName());
-        }
     }
 
     private void checkStudentAttendance(StudentAttendanceModel student) {
@@ -1223,7 +1217,6 @@ public class ClassInformation extends AppCompatActivity {
                 .collection("attendanceRecords")
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null) {
-                        Log.e("ClassInformation", "Error listening to attendance stats", error);
                         return;
                     }
 
@@ -1397,7 +1390,7 @@ public class ClassInformation extends AppCompatActivity {
                     showAttendanceMarkedState();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to mark attendance", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Failed to mark attendance: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -1494,6 +1487,7 @@ public class ClassInformation extends AppCompatActivity {
                 .document(classId)
                 .update("attendanceActive", isActive)
                 .addOnSuccessListener(unused -> {
+
                     db.collection("allClasses")
                             .document(classId)
                             .update("attendanceActive", isActive)
@@ -1502,12 +1496,7 @@ public class ClassInformation extends AppCompatActivity {
                                 Toast.makeText(ClassInformation.this, message, Toast.LENGTH_SHORT).show();
 
                                 if (!isActive) {
-                                    saveRecentSession(System.currentTimeMillis());
-
-                                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
-                                            this::clearAllAttendanceRecords,
-                                            500
-                                    );
+                                    saveRecentSessionWithRecords(System.currentTimeMillis());
                                 }
                             })
                             .addOnFailureListener(e -> {
@@ -1516,6 +1505,105 @@ public class ClassInformation extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to update status", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void saveRecentSessionWithRecords(long endTime) {
+        if (classId == null || classId.isEmpty()) {
+            return;
+        }
+
+        long startTime = attendanceSessionStartTime > 0 ? attendanceSessionStartTime : (endTime - 3600000);
+        String sessionId = String.valueOf(System.currentTimeMillis());
+
+        db.collection("allClasses")
+                .document(classId)
+                .collection("attendanceRecords")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    int recordCount = querySnapshot.size();
+
+                    if (recordCount == 0) {
+                        createSessionDocument(sessionId, startTime, endTime, 0);
+                        return;
+                    }
+
+                    final int[] savedCount = {0};
+                    final int[] failedCount = {0};
+
+                    for (var doc : querySnapshot.getDocuments()) {
+                        String studentId = doc.getId();
+                        Long timestamp = doc.getLong("timestamp");
+                        Boolean marked = doc.getBoolean("marked");
+
+                        if (timestamp != null) {
+                            boolean isMarked = marked != null ? marked : true;
+
+                            Map<String, Object> recordData = new HashMap<>();
+                            recordData.put("studentId", studentId);
+                            recordData.put("timestamp", timestamp);
+                            recordData.put("marked", isMarked);
+
+                            db.collection("allClasses")
+                                    .document(classId)
+                                    .collection("recentSessions")
+                                    .document(sessionId)
+                                    .collection("attendanceRecords")
+                                    .document(studentId)
+                                    .set(recordData)
+                                    .addOnSuccessListener(unused -> {
+                                        savedCount[0]++;
+
+                                        if ((savedCount[0] + failedCount[0]) == recordCount) {
+                                            createSessionDocument(sessionId, startTime, endTime, savedCount[0]);
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        failedCount[0]++;
+
+                                        if ((savedCount[0] + failedCount[0]) == recordCount) {
+                                            createSessionDocument(sessionId, startTime, endTime, savedCount[0]);
+                                        }
+                                    });
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ClassInformation.this, "Failed to save session", Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void createSessionDocument(String sessionId, long startTime, long endTime, int recordCount) {
+        Map<String, Object> sessionData = new HashMap<>();
+        sessionData.put("sessionId", sessionId);
+        sessionData.put("classId", classId);
+        sessionData.put("sessionStartTime", startTime);
+        sessionData.put("sessionEndTime", endTime);
+        sessionData.put("timestamp", endTime);
+
+        db.collection("allClasses")
+                .document(classId)
+                .collection("recentSessions")
+                .document(sessionId)
+                .set(sessionData)
+                .addOnSuccessListener(unused -> {
+                    String teacherId = mAuth.getCurrentUser().getUid();
+                    db.collection("users")
+                            .document(teacherId)
+                            .collection("classes")
+                            .document(classId)
+                            .collection("recentSessions")
+                            .document(sessionId)
+                            .set(sessionData)
+                            .addOnSuccessListener(unused2 -> {
+                                clearAllAttendanceRecords();
+                            })
+                            .addOnFailureListener(e -> {
+                                clearAllAttendanceRecords();
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ClassInformation.this, "Failed to save session: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
@@ -1530,6 +1618,13 @@ public class ClassInformation extends AppCompatActivity {
                     int deleteCount = querySnapshot.size();
 
                     if (deleteCount == 0) {
+                        for (StudentAttendanceModel student : studentList) {
+                            student.setAttendanceStatus("Not Marked");
+                            student.setMarked(false);
+                            student.setTimestamp(null);
+                        }
+                        studentAdapter.notifyDataSetChanged();
+
                         loadRecentSessions();
                         return;
                     }
