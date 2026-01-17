@@ -15,7 +15,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
     private List<ClassModel> classList = new ArrayList<>();
     private OnClassClickListener listener;
-
     public interface OnClassClickListener {
         void onClassClick(ClassModel classModel);
     }
