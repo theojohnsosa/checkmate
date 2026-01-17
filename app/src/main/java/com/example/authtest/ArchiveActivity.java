@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,19 +19,16 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.authtest.databinding.ActivityArchiveBinding;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.OnClassClickListener {
 
-    private static final String TAG = "ArchiveActivity";
     private ActivityArchiveBinding binding;
     private ClassAdapter classAdapter;
     private FirebaseFirestore db;
@@ -54,26 +50,25 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
 
-        binding.hamburgerIcon.setOnClickListener(v -> {
+        binding.hamburgerIcon.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
 
-        binding.backButton.setOnClickListener(v -> finish());
+        binding.backButton.setOnClickListener(view -> {
+            finish();
+        });
 
         setupNavigationDrawer();
         loadUserInfoInDrawer();
         setupBackPressHandler();
         setupRecyclerView();
         setupSwipeToUnarchive();
-
-        Log.d(TAG, "onCreate completed, calling loadArchivedClasses()");
         loadArchivedClasses();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume called, reloading archived classes");
         loadArchivedClasses();
     }
 
@@ -95,7 +90,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
-
             if (itemId == R.id.menu_home) {
                 navigateToUserHome();
                 return true;
@@ -106,7 +100,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 logout();
                 return true;
             }
-
             drawerLayout.closeDrawer(GravityCompat.START);
             return false;
         });
@@ -124,10 +117,8 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     drawerLayout.closeDrawer(GravityCompat.START);
-
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
-
                         if (userType != null) {
                             if ("Student".equalsIgnoreCase(userType.trim())) {
                                 startActivity(new Intent(ArchiveActivity.this, StudentHome.class));
@@ -165,11 +156,11 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
                             String lastName = documentSnapshot.getString("lastName");
-
                             String fullName = "";
                             if (firstName != null && !firstName.isEmpty()) {
                                 fullName = firstName;
                             }
+
                             if (lastName != null && !lastName.isEmpty()) {
                                 fullName += (fullName.isEmpty() ? "" : " ") + lastName;
                             }
@@ -218,7 +209,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 }
 
                 if (direction == ItemTouchHelper.RIGHT) {
-                    Log.d(TAG, "Swiped RIGHT - unarchive class");
                     unarchiveClass(classItem, position);
                 }
                 else if (direction == ItemTouchHelper.LEFT) {
@@ -373,12 +363,11 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 .addOnSuccessListener(classDoc -> {
                     if (classDoc.exists()) {
                         List<String> allowedEmails = (List<String>) classDoc.get("allowedStudentEmails");
-
                         if (allowedEmails != null && !allowedEmails.isEmpty()) {
                             final int[] completedCount = {0};
                             final int totalEmails = allowedEmails.size();
-
                             for (String email : allowedEmails) {
+
                                 db.collection("users")
                                         .whereEqualTo("schoolEmail", email)
                                         .limit(1)
