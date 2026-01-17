@@ -11,7 +11,6 @@ import androidx.appcompat.widget.AppCompatButton;
 
 public class RemoveSessionConfirmationDialog extends Dialog {
 
-    private static final String TAG = "RemoveSessionDialog";
     private final Runnable onConfirm;
     private final Runnable onCancel;
     private AppCompatButton removeButton;
