@@ -6,18 +6,15 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -281,7 +278,6 @@ public class SignUp extends AppCompatActivity {
             return false;
         }
 
-        // Check email format and extract the name part
         String emailPattern;
         String requiredDomain;
 
@@ -295,20 +291,16 @@ public class SignUp extends AppCompatActivity {
             return false;
         }
 
-        // Validate email format (letters only before @)
         if (!email.matches(emailPattern)) {
             return false;
         }
 
-        // Extract and validate the name part (before @)
         String namePart = email.substring(0, email.indexOf("@"));
 
-        // Check if name part contains only letters (no numbers or special characters)
         if (!namePart.matches("^[a-zA-Z]+$")) {
             return false;
         }
 
-        // Ensure the domain is correct
         if (!email.endsWith(requiredDomain)) {
             return false;
         }
@@ -321,9 +313,6 @@ public class SignUp extends AppCompatActivity {
             return false;
         }
 
-        // Pattern: YYYY-0000000
-        // Year: 2019-2025
-        // Digits: 7 digits, each digit must be 1-9 (no zeros)
         String pattern = "^(201[9]|202[0-5])-[1-9]{7}$";
 
         return schoolNumber.matches(pattern);
@@ -352,9 +341,7 @@ public class SignUp extends AppCompatActivity {
         db.collection("users").document(userId)
                 .set(user)
                 .addOnCompleteListener(aVoid -> {
-                    Toast.makeText(SignUp.this,
-                            "Account created successfully!",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUp.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
 
                     Intent intent;
                     if (schoolEmail.contains("@students.")) {
@@ -369,9 +356,7 @@ public class SignUp extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     signUpButton.setEnabled(true);
                     signUpButton.setText("Create Account");
-                    Toast.makeText(SignUp.this,
-                            "Failed to save user data: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(SignUp.this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_LONG).show();
 
                     FirebaseUser currentUser = mAuth.getCurrentUser();
                     if (currentUser != null) {

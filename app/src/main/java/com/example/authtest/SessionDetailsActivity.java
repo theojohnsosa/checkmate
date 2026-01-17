@@ -12,7 +12,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,13 +21,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,23 +41,19 @@ public class SessionDetailsActivity extends AppCompatActivity {
     private long sessionStartTime;
     private long sessionEndTime;
     private String classStartTime;
-
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-
     private TextView totalStudentsCount;
     private TextView presentCount;
     private TextView lateCount;
     private TextView absentCount;
     private View statsCard;
-
     private RecyclerView studentsRecyclerView;
     private StudentAttendanceAdapter studentAdapter;
     private List<StudentAttendanceModel> studentList = new ArrayList<>();
     private List<StudentAttendanceModel> filteredStudentList = new ArrayList<>();
-
     private EditText studentSearchBar;
     private ImageView clearSearchButton;
     private TextView studentsAttendedHeader;
@@ -69,9 +62,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session_details);
-
-        Log.d("SessionDetailsActivity", "=== ACTIVITY CREATED ===");
-        Log.d("SessionDetailsActivity", "Intent extras: " + getIntent().getExtras());
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -83,21 +73,12 @@ public class SessionDetailsActivity extends AppCompatActivity {
         sessionEndTime = intent.getLongExtra("SESSION_END_TIME", 0);
         classStartTime = intent.getStringExtra("CLASS_START_TIME");
 
-        Log.d(TAG, "=== SessionDetailsActivity Started ===");
-        Log.d(TAG, "classId: " + classId);
-        Log.d(TAG, "sessionId: " + sessionId);
-        Log.d(TAG, "sessionStartTime: " + sessionStartTime);
-        Log.d(TAG, "sessionEndTime: " + sessionEndTime);
-        Log.d(TAG, "classStartTime: " + classStartTime);
-
-        // Validate data
         if (classId == null || sessionId == null) {
             Toast.makeText(this, "Error: Invalid session data", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Initialize drawer
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
 
@@ -110,35 +91,28 @@ public class SessionDetailsActivity extends AppCompatActivity {
         loadUserInfoInDrawer();
         setupBackPressHandler();
 
-        // Initialize stats views with NULL CHECKS
         statsCard = findViewById(R.id.attendanceStatsCard);
         if (statsCard != null) {
             totalStudentsCount = statsCard.findViewById(R.id.totalStudentsCount);
             presentCount = statsCard.findViewById(R.id.presentCount);
             lateCount = statsCard.findViewById(R.id.lateCount);
             absentCount = statsCard.findViewById(R.id.absentCount);
-        } else {
-            Log.e(TAG, "ERROR: statsCard is NULL - cannot initialize stats views");
         }
 
-        // Initialize student list views
         studentsRecyclerView = findViewById(R.id.studentsRecyclerView);
         studentSearchBar = findViewById(R.id.studentSearchBar);
         clearSearchButton = findViewById(R.id.clearSearchButton);
         studentsAttendedHeader = findViewById(R.id.studentsAttendedHeader);
 
-        // Setup back button
         View backButton = findViewById(R.id.backButton);
         if (backButton != null) {
             backButton.setOnClickListener(v -> finish());
         }
 
-        // Setup student list
         setupStudentListRecyclerView();
         setupStudentSearch();
         setupSwipeToDelete();
 
-        // Load session data
         loadSessionAttendanceData();
     }
 
@@ -317,7 +291,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
         }
 
         studentAdapter.setStudents(new ArrayList<>(filteredStudentList));
-        Log.d(TAG, "Search for '" + searchQuery + "' returned " + filteredStudentList.size() + " results");
     }
 
     private void setupSwipeToDelete() {
@@ -386,13 +359,10 @@ public class SessionDetailsActivity extends AppCompatActivity {
 
     private void loadSessionAttendanceData() {
         if (classId == null || classId.isEmpty() || sessionId == null || sessionId.isEmpty()) {
-            Log.e(TAG, "Invalid classId or sessionId - cannot load data");
             Toast.makeText(this, "Error: Invalid session data", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-
-        Log.d(TAG, "🔄 Starting to load attendance data for session: " + sessionId);
 
         db.collection("allClasses")
                 .document(classId)
@@ -401,15 +371,12 @@ public class SessionDetailsActivity extends AppCompatActivity {
                 .collection("attendanceRecords")
                 .get()
                 .addOnSuccessListener(attendanceSnapshot -> {
-                    Log.d(TAG, "✅ Found attendance records: " + attendanceSnapshot.size());
-
                     studentList.clear();
                     final int[] loadedCount = {0};
                     final int totalRecords = attendanceSnapshot.size();
 
                     if (totalRecords == 0) {
-                        Log.d(TAG, "⚠ No students in this session");
-                        onAllStudentsLoaded();  // FIX #1: Call this even if totalRecords = 0
+                        onAllStudentsLoaded();
                         return;
                     }
 
@@ -418,9 +385,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
                         Long timestamp = doc.getLong("timestamp");
                         Boolean marked = doc.getBoolean("marked");
 
-                        Log.d(TAG, "Processing record - studentId: " + studentId + ", marked: " + marked + ", timestamp: " + timestamp);
-
-                        // FIX #3: Better logic - always increment, only add to list if marked
                         if (marked != null && marked && timestamp != null) {
                             db.collection("users")
                                     .document(studentId)
@@ -430,8 +394,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
                                             String firstName = userDoc.getString("firstName");
                                             String lastName = userDoc.getString("lastName");
                                             String schoolEmail = userDoc.getString("schoolEmail");
-
-                                            Log.d(TAG, "✓ Found user: " + firstName + " " + lastName);
 
                                             StudentAttendanceModel student = new StudentAttendanceModel(
                                                     studentId,
@@ -446,29 +408,22 @@ public class SessionDetailsActivity extends AppCompatActivity {
                                             student.setTimestamp(timestamp);
 
                                             studentList.add(student);
-                                            Log.d(TAG, "Added student to list - Status: " + status);
-                                        } else {
-                                            Log.w(TAG, "User document not found for ID: " + studentId);
                                         }
 
                                         loadedCount[0]++;
                                         checkIfAllLoaded(loadedCount[0], totalRecords);
                                     })
                                     .addOnFailureListener(e -> {
-                                        Log.e(TAG, "Error loading user details for: " + studentId, e);
                                         loadedCount[0]++;
                                         checkIfAllLoaded(loadedCount[0], totalRecords);
                                     });
                         } else {
-                            // Still increment even if record doesn't meet criteria
                             loadedCount[0]++;
-                            Log.d(TAG, "Skipping record for " + studentId + " (marked=" + marked + ", timestamp=" + timestamp + ")");
                             checkIfAllLoaded(loadedCount[0], totalRecords);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "❌ Error loading attendance records", e);
                     Toast.makeText(this, "Error: Failed to load attendance data - " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
@@ -480,15 +435,12 @@ public class SessionDetailsActivity extends AppCompatActivity {
     }
 
     private void onAllStudentsLoaded() {
-        Log.d(TAG, "=== All students loaded ===");
-        Log.d(TAG, "Total students: " + studentList.size());
-
         sortStudentsByLastName();
         filteredStudentList.clear();
         filteredStudentList.addAll(studentList);
         studentSearchBar.setText("");
         studentAdapter.setStudents(new ArrayList<>(studentList));
-        calculateAndUpdateStats();  // ← CRITICAL - Updates stats display
+        calculateAndUpdateStats();
         updateUI();
     }
 
@@ -506,14 +458,11 @@ public class SessionDetailsActivity extends AppCompatActivity {
 
             return lastNameComparison;
         });
-
-        Log.d(TAG, "Students sorted alphabetically");
     }
 
     private void calculateAndUpdateStats() {
         if (totalStudentsCount == null || presentCount == null ||
                 lateCount == null || absentCount == null) {
-            Log.e(TAG, "ERROR: Stats views not initialized");
             return;
         }
 
@@ -534,7 +483,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
             }
         }
 
-        // Update TextViews
         totalStudentsCount.setText(String.valueOf(total));
         presentCount.setText(String.valueOf(present));
         lateCount.setText(String.valueOf(late));
@@ -571,7 +519,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "Error parsing time", e);
             return "Present";
         }
     }
@@ -582,8 +529,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
             return;
         }
 
-        Log.d(TAG, "Removing student from session: " + student.getFullName());
-
         db.collection("allClasses")
                 .document(classId)
                 .collection("recentSessions")
@@ -592,7 +537,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
                 .document(student.getStudentId())
                 .delete()
                 .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "✓ Student removed from session");
                     studentAdapter.removeStudent(position);
                     studentList.remove(student);
                     calculateAndUpdateStats();
@@ -600,64 +544,37 @@ public class SessionDetailsActivity extends AppCompatActivity {
                     Toast.makeText(this, "Student removed from session", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to remove student from session", e);
                     Toast.makeText(this, "Failed to remove student", Toast.LENGTH_SHORT).show();
                     studentAdapter.notifyItemChanged(position);
                 });
     }
 
     private void updateUI() {
-        // FIX: ALWAYS show stats card and header, regardless of student count
-        // The stats will show 0 values if no students marked attendance
-
-        Log.d(TAG, "updateUI() called - studentCount: " + studentList.size());
-
-        // ALWAYS show stats card
         if (statsCard != null) {
             statsCard.setVisibility(View.VISIBLE);
-            Log.d(TAG, "Stats card visibility: VISIBLE");
         }
 
-        // ALWAYS show header
         if (studentsAttendedHeader != null) {
             studentsAttendedHeader.setVisibility(View.VISIBLE);
-            Log.d(TAG, "Students attended header visibility: VISIBLE");
         }
 
-        // ALWAYS show search bar container
         View searchBarContainer = findViewById(R.id.searchBarContainer);
         if (searchBarContainer != null) {
             searchBarContainer.setVisibility(View.VISIBLE);
-            Log.d(TAG, "Search bar container visibility: VISIBLE");
         }
 
-        // Show/hide recycler view based on whether students exist
         boolean hasStudents = !studentList.isEmpty();
         if (studentsRecyclerView != null) {
             studentsRecyclerView.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
-            Log.d(TAG, "Students recycler view visibility: " + (hasStudents ? "VISIBLE" : "GONE"));
         }
     }
 
     private void debugAttendanceRecords() {
-        Log.d(TAG, "");
-        Log.d(TAG, "╔═══════════════════════════════════════╗");
-        Log.d(TAG, "║   DEBUGGING ATTENDANCE RECORDS        ║");
-        Log.d(TAG, "╚═══════════════════════════════════════╝");
-
-        // Check class-level records BEFORE clearing
         db.collection("allClasses")
                 .document(classId)
                 .collection("attendanceRecords")
                 .get()
                 .addOnSuccessListener(classSnapshot -> {
-                    Log.d(TAG, "📊 CLASS-LEVEL records: " + classSnapshot.size());
-                    for (var doc : classSnapshot.getDocuments()) {
-                        Log.d(TAG, "  - " + doc.getId() + ": marked=" + doc.getBoolean("marked") +
-                                ", timestamp=" + doc.getLong("timestamp"));
-                    }
-
-                    // Get the most recent session
                     db.collection("allClasses")
                             .document(classId)
                             .collection("recentSessions")
@@ -666,35 +583,17 @@ public class SessionDetailsActivity extends AppCompatActivity {
                             .get()
                             .addOnSuccessListener(sessionSnapshot -> {
                                 if (sessionSnapshot.isEmpty()) {
-                                    Log.e(TAG, "❌ No session found!");
                                     return;
                                 }
 
                                 String sessionId = sessionSnapshot.getDocuments().get(0).getString("sessionId");
-                                Log.d(TAG, "🔍 Checking SESSION records for: " + sessionId);
 
                                 db.collection("allClasses")
                                         .document(classId)
                                         .collection("recentSessions")
                                         .document(sessionId)
                                         .collection("attendanceRecords")
-                                        .get()
-                                        .addOnSuccessListener(recordSnapshot -> {
-                                            Log.d(TAG, "📋 SESSION-LEVEL records: " + recordSnapshot.size());
-                                            for (var doc : recordSnapshot.getDocuments()) {
-                                                Log.d(TAG, "  - " + doc.getId() + ": marked=" + doc.getBoolean("marked") +
-                                                        ", timestamp=" + doc.getLong("timestamp"));
-                                            }
-
-                                            Log.d(TAG, "");
-                                            if (recordSnapshot.size() == classSnapshot.size()) {
-                                                Log.d(TAG, "✅ SUCCESS: All records copied!");
-                                            } else {
-                                                Log.e(TAG, "❌ MISMATCH: " + classSnapshot.size() + " class records, " +
-                                                        recordSnapshot.size() + " session records");
-                                            }
-                                            Log.d(TAG, "");
-                                        });
+                                        .get();
                             });
                 });
     }

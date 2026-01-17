@@ -11,7 +11,6 @@ import androidx.appcompat.widget.AppCompatButton;
 
 public class RemoveStudentConfirmationDialog extends Dialog {
 
-    private static final String TAG = "RemoveStudentDialog";
     private final Runnable onConfirm;
     private final Runnable onCancel;
     private AppCompatButton removeButton;

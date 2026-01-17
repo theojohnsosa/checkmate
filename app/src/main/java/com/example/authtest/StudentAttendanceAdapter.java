@@ -5,11 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,13 +15,12 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
 
     private List<StudentAttendanceModel> studentList = new ArrayList<>();
     private OnStudentRemoveListener removeListener;
-    private String sessionId;  // FIX #4: Add session context awareness
+    private String sessionId;
 
     public interface OnStudentRemoveListener {
         void onStudentRemove(StudentAttendanceModel student, int position);
     }
 
-    // FIX #4: Updated constructor to accept sessionId
     public StudentAttendanceAdapter(String sessionId, OnStudentRemoveListener removeListener) {
         this.sessionId = sessionId;
         this.removeListener = removeListener;
@@ -71,7 +68,6 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         return null;
     }
 
-    // FIX #4: Add getter for session context verification
     public String getSessionId() {
         return sessionId;
     }

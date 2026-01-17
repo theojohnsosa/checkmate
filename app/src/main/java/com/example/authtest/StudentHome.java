@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,13 +18,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.authtest.databinding.ActivityStudentHomeBinding;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,22 +47,17 @@ public class StudentHome extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Initialize DrawerLayout and NavigationView using findViewById
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
 
-        // Hamburger icon click listener
         binding.hamburgerIcon.setOnClickListener(v -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
 
-        // Setup navigation drawer menu items
         setupNavigationDrawer();
 
-        // Load user info in drawer header
         loadUserInfoInDrawer();
 
-        // Setup back press handler
         setupBackPressHandler();
 
         setupRecyclerView();
@@ -100,7 +92,6 @@ public class StudentHome extends AppCompatActivity {
         binding.classesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.classesRecyclerView.setAdapter(classAdapter);
 
-        // Setup swipe to archive
         setupSwipeToArchiveClass();
 
         classAdapter.setClasses(classList);
@@ -192,7 +183,6 @@ public class StudentHome extends AppCompatActivity {
         String studentId = mAuth.getCurrentUser().getUid();
         String classId = classItem.getId();
 
-        // Update in student's enrolledClasses collection
         db.collection("users")
                 .document(studentId)
                 .collection("enrolledClasses")
@@ -223,7 +213,6 @@ public class StudentHome extends AppCompatActivity {
                             classAdapter.notifyItemChanged(position);
                         }
                     } catch (Exception ex) {
-                        // Ignore
                     }
                 });
     }
@@ -328,7 +317,6 @@ public class StudentHome extends AppCompatActivity {
             TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
             TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
 
-            // Fetch user details from Firestore
             db.collection("users")
                     .document(currentUser.getUid())
                     .get()
@@ -358,8 +346,6 @@ public class StudentHome extends AppCompatActivity {
         }
     }
 
-    // Replace the loadClasses() method in StudentHome.java
-
     private void loadClasses() {
         if (isLoadingClasses) {
             return;
@@ -371,7 +357,6 @@ public class StudentHome extends AppCompatActivity {
         classList.clear();
         classAdapter.notifyDataSetChanged();
 
-        // Load ALL classes first (don't filter by isArchived in query)
         db.collection("users")
                 .document(studentId)
                 .collection("enrolledClasses")
@@ -389,13 +374,9 @@ public class StudentHome extends AppCompatActivity {
                     for (var doc : querySnapshot) {
                         String classId = doc.getString("classId");
 
-                        // Get the isArchived field from the enrolledClasses document
                         Boolean isArchived = doc.getBoolean("isArchived");
 
-                        // Skip if archived (isArchived == true)
-                        // Include if not archived (isArchived == false or null/missing)
                         if (isArchived != null && isArchived) {
-                            // This class is archived, skip it
                             loadedClasses[0]++;
                             if (loadedClasses[0] == totalClasses) {
                                 classAdapter.notifyDataSetChanged();
