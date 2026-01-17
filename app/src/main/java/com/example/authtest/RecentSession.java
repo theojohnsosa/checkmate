@@ -8,13 +8,14 @@ import java.util.Locale;
 public class RecentSession implements Serializable {
     private String sessionId;
     private String classId;
-    private long sessionStartTime;  // Timestamp when session started
-    private long sessionEndTime;    // Timestamp when session ended
-    private String startTime;       // Formatted start time (e.g., "10:00 AM")
-    private String endTime;         // Formatted end time (e.g., "3:00 PM")
-    private String date;            // Formatted date (e.g., "01/09/2027")
+    private long sessionStartTime;
+    private long sessionEndTime;
+    private String startTime;
+    private String endTime;
+    private String date;
 
     public RecentSession() {
+
     }
 
     public RecentSession(String sessionId, String classId, long sessionStartTime, long sessionEndTime) {
