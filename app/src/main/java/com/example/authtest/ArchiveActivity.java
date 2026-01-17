@@ -192,14 +192,14 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         binding.archivedClassesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.archivedClassesRecyclerView.setAdapter(classAdapter);
         binding.archivedClassesRecyclerView.setNestedScrollingEnabled(false);
-
-        Log.d(TAG, "RecyclerView setup complete");
     }
 
     private void setupSwipeToUnarchive() {
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-            private final ColorDrawable background = new ColorDrawable(Color.parseColor("#2EAD00"));
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            private final ColorDrawable unarchiveBackground = new ColorDrawable(Color.parseColor("#2EAD00"));
+            private final ColorDrawable deleteBackground = new ColorDrawable(Color.parseColor("#C92A2A"));
             private final Drawable unarchiveIcon = ContextCompat.getDrawable(ArchiveActivity.this, R.drawable.ic_unarchive);
+            private final Drawable deleteIcon = ContextCompat.getDrawable(ArchiveActivity.this, android.R.drawable.ic_menu_delete);
 
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
@@ -212,10 +212,27 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 int position = viewHolder.getAdapterPosition();
                 ClassModel classItem = classAdapter.getClassAt(position);
 
-                if (classItem != null) {
-                    unarchiveClass(classItem, position);
-                } else {
+                if (classItem == null) {
                     classAdapter.notifyItemChanged(position);
+                    return;
+                }
+
+                if (direction == ItemTouchHelper.RIGHT) {
+                    Log.d(TAG, "Swiped RIGHT - unarchive class");
+                    unarchiveClass(classItem, position);
+                }
+                else if (direction == ItemTouchHelper.LEFT) {
+                    RemoveClassConfirmationDialog confirmDialog = new RemoveClassConfirmationDialog(
+                            ArchiveActivity.this,
+                            classItem.getClassName(),
+                            () -> {
+                                deleteClassFromArchive(classItem, position);
+                            },
+                            () -> {
+                                classAdapter.notifyItemChanged(position);
+                            }
+                    );
+                    confirmDialog.show();
                 }
             }
 
@@ -239,16 +256,39 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                         unarchiveIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
                     }
 
-                    background.setBounds(
+                    unarchiveBackground.setBounds(
                             itemView.getLeft(),
                             itemView.getTop(),
                             itemView.getLeft() + ((int) dX) + backgroundCornerOffset,
                             itemView.getBottom()
                     );
 
-                    background.draw(c);
+                    unarchiveBackground.draw(c);
                     if (unarchiveIcon != null) {
                         unarchiveIcon.draw(c);
+                    }
+                }
+                else if (dX < 0) {
+                    int iconMargin = (itemView.getHeight() - (deleteIcon != null ? deleteIcon.getIntrinsicHeight() : 0)) / 2;
+                    int iconTop = itemView.getTop() + (itemView.getHeight() - (deleteIcon != null ? deleteIcon.getIntrinsicHeight() : 0)) / 2;
+                    int iconBottom = iconTop + (deleteIcon != null ? deleteIcon.getIntrinsicHeight() : 0);
+                    int iconLeft = itemView.getRight() - iconMargin - (deleteIcon != null ? deleteIcon.getIntrinsicWidth() : 0);
+                    int iconRight = itemView.getRight() - iconMargin;
+
+                    if (deleteIcon != null) {
+                        deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                    }
+
+                    deleteBackground.setBounds(
+                            itemView.getRight() + ((int) dX) - backgroundCornerOffset,
+                            itemView.getTop(),
+                            itemView.getRight(),
+                            itemView.getBottom()
+                    );
+
+                    deleteBackground.draw(c);
+                    if (deleteIcon != null) {
+                        deleteIcon.draw(c);
                     }
                 }
             }
@@ -258,9 +298,120 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         itemTouchHelper.attachToRecyclerView(binding.archivedClassesRecyclerView);
     }
 
-    private void loadArchivedStudentClasses(String userId) {
-        Log.d(TAG, "Loading archived STUDENT classes");
+    private void deleteClassFromArchive(ClassModel classItem, int position) {
+        if (classItem == null || classItem.getId() == null) {
+            Toast.makeText(ArchiveActivity.this, "Error: Invalid class data", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        if (position < 0 || position >= archivedClasses.size()) {
+            Toast.makeText(ArchiveActivity.this, "Error: Invalid position", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = mAuth.getCurrentUser().getUid();
+        String classId = classItem.getId();
+
+        db.collection("users")
+                .document(userId)
+                .collection("classes")
+                .document(classId)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    db.collection("allClasses")
+                            .document(classId)
+                            .delete()
+                            .addOnSuccessListener(unused2 -> {
+                                removeStudentEnrollmentsFromArchive(classId, () -> {
+                                    try {
+                                        if (position >= 0 && position < archivedClasses.size()) {
+                                            archivedClasses.remove(position);
+                                            classAdapter.notifyItemRemoved(position);
+                                            classAdapter.notifyItemRangeChanged(position, archivedClasses.size());
+                                        } else {
+                                            loadArchivedClasses();
+                                            return;
+                                        }
+
+                                        if (archivedClasses.isEmpty()) {
+                                            showEmptyState();
+                                        }
+
+                                        Toast.makeText(ArchiveActivity.this, "Class deleted permanently", Toast.LENGTH_SHORT).show();
+                                    } catch (Exception e) {
+                                        loadArchivedClasses();
+                                    }
+                                });
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(ArchiveActivity.this, "Failed to delete class", Toast.LENGTH_SHORT).show();
+                                try {
+                                    if (position >= 0 && position < archivedClasses.size()) {
+                                        classAdapter.notifyItemChanged(position);
+                                    }
+                                } catch (Exception ex) {
+
+                                }
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ArchiveActivity.this, "Failed to delete class", Toast.LENGTH_SHORT).show();
+                    try {
+                        if (position >= 0 && position < archivedClasses.size()) {
+                            classAdapter.notifyItemChanged(position);
+                        }
+                    } catch (Exception ex) {
+
+                    }
+                });
+    }
+
+    private void removeStudentEnrollmentsFromArchive(String classId, Runnable onComplete) {
+        db.collection("allClasses")
+                .document(classId)
+                .get()
+                .addOnSuccessListener(classDoc -> {
+                    if (classDoc.exists()) {
+                        List<String> allowedEmails = (List<String>) classDoc.get("allowedStudentEmails");
+
+                        if (allowedEmails != null && !allowedEmails.isEmpty()) {
+                            final int[] completedCount = {0};
+                            final int totalEmails = allowedEmails.size();
+
+                            for (String email : allowedEmails) {
+                                db.collection("users")
+                                        .whereEqualTo("schoolEmail", email)
+                                        .limit(1)
+                                        .get()
+                                        .addOnCompleteListener(task -> {
+                                            if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                                                String studentId = task.getResult().getDocuments().get(0).getId();
+                                                db.collection("users")
+                                                        .document(studentId)
+                                                        .collection("enrolledClasses")
+                                                        .document(classId)
+                                                        .delete();
+                                            }
+
+                                            completedCount[0]++;
+                                            if (completedCount[0] == totalEmails) {
+                                                onComplete.run();
+                                            }
+                                        });
+                            }
+                        } else {
+                            onComplete.run();
+                        }
+                    } else {
+                        onComplete.run();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    onComplete.run();
+                });
+    }
+
+    private void loadArchivedStudentClasses(String userId) {
         db.collection("users")
                 .document(userId)
                 .collection("enrolledClasses")
@@ -269,27 +420,22 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     archivedClasses.clear();
 
-                    Log.d(TAG, "Query returned: " + queryDocumentSnapshots.size() + " documents");
-
                     final int totalClasses = queryDocumentSnapshots.size();
                     final int[] loadedClasses = {0};
 
                     if (totalClasses == 0) {
-                        Log.d(TAG, "No archived classes found");
                         classAdapter.setClasses(archivedClasses);
                         classAdapter.notifyDataSetChanged();
                         updateUI();
                         return;
                     }
 
-                    // Use a temporary list to avoid duplicates
                     List<ClassModel> tempClasses = new ArrayList<>();
 
                     for (var document : queryDocumentSnapshots) {
                         String classId = document.getString("classId");
 
                         if (classId != null) {
-                            // Load the actual class details from allClasses
                             db.collection("allClasses")
                                     .document(classId)
                                     .get()
@@ -299,41 +445,29 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                                             if (classModel != null) {
                                                 classModel.setId(classDoc.getId());
                                                 tempClasses.add(classModel);
-                                                Log.d(TAG, "  Added: " + classModel.getClassName() + " (ID: " + classDoc.getId() + ")");
                                             }
                                         }
 
                                         loadedClasses[0]++;
                                         if (loadedClasses[0] == totalClasses) {
-                                            // All classes loaded, update the main list once
                                             archivedClasses.clear();
                                             archivedClasses.addAll(tempClasses);
-
-                                            Log.d(TAG, "Total archived classes: " + archivedClasses.size());
-                                            Log.d(TAG, "Updating adapter with " + archivedClasses.size() + " classes");
 
                                             classAdapter.setClasses(archivedClasses);
                                             classAdapter.notifyDataSetChanged();
 
                                             updateUI();
-
-                                            Log.d(TAG, "=== LOAD COMPLETE ===");
                                         }
                                     })
                                     .addOnFailureListener(e -> {
-                                        Log.e(TAG, "Error loading class details for: " + classId, e);
-
                                         loadedClasses[0]++;
                                         if (loadedClasses[0] == totalClasses) {
-                                            // All classes processed (some may have failed)
                                             archivedClasses.clear();
                                             archivedClasses.addAll(tempClasses);
 
-                                            Log.d(TAG, "Total archived classes: " + archivedClasses.size());
                                             classAdapter.setClasses(archivedClasses);
                                             classAdapter.notifyDataSetChanged();
                                             updateUI();
-                                            Log.d(TAG, "=== LOAD COMPLETE ===");
                                         }
                                     });
                         } else {
@@ -344,13 +478,11 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                                 classAdapter.setClasses(archivedClasses);
                                 classAdapter.notifyDataSetChanged();
                                 updateUI();
-                                Log.d(TAG, "=== LOAD COMPLETE ===");
                             }
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading archived student classes: " + e.getMessage(), e);
                     Toast.makeText(ArchiveActivity.this, "Error loading archived classes", Toast.LENGTH_SHORT).show();
                     showEmptyState();
                 });
@@ -360,9 +492,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         String userId = mAuth.getCurrentUser().getUid();
         String classId = classItem.getId();
 
-        Log.d(TAG, "Unarchiving class: " + classItem.getClassName());
-
-        // Determine if user is teacher or student and update appropriate collection
         db.collection("users")
                 .document(userId)
                 .get()
@@ -378,29 +507,22 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error getting user type", e);
                     classAdapter.notifyItemChanged(position);
                     Toast.makeText(ArchiveActivity.this, "Failed to unarchive class", Toast.LENGTH_SHORT).show();
                 });
     }
 
     private void unarchiveTeacherClass(String teacherId, String classId, int position) {
-        // Update in teacher's classes collection
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
                 .document(classId)
                 .update("isArchived", false)
                 .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "✓ Updated teacher's classes");
-
-                    // Update in allClasses collection
                     db.collection("allClasses")
                             .document(classId)
                             .update("isArchived", false)
                             .addOnSuccessListener(unused2 -> {
-                                Log.d(TAG, "✓ Updated allClasses");
-
                                 archivedClasses.remove(position);
                                 classAdapter.notifyItemRemoved(position);
                                 classAdapter.notifyItemRangeChanged(position, archivedClasses.size());
@@ -409,28 +531,23 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                                 Toast.makeText(ArchiveActivity.this, "Class unarchived successfully", Toast.LENGTH_SHORT).show();
                             })
                             .addOnFailureListener(e -> {
-                                Log.e(TAG, "Failed to unarchive in allClasses", e);
                                 classAdapter.notifyItemChanged(position);
                                 Toast.makeText(ArchiveActivity.this, "Failed to unarchive class", Toast.LENGTH_SHORT).show();
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to unarchive in teacher's classes", e);
                     classAdapter.notifyItemChanged(position);
                     Toast.makeText(ArchiveActivity.this, "Failed to unarchive class", Toast.LENGTH_SHORT).show();
                 });
     }
 
     private void unarchiveStudentClass(String studentId, String classId, int position) {
-        // Update in student's enrolledClasses collection
         db.collection("users")
                 .document(studentId)
                 .collection("enrolledClasses")
                 .document(classId)
                 .update("isArchived", false)
                 .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "✓ Updated student's enrolledClasses");
-
                     archivedClasses.remove(position);
                     classAdapter.notifyItemRemoved(position);
                     classAdapter.notifyItemRangeChanged(position, archivedClasses.size());
@@ -439,7 +556,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                     Toast.makeText(ArchiveActivity.this, "Class unarchived successfully", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to unarchive student class", e);
                     classAdapter.notifyItemChanged(position);
                     Toast.makeText(ArchiveActivity.this, "Failed to unarchive class", Toast.LENGTH_SHORT).show();
                 });
@@ -448,7 +564,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
     private void loadArchivedClasses() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            Log.e(TAG, "User not authenticated");
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
             showEmptyState();
             return;
@@ -456,41 +571,30 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
 
         String userId = currentUser.getUid();
 
-        Log.d(TAG, "=== LOADING ARCHIVED CLASSES ===");
-        Log.d(TAG, "User ID: " + userId);
-
-        // First, determine if user is a teacher or student
         db.collection("users")
                 .document(userId)
                 .get()
                 .addOnSuccessListener(userDoc -> {
                     if (userDoc.exists()) {
                         String userType = userDoc.getString("userType");
-                        Log.d(TAG, "User type: " + userType);
 
-                        // Load from appropriate collection based on user type
                         if ("Teacher".equalsIgnoreCase(userType)) {
                             loadArchivedTeacherClasses(userId);
                         } else if ("Student".equalsIgnoreCase(userType)) {
                             loadArchivedStudentClasses(userId);
                         } else {
-                            Log.w(TAG, "Unknown user type: " + userType);
                             showEmptyState();
                         }
                     } else {
-                        Log.e(TAG, "User document not found");
                         showEmptyState();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error getting user type: " + e.getMessage());
                     showEmptyState();
                 });
     }
 
     private void loadArchivedTeacherClasses(String userId) {
-        Log.d(TAG, "Loading archived TEACHER classes");
-
         db.collection("users")
                 .document(userId)
                 .collection("classes")
@@ -499,27 +603,18 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     archivedClasses.clear();
 
-                    Log.d(TAG, "Query returned: " + queryDocumentSnapshots.size() + " documents");
-
                     for (var document : queryDocumentSnapshots) {
                         ClassModel classModel = document.toObject(ClassModel.class);
                         classModel.setId(document.getId());
                         archivedClasses.add(classModel);
-                        Log.d(TAG, "  Added: " + classModel.getClassName() + " (ID: " + document.getId() + ")");
                     }
-
-                    Log.d(TAG, "Total archived classes: " + archivedClasses.size());
-                    Log.d(TAG, "Updating adapter with " + archivedClasses.size() + " classes");
 
                     classAdapter.setClasses(archivedClasses);
                     classAdapter.notifyDataSetChanged();
 
                     updateUI();
-
-                    Log.d(TAG, "=== LOAD COMPLETE ===");
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading archived teacher classes: " + e.getMessage(), e);
                     Toast.makeText(ArchiveActivity.this, "Error loading archived classes", Toast.LENGTH_SHORT).show();
                     showEmptyState();
                 });
@@ -527,7 +622,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
 
     private void updateUI() {
         boolean isEmpty = archivedClasses.isEmpty();
-        Log.d(TAG, "updateUI() - isEmpty: " + isEmpty + ", classCount: " + archivedClasses.size());
 
         binding.emptyStateLayout.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         binding.archivedClassesRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
