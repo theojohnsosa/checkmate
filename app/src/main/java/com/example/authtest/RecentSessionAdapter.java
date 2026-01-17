@@ -1,21 +1,17 @@
 package com.example.authtest;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdapter.SessionViewHolder> {
 
-    private static final String TAG = "RecentSessionAdapter";
     private List<RecentSession> sessionList = new ArrayList<>();
     private OnSessionClickListener clickListener;
     private OnSessionRemoveListener removeListener;
