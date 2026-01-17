@@ -10,18 +10,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,10 +26,8 @@ public class CreateClass extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-
     private EditText classNameInput, subjectCodeInput, roomInput;
     private ToggleButton monToggle, tueToggle, wedToggle, thuToggle, friToggle, satToggle;
     private AutoCompleteTextView startTimeInput, endTimeInput;
@@ -57,7 +52,6 @@ public class CreateClass extends AppCompatActivity {
         setupNavigationDrawer();
         setupBackPressHandler();
         loadUserInfoInDrawer();
-
         bindViews();
         setupTimeDropdowns();
 
@@ -91,7 +85,6 @@ public class CreateClass extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
     }
 
-    /* ---------------- Drawer ---------------- */
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -192,7 +185,6 @@ public class CreateClass extends AppCompatActivity {
             TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
             TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
 
-            // Fetch user details from Firestore
             db.collection("users")
                     .document(currentUser.getUid())
                     .get()
@@ -221,8 +213,6 @@ public class CreateClass extends AppCompatActivity {
             userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
         }
     }
-
-    /* ---------------- Logic ---------------- */
 
     private ClassModel createClassModel() {
         FirebaseUser user = mAuth.getCurrentUser();
@@ -253,11 +243,9 @@ public class CreateClass extends AppCompatActivity {
         String[] parts = displayName.trim().split("\\s+");
 
         if (parts.length >= 2) {
-            // First name + last name only
             return parts[0] + " " + parts[parts.length - 1];
         }
 
-        // Single-word name (still better than email)
         return parts[0];
     }
 
