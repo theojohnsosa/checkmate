@@ -174,9 +174,14 @@ public class ClassInformation extends AppCompatActivity {
         }
 
         recentSessionAdapter = new RecentSessionAdapter();
-        recentSessionsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        recentSessionsRecyclerView.setLayoutManager(layoutManager);
         recentSessionsRecyclerView.setAdapter(recentSessionAdapter);
-        recentSessionsRecyclerView.setNestedScrollingEnabled(false);
+        recentSessionsRecyclerView.setNestedScrollingEnabled(true);
+        recentSessionsRecyclerView.setHasFixedSize(false);
 
         recentSessionAdapter.setClickListener(session -> {
             navigateToSessionDetails(session);
@@ -433,8 +438,15 @@ public class ClassInformation extends AppCompatActivity {
 
     private void loadRecentSessions() {
         if (classId == null || classId.isEmpty()) {
+            Log.e(TAG, "Cannot load sessions - classId is null");
             return;
         }
+
+        Log.d(TAG, "");
+        Log.d(TAG, "╔════════════════════════════════════════╗");
+        Log.d(TAG, "║    LOADING RECENT SESSIONS             ║");
+        Log.d(TAG, "╚════════════════════════════════════════╝");
+        Log.d(TAG, "Class ID: " + classId);
 
         db.collection("allClasses")
                 .document(classId)
@@ -443,8 +455,18 @@ public class ClassInformation extends AppCompatActivity {
                 .limit(10)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    recentSessionList.clear();
+                    Log.d(TAG, "📦 QuerySnapshot size: " + querySnapshot.size() + " documents");
 
+                    // DEBUG: Show what's in Firestore BEFORE clearing
+                    Log.d(TAG, "Sessions in Firestore:");
+                    for (var doc : querySnapshot.getDocuments()) {
+                        Log.d(TAG, "  - " + doc.getId() + " (timestamp: " + doc.getLong("timestamp") + ")");
+                    }
+
+                    recentSessionList.clear(); // ✅ Clear old data
+                    Log.d(TAG, "Cleared recentSessionList. Size now: " + recentSessionList.size());
+
+                    // Add each session
                     for (var doc : querySnapshot.getDocuments()) {
                         long startTime = doc.getLong("sessionStartTime") != null ? doc.getLong("sessionStartTime") : 0;
                         long endTime = doc.getLong("sessionEndTime") != null ? doc.getLong("sessionEndTime") : 0;
@@ -452,13 +474,33 @@ public class ClassInformation extends AppCompatActivity {
 
                         RecentSession session = new RecentSession(sessionId, classId, startTime, endTime);
                         recentSessionList.add(session);
+
+                        Log.d(TAG, "✓ Added session: " + session.getDate() + " (ID: " + sessionId + ")");
                     }
 
-                    if (recentSessionAdapter != null) {
-                        recentSessionAdapter.setSessions(new ArrayList<>(recentSessionList));
+                    Log.d(TAG, "📊 Total sessions in list: " + recentSessionList.size());
+
+                    // DEBUG: Check if adapter exists and has correct data
+                    if (recentSessionAdapter == null) {
+                        Log.e(TAG, "❌ ERROR: recentSessionAdapter is NULL!");
+                        return;
                     }
+
+                    Log.d(TAG, "Calling adapter.setSessions() with " + recentSessionList.size() + " sessions");
+
+                    // ✅ CRITICAL: Pass a NEW ArrayList to force update
+                    List<RecentSession> adapterList = new ArrayList<>(recentSessionList);
+                    Log.d(TAG, "Created new ArrayList for adapter: size = " + adapterList.size());
+
+                    recentSessionAdapter.setSessions(adapterList);
+                    Log.d(TAG, "✓ Adapter updated");
 
                     updateRecentSessionsVisibility();
+
+                    Log.d(TAG, "");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "❌ Error loading recent sessions", e);
                 });
     }
 
@@ -747,9 +789,16 @@ public class ClassInformation extends AppCompatActivity {
 
     private void setupStudentListRecyclerView() {
         studentAdapter = new StudentAttendanceAdapter(classId, this::removeStudentFromClass);
-        studentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        studentsRecyclerView.setLayoutManager(layoutManager);
         studentsRecyclerView.setAdapter(studentAdapter);
-        studentsRecyclerView.setNestedScrollingEnabled(false);
+
+        studentsRecyclerView.setNestedScrollingEnabled(true);
+        studentsRecyclerView.setHasFixedSize(false);
+
         setupSwipeToDelete();
     }
 

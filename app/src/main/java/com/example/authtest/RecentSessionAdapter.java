@@ -1,5 +1,6 @@
 package com.example.authtest;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import java.util.List;
 
 public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdapter.SessionViewHolder> {
 
+    private static final String TAG = "RecentSessionAdapter";
     private List<RecentSession> sessionList = new ArrayList<>();
     private OnSessionClickListener clickListener;
     private OnSessionRemoveListener removeListener;
@@ -57,26 +59,17 @@ public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdap
     }
 
     public void setSessions(List<RecentSession> sessions) {
-        if (sessions == null) {
-            this.sessionList = new ArrayList<>();
+        if (sessions == null || sessions.isEmpty()) {
+            this.sessionList.clear();
         } else {
-            this.sessionList = sessions;
+            this.sessionList = new ArrayList<>(sessions);
+
+            for (int i = 0; i < this.sessionList.size(); i++) {
+                RecentSession session = this.sessionList.get(i);
+            }
         }
+
         notifyDataSetChanged();
-    }
-
-    public void addSession(RecentSession session) {
-        if (session != null) {
-            this.sessionList.add(0, session);
-            notifyItemInserted(0);
-        }
-    }
-
-    public void removeSession(int position) {
-        if (position >= 0 && position < sessionList.size()) {
-            sessionList.remove(position);
-            notifyItemRemoved(position);
-        }
     }
 
     public RecentSession getSessionAt(int position) {
@@ -114,7 +107,7 @@ public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdap
 
             itemView.setOnClickListener(v -> {
                 if (clickListener != null) {
-                    clickListener.onSessionClick(session);  // ← Passes session to callback
+                    clickListener.onSessionClick(session);
                 }
             });
         }

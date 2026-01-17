@@ -59,7 +59,7 @@
         </LinearLayout>
 
         <!-- Scrollable Main Content -->
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true">
@@ -89,7 +89,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp" />
 
-                <!-- Recent Sessions Section - NEW -->
+                <!-- Recent Sessions Section -->
                 <TextView
                     android:id="@+id/recentSessionsHeader"
                     android:layout_width="wrap_content"
@@ -102,11 +102,12 @@
                     android:layout_marginBottom="16dp"
                     android:visibility="gone" />
 
+                <!-- ✅ FIXED: Use proper height and enable nested scrolling -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recentSessionsRecyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
+                    android:nestedScrollingEnabled="true"
                     android:layout_marginBottom="20dp"
                     android:visibility="gone" />
 
@@ -194,16 +195,17 @@
 
                 </LinearLayout>
 
+                <!-- ✅ FIXED: Enable nested scrolling for students RecyclerView too -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/studentsRecyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
+                    android:nestedScrollingEnabled="true"
                     android:visibility="gone" />
 
             </LinearLayout>
 
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
