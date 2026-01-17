@@ -11,7 +11,6 @@ import androidx.appcompat.widget.AppCompatButton;
 
 public class ArchiveClassConfirmationDialog extends Dialog {
 
-    private static final String TAG = "ArchiveClassDialog";
     private final Runnable onConfirm;
     private final Runnable onCancel;
     private AppCompatButton archiveButton;
@@ -45,14 +44,14 @@ public class ArchiveClassConfirmationDialog extends Dialog {
 
         messageText.setText("Are you sure you want to archive \"" + className + "\"?");
 
-        cancelButton.setOnClickListener(v -> {
+        cancelButton.setOnClickListener(view -> {
             dismiss();
             if (onCancel != null) {
                 onCancel.run();
             }
         });
 
-        archiveButton.setOnClickListener(v -> {
+        archiveButton.setOnClickListener(view -> {
             dismiss();
             if (onConfirm != null) {
                 onConfirm.run();
