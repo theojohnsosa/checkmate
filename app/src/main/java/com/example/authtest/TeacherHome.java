@@ -102,14 +102,19 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                 return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                startActivity(new Intent(TeacherHome.this, ArchiveActivity.class));
+                Toast.makeText(this, "Archive feature coming soon", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 Toast.makeText(this, "Settings feature coming soon", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (itemId == R.id.menu_logout) {
-                logout();
+                LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,
+                        () -> {
+                            drawerLayout.closeDrawer(GravityCompat.START);
+                        }
+                );
+                confirmDialog.show();
                 return true;
             }
 

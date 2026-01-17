@@ -96,7 +96,12 @@ public class AddStudentsForm extends AppCompatActivity {
                 Toast.makeText(this, "Settings feature coming soon", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (itemId == R.id.menu_logout) {
-                logout();
+                LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,
+                        () -> {
+                            drawerLayout.closeDrawer(GravityCompat.START);
+                        }
+                );
+                confirmDialog.show();
                 return true;
             }
 

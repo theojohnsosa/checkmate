@@ -1,0 +1,61 @@
+package com.example.authtest;
+
+import android.app.Dialog;
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.TextView;
+import androidx.appcompat.widget.AppCompatButton;
+
+public class LogoutConfirmationDialog extends Dialog {
+
+    private final Runnable onConfirm;
+    private final Runnable onCancel;
+    private AppCompatButton logoutButton;
+
+    public LogoutConfirmationDialog(
+            Context context,
+            Runnable onConfirm,
+            Runnable onCancel
+    ) {
+        super(context);
+        this.onConfirm = onConfirm;
+        this.onCancel = onCancel;
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.dialog_logout);
+
+        setCancelable(false);
+
+        Window window = getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setLayout(
+                    (int) (context.getResources().getDisplayMetrics().widthPixels * 0.92),
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+        }
+
+        TextView messageText = findViewById(R.id.logoutConfirmationMessage);
+        logoutButton = findViewById(R.id.logoutButton);
+        AppCompatButton cancelButton = findViewById(R.id.cancelButton);
+
+        messageText.setText("Are you sure you want to logout of your account?");
+
+        cancelButton.setOnClickListener(v -> {
+            dismiss();
+            if (onCancel != null) {
+                onCancel.run();
+            }
+        });
+
+        logoutButton.setOnClickListener(v -> {
+            dismiss();
+            if (onConfirm != null) {
+                onConfirm.run();
+            }
+        });
+    }
+}

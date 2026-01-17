@@ -597,12 +597,25 @@ public class ClassInformation extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show();
                 return true;
+            } else if (itemId == R.id.menu_streak) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_archive) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Archive feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 Toast.makeText(this, "Settings feature coming soon", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (itemId == R.id.menu_logout) {
-                logout();
+                LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,
+                        () -> {
+                            drawerLayout.closeDrawer(GravityCompat.START);
+                        }
+                );
+                confirmDialog.show();
                 return true;
             }
 
