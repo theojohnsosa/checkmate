@@ -63,8 +63,13 @@ public class AddStudentsForm extends AppCompatActivity {
         addStudentButton = findViewById(R.id.addStudentToClassButton);
         studentEmailInput = findViewById(R.id.studentEmailInput);
 
-        backButton.setOnClickListener(v -> finish());
-        addStudentButton.setOnClickListener(v -> addStudentToClass());
+        backButton.setOnClickListener(view -> {
+            finish();
+        });
+
+        addStudentButton.setOnClickListener(view -> {
+            addStudentToClass();
+        });
     }
 
     private void setupNavigationDrawer() {
@@ -215,7 +220,7 @@ public class AddStudentsForm extends AppCompatActivity {
         }
 
         addStudentButton.setEnabled(false);
-        addStudentButton.setText("Checking...");
+        addStudentButton.setText("Adding Student...");
 
         String teacherId = mAuth.getCurrentUser().getUid();
         checkIfStudentExists(studentEmail, teacherId);
@@ -250,24 +255,22 @@ public class AddStudentsForm extends AppCompatActivity {
     }
 
     private void addStudentToClassFirebase(String studentEmail, String teacherId) {
-        addStudentButton.setText("Adding...");
+        addStudentButton.setText("Adding Student...");
 
-        // Update user's classes collection
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
                 .document(classId)
                 .update(
                         "allowedStudentEmails", FieldValue.arrayUnion(studentEmail),
-                        "students", FieldValue.increment(1)  // ← ADD THIS LINE
+                        "students", FieldValue.increment(1)
                 )
                 .addOnSuccessListener(unused -> {
-                    // Update allClasses collection
                     db.collection("allClasses")
                             .document(classId)
                             .update(
                                     "allowedStudentEmails", FieldValue.arrayUnion(studentEmail),
-                                    "students", FieldValue.increment(1)  // ← ADD THIS LINE
+                                    "students", FieldValue.increment(1)
                             )
                             .addOnSuccessListener(unused2 -> {
                                 Toast.makeText(this, "Student added successfully!", Toast.LENGTH_SHORT).show();
