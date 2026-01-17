@@ -8,13 +8,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.widget.AppCompatButton;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.HashMap;
 import java.util.List;
 
@@ -151,7 +148,6 @@ public class JoinClassDialog extends Dialog {
                 .get()
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
-                        // Student has already enrolled in this class
                         Toast.makeText(
                                 context,
                                 "You have already joined this class.",
@@ -159,7 +155,6 @@ public class JoinClassDialog extends Dialog {
                         ).show();
                         joinButton.setEnabled(true);
                     } else {
-                        // Student hasn't enrolled yet, proceed with enrollment
                         addEnrolledClass(db, studentId, classId, classModel, context);
                     }
                 })
