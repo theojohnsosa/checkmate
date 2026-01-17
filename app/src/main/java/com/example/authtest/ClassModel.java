@@ -19,7 +19,7 @@ public class ClassModel implements Serializable {
     private List<String> allowedStudentEmails;
     private boolean isAttendanceActive = false;
     private String teacherId;
-    private boolean isArchived = false;  // NEW FIELD
+    private boolean isArchived = false;
 
     public ClassModel() {
         this.allowedStudentEmails = new ArrayList<>();
