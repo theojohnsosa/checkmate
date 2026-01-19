@@ -18,11 +18,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class AttendanceHistoryActivity extends AppCompatActivity {
 
@@ -50,7 +47,7 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
 
         ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
-        hamburgerIcon.setOnClickListener(v -> {
+        hamburgerIcon.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
 
@@ -60,7 +57,9 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         setupRecyclerView();
         checkUserTypeAndLoadHistory();
 
-        findViewById(R.id.backButton).setOnClickListener(v -> finish());
+        findViewById(R.id.backButton).setOnClickListener(view -> {
+            finish();
+        });
     }
 
     private void setupRecyclerView() {

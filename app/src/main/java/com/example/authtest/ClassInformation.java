@@ -1387,6 +1387,11 @@ public class ClassInformation extends AppCompatActivity {
             return;
         }
 
+        if (!isCurrentTimeWithinClassTime()) {
+            Toast.makeText(this, "Attendance can only be marked during class time", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String studentId = mAuth.getCurrentUser().getUid();
         long timestamp = System.currentTimeMillis();
 
@@ -1409,6 +1414,41 @@ public class ClassInformation extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to mark attendance: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private boolean isCurrentTimeWithinClassTime() {
+        if (classStartTime == null || classStartTime.isEmpty()) {
+            return false;
+        }
+
+        try {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd h:mm a", Locale.getDefault());
+
+            Date now = new Date();
+            String todayDate = dateFormat.format(now);
+
+            String startTimeString = todayDate + " " + classStartTime;
+            Date classStartDateTime = fullFormat.parse(startTimeString);
+
+            if (classStartDateTime == null) {
+                return false;
+            }
+
+            long currentTimeMs = System.currentTimeMillis();
+            long classStartTimeMs = classStartDateTime.getTime();
+
+            if (currentTimeMs >= classStartTimeMs) {
+                return true;
+            }
+
+            return false;
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private String formatTimestamp(long timestamp) {
