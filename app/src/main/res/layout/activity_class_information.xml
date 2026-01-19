@@ -146,11 +146,10 @@
                     android:layout_marginBottom="16dp"
                     android:visibility="gone" />
 
-                <!-- Search Bar Container -->
                 <LinearLayout
                     android:id="@+id/searchBarContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="60dp"
                     android:orientation="horizontal"
                     android:layout_marginBottom="16dp"
                     android:paddingHorizontal="4dp"
@@ -195,7 +194,6 @@
 
                 </LinearLayout>
 
-                <!-- ✅ FIXED: Enable nested scrolling for students RecyclerView too -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/studentsRecyclerView"
                     android:layout_width="match_parent"

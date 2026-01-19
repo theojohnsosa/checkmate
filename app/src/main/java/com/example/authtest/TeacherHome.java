@@ -7,6 +7,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
@@ -36,6 +38,9 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private List<ClassModel> classList = new ArrayList<>();
+    private List<ClassModel> filteredClasses = new ArrayList<>();
+    private EditText classSearchBar;
+    private ImageView clearSearchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,9 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
 
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
+
+        classSearchBar = findViewById(R.id.classSearchBar);
+        clearSearchButton = findViewById(R.id.clearSearchButton);
 
         binding.classesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         classAdapter = new ClassAdapter(this);
@@ -66,6 +74,7 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         setupNavigationDrawer();
         loadUserInfoInDrawer();
         setupBackPressHandler();
+        setupClassSearch();
 
         loadClasses();
     }
@@ -215,6 +224,57 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         startActivity(intent);
     }
 
+    private void setupClassSearch() {
+        classSearchBar.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String searchQuery = s.toString().trim().toLowerCase();
+                filterClasses(searchQuery);
+
+                if (searchQuery.isEmpty()) {
+                    clearSearchButton.setVisibility(View.GONE);
+                } else {
+                    clearSearchButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        clearSearchButton.setOnClickListener(v -> {
+            classSearchBar.setText("");
+            filteredClasses.clear();
+            classAdapter.setClasses(new ArrayList<>(classList));
+        });
+    }
+
+    private void filterClasses(String searchQuery) {
+        filteredClasses.clear();
+
+        if (searchQuery.isEmpty()) {
+            classAdapter.setClasses(new ArrayList<>(classList));
+            return;
+        }
+
+        for (ClassModel classModel : classList) {
+            String className = classModel.getClassName() != null ? classModel.getClassName().toLowerCase() : "";
+            String classCode = classModel.getClassCode() != null ? classModel.getClassCode().toLowerCase() : "";
+            String subjectCode = classModel.getSubjectCode() != null ? classModel.getSubjectCode().toLowerCase() : "";
+
+            if (className.contains(searchQuery) ||
+                    classCode.contains(searchQuery) ||
+                    subjectCode.contains(searchQuery)) {
+                filteredClasses.add(classModel);
+            }
+        }
+
+        classAdapter.setClasses(new ArrayList<>(filteredClasses));
+    }
+
     private void loadClasses() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -261,11 +321,13 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     private void showEmptyState() {
         binding.emptyStateLayout.setVisibility(View.VISIBLE);
         binding.classesRecyclerView.setVisibility(View.GONE);
+        binding.searchBarContainer.setVisibility(View.GONE);
     }
 
     private void showClasses(List<ClassModel> classes) {
         binding.emptyStateLayout.setVisibility(View.GONE);
         binding.classesRecyclerView.setVisibility(View.VISIBLE);
+        binding.searchBarContainer.setVisibility(View.VISIBLE);
         classAdapter.setClasses(classes);
     }
 
