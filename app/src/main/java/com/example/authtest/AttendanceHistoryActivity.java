@@ -3,6 +3,7 @@ package com.example.authtest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,12 +27,16 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
     private RecyclerView historyRecyclerView;
     private AttendanceHistoryAdapter historyAdapter;
     private List<AttendanceHistoryModel> historyList = new ArrayList<>();
+    private List<AttendanceHistoryModel> filteredHistory = new ArrayList<>();
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private LinearLayout emptyStateLayout;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private boolean isStudent = false;
+    private EditText historySearchBar;
+    private ImageView clearSearchButton;
+    private LinearLayout searchBarContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +50,9 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.navigation_view);
         historyRecyclerView = findViewById(R.id.historyRecyclerView);
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
+        historySearchBar = findViewById(R.id.historySearchBar);
+        clearSearchButton = findViewById(R.id.clearSearchButton);
+        searchBarContainer = findViewById(R.id.searchBarContainer);
 
         ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
         hamburgerIcon.setOnClickListener(view -> {
@@ -55,6 +63,7 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         loadUserInfoInDrawer();
         setupBackPressHandler();
         setupRecyclerView();
+        setupHistorySearch();
         checkUserTypeAndLoadHistory();
 
         findViewById(R.id.backButton).setOnClickListener(view -> {
@@ -67,6 +76,57 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         historyRecyclerView.setAdapter(historyAdapter);
         historyRecyclerView.setNestedScrollingEnabled(true);
+    }
+
+    private void setupHistorySearch() {
+        historySearchBar.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String searchQuery = s.toString().trim().toLowerCase();
+                filterHistory(searchQuery);
+
+                if (searchQuery.isEmpty()) {
+                    clearSearchButton.setVisibility(View.GONE);
+                } else {
+                    clearSearchButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        clearSearchButton.setOnClickListener(view -> {
+            historySearchBar.setText("");
+            filteredHistory.clear();
+            historyAdapter.updateList(new ArrayList<>(historyList));
+        });
+    }
+
+    private void filterHistory(String searchQuery) {
+        filteredHistory.clear();
+
+        if (searchQuery.isEmpty()) {
+            historyAdapter.updateList(new ArrayList<>(historyList));
+            return;
+        }
+
+        for (AttendanceHistoryModel history : historyList) {
+            String className = history.getClassName() != null ? history.getClassName().toLowerCase() : "";
+            String classCode = history.getClassCode() != null ? history.getClassCode().toLowerCase() : "";
+            String subjectCode = history.getSubjectCode() != null ? history.getSubjectCode().toLowerCase() : "";
+
+            if (className.contains(searchQuery) ||
+                    classCode.contains(searchQuery) ||
+                    subjectCode.contains(searchQuery)) {
+                filteredHistory.add(history);
+            }
+        }
+
+        historyAdapter.updateList(new ArrayList<>(filteredHistory));
     }
 
     private void checkUserTypeAndLoadHistory() {
@@ -219,9 +279,11 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         if (isEmpty) {
             emptyStateLayout.setVisibility(View.VISIBLE);
             historyRecyclerView.setVisibility(View.GONE);
+            searchBarContainer.setVisibility(View.GONE);
         } else {
             emptyStateLayout.setVisibility(View.GONE);
             historyRecyclerView.setVisibility(View.VISIBLE);
+            searchBarContainer.setVisibility(View.VISIBLE);
         }
     }
 

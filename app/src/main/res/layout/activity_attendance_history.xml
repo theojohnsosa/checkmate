@@ -43,12 +43,12 @@
 
         </RelativeLayout>
 
-        <!-- Back Button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="20dp"
-            android:paddingTop="24dp">
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/backButton"
@@ -85,6 +85,55 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/searchBarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="5dp"
+            android:paddingHorizontal="4dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/rounded_search_bg"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="Search"
+                android:layout_marginStart="12dp"
+                app:tint="#828282" />
+
+            <EditText
+                android:id="@+id/historySearchBar"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="Search by class name..."
+                android:textColorHint="#828282"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:maxLines="1" />
+
+            <ImageView
+                android:id="@+id/clearSearchButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_close"
+                android:contentDescription="Clear search"
+                android:layout_marginEnd="12dp"
+                app:tint="#828282"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -97,7 +146,8 @@
                 android:visibility="gone"
                 android:paddingHorizontal="20dp"
                 android:paddingTop="10dp"
-                android:paddingBottom="20dp" />
+                android:paddingBottom="20dp"
+                android:clipToPadding="false" />
 
             <LinearLayout
                 android:id="@+id/emptyStateLayout"

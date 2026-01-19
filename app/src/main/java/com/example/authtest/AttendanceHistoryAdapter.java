@@ -43,6 +43,11 @@ public class AttendanceHistoryAdapter extends RecyclerView.Adapter<AttendanceHis
         notifyDataSetChanged();
     }
 
+    public void updateList(List<AttendanceHistoryModel> newList) {
+        this.historyList = newList;
+        notifyDataSetChanged();
+    }
+
     static class HistoryViewHolder extends RecyclerView.ViewHolder {
         private TextView classNameText;
         private TextView classCodeText;
