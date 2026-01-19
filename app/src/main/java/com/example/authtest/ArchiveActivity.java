@@ -7,6 +7,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
@@ -103,7 +105,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Archive feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(ArchiveActivity.this, ArchiveActivity.class));
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
@@ -202,6 +204,8 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         binding.archivedClassesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.archivedClassesRecyclerView.setAdapter(classAdapter);
         binding.archivedClassesRecyclerView.setNestedScrollingEnabled(false);
+
+        setupSwipeToUnarchive();
     }
 
     private void setupSwipeToUnarchive() {

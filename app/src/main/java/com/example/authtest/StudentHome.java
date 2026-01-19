@@ -249,7 +249,7 @@ public class StudentHome extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Archive feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(StudentHome.this, ArchiveActivity.class));
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
