@@ -68,10 +68,10 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:layout_marginBottom="20dp" >
+            android:layout_marginBottom="15dp" >
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/joinClassButton"
@@ -81,7 +81,57 @@
                 android:textStyle="bold"
                 android:textSize="15sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="60dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/searchBarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="15dp"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="8dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/rounded_search_bg"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="Search"
+                android:layout_marginStart="12dp"
+                app:tint="#828282" />
+
+            <EditText
+                android:id="@+id/classSearchBar"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="Search by class name..."
+                android:textColorHint="#828282"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:maxLines="1" />
+
+            <ImageView
+                android:id="@+id/clearSearchButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_close"
+                android:contentDescription="Clear search"
+                android:layout_marginEnd="12dp"
+                app:tint="#828282"
+                android:visibility="gone" />
 
         </LinearLayout>
 

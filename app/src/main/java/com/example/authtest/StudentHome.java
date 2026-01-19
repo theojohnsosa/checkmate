@@ -7,6 +7,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
@@ -33,9 +35,12 @@ public class StudentHome extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private ClassAdapter classAdapter;
     private List<ClassModel> classList = new ArrayList<>();
+    private List<ClassModel> filteredClasses = new ArrayList<>();
     private boolean isLoadingClasses = false;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
+    private EditText classSearchBar;
+    private ImageView clearSearchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,9 @@ public class StudentHome extends AppCompatActivity {
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
 
+        classSearchBar = findViewById(R.id.classSearchBar);
+        clearSearchButton = findViewById(R.id.clearSearchButton);
+
         binding.hamburgerIcon.setOnClickListener(v -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
@@ -61,6 +69,7 @@ public class StudentHome extends AppCompatActivity {
         setupBackPressHandler();
 
         setupRecyclerView();
+        setupClassSearch();
         loadClasses();
 
         binding.joinClassButton.setOnClickListener(v -> {
@@ -95,6 +104,57 @@ public class StudentHome extends AppCompatActivity {
         setupSwipeToArchiveClass();
 
         classAdapter.setClasses(classList);
+    }
+
+    private void setupClassSearch() {
+        classSearchBar.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String searchQuery = s.toString().trim().toLowerCase();
+                filterClasses(searchQuery);
+
+                if (searchQuery.isEmpty()) {
+                    clearSearchButton.setVisibility(View.GONE);
+                } else {
+                    clearSearchButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        clearSearchButton.setOnClickListener(v -> {
+            classSearchBar.setText("");
+            filteredClasses.clear();
+            classAdapter.setClasses(new ArrayList<>(classList));
+        });
+    }
+
+    private void filterClasses(String searchQuery) {
+        filteredClasses.clear();
+
+        if (searchQuery.isEmpty()) {
+            classAdapter.setClasses(new ArrayList<>(classList));
+            return;
+        }
+
+        for (ClassModel classModel : classList) {
+            String className = classModel.getClassName() != null ? classModel.getClassName().toLowerCase() : "";
+            String classCode = classModel.getClassCode() != null ? classModel.getClassCode().toLowerCase() : "";
+            String subjectCode = classModel.getSubjectCode() != null ? classModel.getSubjectCode().toLowerCase() : "";
+
+            if (className.contains(searchQuery) ||
+                    classCode.contains(searchQuery) ||
+                    subjectCode.contains(searchQuery)) {
+                filteredClasses.add(classModel);
+            }
+        }
+
+        classAdapter.setClasses(new ArrayList<>(filteredClasses));
     }
 
     private void setupSwipeToArchiveClass() {
@@ -360,6 +420,7 @@ public class StudentHome extends AppCompatActivity {
         String studentId = mAuth.getCurrentUser().getUid();
 
         classList.clear();
+        filteredClasses.clear();
         classAdapter.notifyDataSetChanged();
 
         db.collection("users")
@@ -378,12 +439,12 @@ public class StudentHome extends AppCompatActivity {
 
                     for (var doc : querySnapshot) {
                         String classId = doc.getString("classId");
-
                         Boolean isArchived = doc.getBoolean("isArchived");
 
                         if (isArchived != null && isArchived) {
                             loadedClasses[0]++;
                             if (loadedClasses[0] == totalClasses) {
+                                classAdapter.setClasses(new ArrayList<>(classList));
                                 classAdapter.notifyDataSetChanged();
                                 updateUI();
                                 isLoadingClasses = false;
@@ -391,7 +452,7 @@ public class StudentHome extends AppCompatActivity {
                             continue;
                         }
 
-                        if (classId != null) {
+                        if (classId != null && !classId.isEmpty()) {
                             db.collection("allClasses")
                                     .document(classId)
                                     .get()
@@ -406,6 +467,7 @@ public class StudentHome extends AppCompatActivity {
 
                                         loadedClasses[0]++;
                                         if (loadedClasses[0] == totalClasses) {
+                                            classAdapter.setClasses(new ArrayList<>(classList));
                                             classAdapter.notifyDataSetChanged();
                                             updateUI();
                                             isLoadingClasses = false;
@@ -414,6 +476,7 @@ public class StudentHome extends AppCompatActivity {
                                     .addOnFailureListener(e -> {
                                         loadedClasses[0]++;
                                         if (loadedClasses[0] == totalClasses) {
+                                            classAdapter.setClasses(new ArrayList<>(classList));
                                             classAdapter.notifyDataSetChanged();
                                             updateUI();
                                             isLoadingClasses = false;
@@ -422,6 +485,7 @@ public class StudentHome extends AppCompatActivity {
                         } else {
                             loadedClasses[0]++;
                             if (loadedClasses[0] == totalClasses) {
+                                classAdapter.setClasses(new ArrayList<>(classList));
                                 classAdapter.notifyDataSetChanged();
                                 updateUI();
                                 isLoadingClasses = false;
@@ -439,5 +503,6 @@ public class StudentHome extends AppCompatActivity {
         boolean isEmpty = classList.isEmpty();
         binding.emptyStateLayout.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         binding.classesRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        binding.searchBarContainer.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 }
