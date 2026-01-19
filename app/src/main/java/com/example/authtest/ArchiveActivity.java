@@ -37,6 +37,9 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private List<ClassModel> archivedClasses = new ArrayList<>();
+    private List<ClassModel> filteredClasses = new ArrayList<>();
+    private EditText classSearchBar;
+    private ImageView clearSearchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +54,9 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
 
+        classSearchBar = findViewById(R.id.classSearchBar);
+        clearSearchButton = findViewById(R.id.clearSearchButton);
+
         binding.hamburgerIcon.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
@@ -64,6 +70,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         setupBackPressHandler();
         setupRecyclerView();
         setupSwipeToUnarchive();
+        setupClassSearch();
         loadArchivedClasses();
     }
 
@@ -206,6 +213,57 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         binding.archivedClassesRecyclerView.setNestedScrollingEnabled(false);
 
         setupSwipeToUnarchive();
+    }
+
+    private void setupClassSearch() {
+        classSearchBar.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String searchQuery = s.toString().trim().toLowerCase();
+                filterClasses(searchQuery);
+
+                if (searchQuery.isEmpty()) {
+                    clearSearchButton.setVisibility(View.GONE);
+                } else {
+                    clearSearchButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        clearSearchButton.setOnClickListener(v -> {
+            classSearchBar.setText("");
+            filteredClasses.clear();
+            classAdapter.setClasses(new ArrayList<>(archivedClasses));
+        });
+    }
+
+    private void filterClasses(String searchQuery) {
+        filteredClasses.clear();
+
+        if (searchQuery.isEmpty()) {
+            classAdapter.setClasses(new ArrayList<>(archivedClasses));
+            return;
+        }
+
+        for (ClassModel classModel : archivedClasses) {
+            String className = classModel.getClassName() != null ? classModel.getClassName().toLowerCase() : "";
+            String classCode = classModel.getClassCode() != null ? classModel.getClassCode().toLowerCase() : "";
+            String subjectCode = classModel.getSubjectCode() != null ? classModel.getSubjectCode().toLowerCase() : "";
+
+            if (className.contains(searchQuery) ||
+                    classCode.contains(searchQuery) ||
+                    subjectCode.contains(searchQuery)) {
+                filteredClasses.add(classModel);
+            }
+        }
+
+        classAdapter.setClasses(new ArrayList<>(filteredClasses));
     }
 
     private void setupSwipeToUnarchive() {
@@ -637,11 +695,13 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
 
         binding.emptyStateLayout.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         binding.archivedClassesRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        binding.searchBarContainer.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 
     private void showEmptyState() {
         binding.emptyStateLayout.setVisibility(View.VISIBLE);
         binding.archivedClassesRecyclerView.setVisibility(View.GONE);
+        binding.searchBarContainer.setVisibility(View.GONE);
     }
 
     @Override
