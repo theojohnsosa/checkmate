@@ -139,9 +139,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="20dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="40dp"
                 android:clipToPadding="false" />
 
             <LinearLayout
