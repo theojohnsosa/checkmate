@@ -49,6 +49,9 @@
         <activity
             android:name=".ArchiveActivity"
             android:exported="false" />
+        <activity
+            android:name=".AttendanceHistoryActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

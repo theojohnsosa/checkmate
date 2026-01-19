@@ -100,6 +100,10 @@ public class CreateClass extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
                 return true;
+            } else if (itemId == R.id.menu_attendance_history) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(CreateClass.this, AttendanceHistoryActivity.class));
+                return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(CreateClass.this, ArchiveActivity.class));
@@ -257,6 +261,8 @@ public class CreateClass extends AppCompatActivity {
 
     private void createClass(ClassModel model) {
         String teacherId = mAuth.getCurrentUser().getUid();
+
+        model.setCreatedAt(System.currentTimeMillis());
 
         db.collection("users")
                 .document(teacherId)

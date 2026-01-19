@@ -130,6 +130,10 @@ public class SessionDetailsActivity extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
                 return true;
+            } else if (itemId == R.id.menu_attendance_history) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(SessionDetailsActivity.this, AttendanceHistoryActivity.class));
+                return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(SessionDetailsActivity.this, ArchiveActivity.class));
