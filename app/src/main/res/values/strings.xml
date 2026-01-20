@@ -4,7 +4,7 @@
     <string name="password">Password</string>
     <string name="create_an_account">Create an account</string>
     <string name="already_have_an_account_sign_in">Already have an account? Sign in</string>
-    <string name="dont_have_an_account_sign_in">Already have an account? Sign up</string>
+    <string name="dont_have_an_account_sign_in">Do not have an account? Sign up</string>
     <string name="join_the_community">Join the community</string>
     <string name="complete_the_form_to_login">Complete the form to login</string>
     <string name="first_name">First name</string>
