@@ -52,6 +52,9 @@
         <activity
             android:name=".AttendanceHistoryActivity"
             android:exported="false" />
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
