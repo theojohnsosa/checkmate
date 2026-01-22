@@ -2,12 +2,20 @@ package com.example.authtest;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import android.widget.LinearLayout;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -22,6 +30,9 @@ public class SettingsActivity extends AppCompatActivity {
     private AppCompatButton logoutButton;
     private AppCompatButton backButton;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +40,18 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        drawerLayout = findViewById(R.id.main);
+        navigationView = findViewById(R.id.navigation_view);
+
+        findViewById(R.id.hamburger_icon).setOnClickListener(v -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
+
+        setupNavigationDrawer();
+        loadUserInfoInDrawer();
+        setupBackPressHandler();
         initializeViews();
         setupToggleListeners();
         setupButtonListeners();
@@ -63,35 +86,170 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void setupButtonListeners() {
-        appIconButton.setOnClickListener(v ->
-                Toast.makeText(this, "App Icon feature coming soon", Toast.LENGTH_SHORT).show()
-        );
+        appIconButton.setOnClickListener(v -> openAppIcon());
 
-        shareFeedbackButton.setOnClickListener(v ->
-                Toast.makeText(this, "Share Feedback feature coming soon", Toast.LENGTH_SHORT).show()
-        );
+        shareFeedbackButton.setOnClickListener(v -> shareFeeback());
 
-        termsOfServicesButton.setOnClickListener(v ->
-                Toast.makeText(this, "Terms of Services feature coming soon", Toast.LENGTH_SHORT).show()
-        );
+        termsOfServicesButton.setOnClickListener(v -> openTermsOfServices());
 
-        privacyPolicyButton.setOnClickListener(v ->
-                Toast.makeText(this, "Privacy Policy feature coming soon", Toast.LENGTH_SHORT).show()
-        );
+        privacyPolicyButton.setOnClickListener(v -> openPrivacyPolicy());
 
-        faqsButton.setOnClickListener(v ->
-                Toast.makeText(this, "FAQs feature coming soon", Toast.LENGTH_SHORT).show()
-        );
+        faqsButton.setOnClickListener(v -> openFAQs());
 
-        logoutButton.setOnClickListener(v -> {
-            showLogoutConfirmation();
-        });
+        logoutButton.setOnClickListener(v -> showLogoutConfirmation());
     }
 
     private void setupBackButton() {
-        backButton.setOnClickListener(v -> {
-            finish();
+        backButton.setOnClickListener(v -> finish());
+    }
+
+    private void setupBackPressHandler() {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
+    }
+
+    private void setupNavigationDrawer() {
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.menu_home) {
+                navigateToUserHome();
+                return true;
+            } else if (itemId == R.id.menu_profile) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_streak) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_attendance_history) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(SettingsActivity.this, AttendanceHistoryActivity.class));
+                return true;
+            } else if (itemId == R.id.menu_archive) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(SettingsActivity.this, ArchiveActivity.class));
+                return true;
+            } else if (itemId == R.id.menu_settings) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            } else if (itemId == R.id.menu_logout) {
+                LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,
+                        () -> {
+                            drawerLayout.closeDrawer(GravityCompat.START);
+                        }
+                );
+                confirmDialog.show();
+                return true;
+            }
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return false;
         });
+    }
+
+    private void navigateToUserHome() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        if (userType != null) {
+                            if ("Student".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(SettingsActivity.this, StudentHome.class));
+                            } else if ("Teacher".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(SettingsActivity.this, TeacherHome.class));
+                            } else {
+                                Toast.makeText(SettingsActivity.this, "Unknown user type: " + userType, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(SettingsActivity.this, "User type not found in document", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(SettingsActivity.this, "User document not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Toast.makeText(SettingsActivity.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void loadUserInfoInDrawer() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            View headerView = navigationView.getHeaderView(0);
+            TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
+            TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
+
+            db.collection("users")
+                    .document(currentUser.getUid())
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String firstName = documentSnapshot.getString("firstName");
+                            String lastName = documentSnapshot.getString("lastName");
+
+                            String fullName = "";
+                            if (firstName != null && !firstName.isEmpty()) {
+                                fullName = firstName;
+                            }
+                            if (lastName != null && !lastName.isEmpty()) {
+                                fullName += (fullName.isEmpty() ? "" : " ") + lastName;
+                            }
+
+                            userNameTextView.setText(fullName.isEmpty() ? "User" : fullName);
+                        } else {
+                            userNameTextView.setText("User");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        userNameTextView.setText("User");
+                    });
+
+            userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
+        }
+    }
+
+    private void openAppIcon() {
+        Toast.makeText(this, "App Icon feature coming soon", Toast.LENGTH_SHORT).show();
+    }
+
+    private void shareFeeback() {
+        Toast.makeText(this, "Share Feedback feature coming soon", Toast.LENGTH_SHORT).show();
+    }
+
+    private void openTermsOfServices() {
+        Toast.makeText(this, "Terms of Services feature coming soon", Toast.LENGTH_SHORT).show();
+    }
+
+    private void openPrivacyPolicy() {
+        Toast.makeText(this, "Privacy Policy feature coming soon", Toast.LENGTH_SHORT).show();
+    }
+
+    private void openFAQs() {
+        Toast.makeText(this, "FAQs feature coming soon", Toast.LENGTH_SHORT).show();
     }
 
     private void logout() {
@@ -107,7 +265,7 @@ public class SettingsActivity extends AppCompatActivity {
                 this,
                 this::logout,
                 () -> {
-
+                    // Dialog dismissed, stay on settings
                 }
         );
         confirmDialog.show();
