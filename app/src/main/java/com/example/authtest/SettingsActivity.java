@@ -1,11 +1,13 @@
 package com.example.authtest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Switch;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import android.widget.LinearLayout;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -19,12 +21,14 @@ public class SettingsActivity extends AppCompatActivity {
     private LinearLayout faqsButton;
     private AppCompatButton logoutButton;
     private AppCompatButton backButton;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        mAuth = FirebaseAuth.getInstance();
         initializeViews();
         setupToggleListeners();
         setupButtonListeners();
@@ -79,12 +83,33 @@ public class SettingsActivity extends AppCompatActivity {
                 Toast.makeText(this, "FAQs feature coming soon", Toast.LENGTH_SHORT).show()
         );
 
-        logoutButton.setOnClickListener(v ->
-                Toast.makeText(this, "Logout feature coming soon", Toast.LENGTH_SHORT).show()
-        );
+        logoutButton.setOnClickListener(v -> {
+            showLogoutConfirmation();
+        });
     }
 
     private void setupBackButton() {
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v -> {
+            finish();
+        });
+    }
+
+    private void logout() {
+        mAuth.signOut();
+        Intent intent = new Intent(SettingsActivity.this, SignIn.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void showLogoutConfirmation() {
+        LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(
+                this,
+                this::logout,
+                () -> {
+
+                }
+        );
+        confirmDialog.show();
     }
 }
