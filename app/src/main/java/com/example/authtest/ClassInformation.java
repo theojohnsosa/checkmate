@@ -44,6 +44,7 @@ import java.util.Map;
 public class ClassInformation extends AppCompatActivity {
 
     private static final String TAG = "ClassInformation";
+    private AppCompatButton viewSeatPlanButton;
     private ActivityClassInformationBinding binding;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -119,6 +120,12 @@ public class ClassInformation extends AppCompatActivity {
         setupRecentSessionsRecyclerView();
 
         checkUserTypeAndSetupUI();
+
+        viewSeatPlanButton = findViewById(R.id.viewSeatPlanButton);
+        viewSeatPlanButton.setOnClickListener(view ->{
+            Intent intent = new Intent(this, SeatPlan.class);
+            startActivity(intent);
+        });
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("CLASS_MODEL")) {
