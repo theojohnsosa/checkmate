@@ -101,7 +101,7 @@
                     android:layout_height="wrap_content"
                     android:text="Preferences"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp" />
 
@@ -188,7 +188,7 @@
                     android:layout_height="wrap_content"
                     android:text="Notifications"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="12dp" />
@@ -273,7 +273,7 @@
                     android:layout_height="wrap_content"
                     android:text="Feedback"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="12dp" />
@@ -323,7 +323,7 @@
                     android:layout_height="wrap_content"
                     android:text="About"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="12dp" />
@@ -412,7 +412,7 @@
                     android:layout_height="wrap_content"
                     android:text="Help"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="12dp" />
@@ -463,7 +463,7 @@
                     android:layout_height="60dp"
                     android:text="Logout"
                     android:textColor="#FFFFFF"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     android:textAllCaps="false"
                     android:background="@drawable/settings_logout_button" />
 
