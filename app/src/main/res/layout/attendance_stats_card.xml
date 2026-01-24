@@ -4,6 +4,7 @@
     android:id="@+id/attendanceStatsCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="15dp"
     app:cardBackgroundColor="#0F0F0F"
     app:cardCornerRadius="12dp"
     app:cardElevation="0dp">
@@ -23,8 +24,7 @@
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="15dp"
                 app:cardBackgroundColor="#2C2C2C"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp">
@@ -34,7 +34,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:id="@+id/totalStudentsCount"
@@ -50,7 +50,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Total Students"
-                        android:textColor="#828282"
+                        android:textColor="#FFFFFF"
                         android:textSize="12sp"
                         android:textAlignment="center" />
 
@@ -62,8 +62,8 @@
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginBottom="15dp"
                 app:cardBackgroundColor="#2F9E44"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp">
@@ -73,7 +73,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:id="@+id/presentCount"
@@ -109,7 +109,6 @@
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
                 app:cardBackgroundColor="#F59F00"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp">
@@ -119,7 +118,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:id="@+id/lateCount"
@@ -147,7 +146,7 @@
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="15dp"
                 app:cardBackgroundColor="#C92A2A"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp">

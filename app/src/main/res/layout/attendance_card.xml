@@ -5,7 +5,7 @@
     android:id="@+id/attendanceCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="20dp"
+    android:layout_marginBottom="15dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="8dp"
     app:cardBackgroundColor="#FFFFFF">
@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="top"
-            android:layout_marginBottom="14dp">
+            android:layout_marginBottom="15dp">
 
             <TextView
                 android:id="@+id/bellIcon"
@@ -73,11 +73,10 @@
 
         </LinearLayout>
 
-        <!-- BUTTON -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/attendanceButton"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="60dp"
             android:text="Start Attendance Session"
             android:textAllCaps="false"
             android:textSize="16sp"
