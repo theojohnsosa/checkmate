@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:paddingHorizontal="20dp"
             android:paddingTop="24dp"
-            android:paddingBottom="16dp">
+            android:paddingBottom="15dp">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/backButton"
@@ -66,7 +66,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingTop="0dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="15dp" >
 
             <TextView
                 android:text="History"
@@ -86,51 +89,56 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/searchBarContainer"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:orientation="horizontal"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="5dp"
-            android:paddingHorizontal="4dp"
-            android:gravity="center_vertical"
-            android:background="@drawable/rounded_search_bg"
-            android:visibility="gone">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp" >
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_search"
-                android:contentDescription="Search"
-                android:layout_marginStart="12dp"
-                app:tint="#828282" />
+            <LinearLayout
+                android:id="@+id/searchBarContainer"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:orientation="horizontal"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:paddingHorizontal="4dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/rounded_search_bg" >
 
-            <EditText
-                android:id="@+id/historySearchBar"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Search by class name..."
-                android:textColorHint="#828282"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:inputType="text"
-                android:imeOptions="actionSearch"
-                android:maxLines="1" />
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_search"
+                    android:contentDescription="Search"
+                    android:layout_marginStart="12dp"
+                    app:tint="#828282" />
 
-            <ImageView
-                android:id="@+id/clearSearchButton"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_close"
-                android:contentDescription="Clear search"
-                android:layout_marginEnd="12dp"
-                app:tint="#828282"
-                android:visibility="gone" />
+                <EditText
+                    android:id="@+id/historySearchBar"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Search by class name..."
+                    android:textColorHint="#828282"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:maxLines="1" />
+
+                <ImageView
+                    android:id="@+id/clearSearchButton"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_close"
+                    android:contentDescription="Clear search"
+                    android:layout_marginEnd="12dp"
+                    app:tint="#828282"
+                    android:visibility="gone" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -145,7 +153,6 @@
                 android:layout_height="match_parent"
                 android:visibility="gone"
                 android:paddingHorizontal="20dp"
-                android:paddingTop="10dp"
                 android:paddingBottom="20dp"
                 android:clipToPadding="false" />
 
@@ -156,6 +163,7 @@
                 android:gravity="center_horizontal"
                 android:orientation="vertical"
                 android:padding="20dp"
+                android:paddingTop="0dp"
                 android:visibility="visible">
 
                 <ImageView
