@@ -8,13 +8,11 @@
     android:background="#0F0F0F"
     android:fitsSystemWindows="true">
 
-    <!-- Main content -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Header -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
@@ -42,40 +40,40 @@
 
         </RelativeLayout>
 
-        <!-- Back button -->
         <LinearLayout
-            android:paddingStart="20dp"
-            android:paddingTop="24dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="15dp" >
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/backButton"
-                android:text="Back"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:drawableStart="@drawable/left_arrow"
                 android:drawablePadding="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:text="Back"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF" />
         </LinearLayout>
 
-        <!-- Content Form -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="20dp">
+            android:layout_weight="1" >
 
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:gravity="center_horizontal">
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:paddingTop="0dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="0dp">
 
-                <!-- Title -->
                 <TextView
                     android:id="@+id/createClassHeader"
                     android:text="Create Class"
@@ -85,7 +83,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <!-- Description -->
                 <TextView
                     android:id="@+id/createClassDescription"
                     android:text="Set up a new class for your students"
@@ -93,9 +90,8 @@
                     android:textAlignment="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp" />
+                    android:layout_marginBottom="15dp" />
 
-                <!-- Class Name -->
                 <EditText
                     android:id="@+id/classNameInput"
                     android:hint="Class name"
