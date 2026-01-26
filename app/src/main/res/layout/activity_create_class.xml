@@ -105,7 +105,6 @@
                     android:layout_height="60dp"
                     android:layout_marginBottom="10dp"/>
 
-                <!-- Subject Code -->
                 <EditText
                     android:id="@+id/subjectCodeInput"
                     android:hint="Subject code"
@@ -119,7 +118,6 @@
                     android:layout_height="60dp"
                     android:layout_marginBottom="10dp"/>
 
-                <!-- Days toggles -->
                 <LinearLayout
                     android:orientation="horizontal"
                     android:gravity="center"
@@ -199,7 +197,6 @@
                         android:textAllCaps="false"/>
                 </LinearLayout>
 
-                <!-- Time Inputs -->
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
@@ -235,7 +232,6 @@
                         android:drawableEnd="@drawable/dropdown_icon"/>
                 </LinearLayout>
 
-                <!-- Room -->
                 <EditText
                     android:id="@+id/roomInput"
                     android:hint="Room"
@@ -249,7 +245,7 @@
                     android:layout_height="60dp"
                     android:layout_marginBottom="10dp"/>
 
-                <!-- Create Button -->
+
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/createClassButton"
                     android:text="Create New Class"
