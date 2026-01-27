@@ -16,30 +16,30 @@
         android:orientation="vertical">
 
         <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="#FFFFFF">
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#FFFFFF">
 
-        <ImageView
-            android:id="@+id/header_logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="16dp"
-            android:src="@drawable/header_logo"
-            android:contentDescription="header_logo" />
+            <ImageView
+                android:id="@+id/header_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/header_logo"
+                android:contentDescription="header_logo" />
 
-        <ImageView
-            android:id="@+id/hamburger_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/hamburger_icon"
-            android:contentDescription="hamburger_icon" />
-    </RelativeLayout>
+            <ImageView
+                android:id="@+id/hamburger_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/hamburger_icon"
+                android:contentDescription="hamburger_icon" />
+        </RelativeLayout>
 
 
         <LinearLayout
@@ -100,35 +100,35 @@
                 android:padding="0dp" >
 
                 <include
-                    android:id="@+id/seatPlanCard"
+                    android:id="@+id/seatPlanCard1"
                     layout="@layout/seat_plan_card" />
 
                 <include
-                    android:id="@+id/seatPlanCard"
+                    android:id="@+id/seatPlanCard2"
                     layout="@layout/seat_plan_card" />
 
                 <include
-                    android:id="@+id/seatPlanCard"
+                    android:id="@+id/seatPlanCard3"
                     layout="@layout/seat_plan_card" />
 
                 <include
-                    android:id="@+id/seatPlanCard"
+                    android:id="@+id/seatPlanCard4"
                     layout="@layout/seat_plan_card" />
 
                 <include
-                    android:id="@+id/seatPlanCard"
+                    android:id="@+id/seatPlanCard5"
                     layout="@layout/seat_plan_card" />
 
                 <include
-                    android:id="@+id/seatPlanCard"
+                    android:id="@+id/seatPlanCard6"
                     layout="@layout/seat_plan_card" />
 
                 <include
-                    android:id="@+id/seatPlanCard"
+                    android:id="@+id/seatPlanCard7"
                     layout="@layout/seat_plan_card" />
 
                 <include
-                    android:id="@+id/seatPlanCard"
+                    android:id="@+id/seatPlanCard8"
                     layout="@layout/seat_plan_card" />
 
             </LinearLayout>
@@ -138,4 +138,4 @@
     </LinearLayout>
 
 
-  </androidx.drawerlayout.widget.DrawerLayout>
+</androidx.drawerlayout.widget.DrawerLayout>
