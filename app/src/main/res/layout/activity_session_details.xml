@@ -8,13 +8,11 @@
     android:background="#0F0F0F"
     android:fitsSystemWindows="true">
 
-    <!-- Main Content -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Header with Hamburger -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
@@ -39,12 +37,12 @@
                 android:src="@drawable/hamburger_icon" />
         </RelativeLayout>
 
-        <!-- Back Button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="20dp"
-            android:paddingTop="24dp">
+            android:paddingTop="24dp"
+            android:paddingBottom="15dp" >
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/backButton"
@@ -58,7 +56,6 @@
                 android:textColor="#FFFFFF" />
         </LinearLayout>
 
-        <!-- Main Content - FIX: Use LinearLayout instead of ScrollView for top content -->
         <LinearLayout
             android:id="@+id/mainContent"
             android:layout_width="match_parent"
@@ -66,10 +63,8 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:paddingHorizontal="20dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="40dp">
+            android:paddingBottom="15dp">
 
-            <!-- Session Header -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -77,18 +72,15 @@
                 android:textColor="#FFFFFF"
                 android:textSize="30sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="20dp" />
+                android:layout_marginBottom="15dp" />
 
-            <!-- Attendance Stats Card -->
             <include
                 android:id="@+id/attendanceStatsCard"
                 layout="@layout/attendance_stats_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:visibility="visible" />
+                android:layout_marginBottom="15dp" />
 
-            <!-- Students Attended Header -->
             <TextView
                 android:id="@+id/studentsAttendedHeader"
                 android:layout_width="wrap_content"
@@ -97,11 +89,9 @@
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="15dp"
                 android:visibility="visible" />
 
-            <!-- Search Bar Container -->
             <LinearLayout
                 android:id="@+id/searchBarContainer"
                 android:layout_width="match_parent"

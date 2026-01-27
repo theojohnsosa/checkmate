@@ -150,50 +150,49 @@
                 android:id="@+id/emptyStateLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
                 android:gravity="center_horizontal"
-                android:padding="20dp"
-                android:visibility="visible" >
+                android:orientation="vertical"
+                android:padding="20dp">
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/no_classes_image"
                     android:layout_marginTop="40dp"
-                    android:layout_marginBottom="20dp" />
+                    android:layout_marginBottom="20dp"
+                    android:src="@drawable/no_classes_image" />
 
                 <TextView
                     android:id="@+id/no_classes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
                     android:text="No Classes"
                     android:textColor="#FFFFFF"
-                    android:textStyle="bold"
                     android:textSize="25dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:textStyle="bold" />
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
                     android:text="Generate a class code for your students to \n use when joining your class."
                     android:textAlignment="center"
-                    android:textColor="#828282"
-                    android:layout_marginBottom="20dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:textColor="#828282" />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/ctaButton"
-                    android:text="Create Class"
-                    android:textStyle="bold"
-                    android:textAllCaps="false"
-                    android:paddingStart="40dp"
-                    android:paddingEnd="40dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/buttons_corner_radius"
                     android:drawableStart="@drawable/plus"
                     android:drawablePadding="10dp"
-                    android:background="@drawable/buttons_corner_radius"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:paddingStart="40dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="40dp"
+                    android:paddingBottom="10dp"
+                    android:text="Create Class"
+                    android:textAllCaps="false"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
