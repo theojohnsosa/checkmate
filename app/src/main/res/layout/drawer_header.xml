@@ -21,9 +21,8 @@
         android:layout_height="wrap_content"
         android:text="User Name"
         android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="5dp" />
+        android:textSize="30sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/drawer_user_email"
@@ -31,6 +30,6 @@
         android:layout_height="wrap_content"
         android:text="user@example.com"
         android:textColor="#828282"
-        android:textSize="12sp" />
+        android:textSize="16sp" />
 
 </LinearLayout>
