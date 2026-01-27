@@ -73,7 +73,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void setupToggleListeners() {
         appearanceToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Toggle functionality will be added later
+            Toast.makeText(this, "Appearance feature coming soon", Toast.LENGTH_SHORT).show();
         });
 
         notificationsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
