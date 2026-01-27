@@ -62,7 +62,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingTop="0dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="15dp" >
 
             <TextView
                 android:text="Settings"
@@ -92,10 +95,9 @@
                 android:orientation="vertical"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:paddingTop="0dp"
+                android:paddingTop="20dp"
                 android:paddingBottom="20dp">
 
-                <!-- PREFERENCES SECTION -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -103,9 +105,8 @@
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="15dp" />
 
-                <!-- Appearance Toggle -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
@@ -114,7 +115,7 @@
                     android:background="@drawable/settings_button_bg"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="15dp">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -142,7 +143,6 @@
 
                 </LinearLayout>
 
-                <!-- App Icon Button -->
                 <LinearLayout
                     android:id="@+id/appIconButton"
                     android:layout_width="match_parent"
@@ -152,7 +152,6 @@
                     android:background="@drawable/settings_button_bg"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
-                    android:layout_marginBottom="12dp"
                     android:clickable="true"
                     android:focusable="true">
 
@@ -168,8 +167,7 @@
                             android:layout_height="wrap_content"
                             android:text="App Icon"
                             android:textStyle="bold"
-                            android:textSize="16sp"
-                            />
+                            android:textSize="16sp" />
 
                     </LinearLayout>
 
@@ -178,11 +176,10 @@
                         android:layout_height="24dp"
                         android:src="@drawable/ic_arrow_right"
                         android:contentDescription="Navigate"
-                        android:tint="#828282" />
+                        app:tint="#828282" />
 
                 </LinearLayout>
 
-                <!-- NOTIFICATIONS SECTION -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -191,9 +188,8 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="20dp"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="15dp" />
 
-                <!-- Allow Notifications Toggle -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
@@ -202,7 +198,7 @@
                     android:background="@drawable/settings_button_bg"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="15dp">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -230,7 +226,6 @@
 
                 </LinearLayout>
 
-                <!-- Do Not Disturb Toggle -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
@@ -238,8 +233,7 @@
                     android:gravity="center_vertical"
                     android:background="@drawable/settings_button_bg"
                     android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:layout_marginBottom="12dp">
+                    android:paddingEnd="16dp" >
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -267,7 +261,6 @@
 
                 </LinearLayout>
 
-                <!-- FEEDBACK SECTION -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -276,9 +269,8 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="20dp"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="15dp" />
 
-                <!-- Share Feedback Button -->
                 <LinearLayout
                     android:id="@+id/shareFeedbackButton"
                     android:layout_width="match_parent"
@@ -288,7 +280,6 @@
                     android:background="@drawable/settings_button_bg"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
-                    android:layout_marginBottom="12dp"
                     android:clickable="true"
                     android:focusable="true">
 
@@ -313,11 +304,10 @@
                         android:layout_height="24dp"
                         android:src="@drawable/ic_arrow_right"
                         android:contentDescription="Navigate"
-                        android:tint="#828282" />
+                        app:tint="#828282" />
 
                 </LinearLayout>
 
-                <!-- ABOUT SECTION -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -326,9 +316,8 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="20dp"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="15dp" />
 
-                <!-- Terms of Services Button -->
                 <LinearLayout
                     android:id="@+id/termsOfServicesButton"
                     android:layout_width="match_parent"
@@ -338,7 +327,7 @@
                     android:background="@drawable/settings_button_bg"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="15dp"
                     android:clickable="true"
                     android:focusable="true">
 
@@ -363,11 +352,10 @@
                         android:layout_height="24dp"
                         android:src="@drawable/ic_arrow_right"
                         android:contentDescription="Navigate"
-                        android:tint="#828282" />
+                        app:tint="#828282" />
 
                 </LinearLayout>
 
-                <!-- Privacy Policy Button -->
                 <LinearLayout
                     android:id="@+id/privacyPolicyButton"
                     android:layout_width="match_parent"
@@ -377,7 +365,6 @@
                     android:background="@drawable/settings_button_bg"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
-                    android:layout_marginBottom="12dp"
                     android:clickable="true"
                     android:focusable="true">
 
@@ -402,11 +389,10 @@
                         android:layout_height="24dp"
                         android:src="@drawable/ic_arrow_right"
                         android:contentDescription="Navigate"
-                        android:tint="#828282" />
+                        app:tint="#828282" />
 
                 </LinearLayout>
 
-                <!-- HELP SECTION -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -415,9 +401,8 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="20dp"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="15dp" />
 
-                <!-- FAQs Button -->
                 <LinearLayout
                     android:id="@+id/faqsButton"
                     android:layout_width="match_parent"
@@ -452,11 +437,10 @@
                         android:layout_height="24dp"
                         android:src="@drawable/ic_arrow_right"
                         android:contentDescription="Navigate"
-                        android:tint="#828282" />
+                        app:tint="#828282" />
 
                 </LinearLayout>
 
-                <!-- Logout Button -->
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/logoutButton"
                     android:layout_width="match_parent"
