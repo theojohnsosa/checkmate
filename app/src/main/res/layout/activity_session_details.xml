@@ -140,7 +140,6 @@
 
             </LinearLayout>
 
-            <!-- Students RecyclerView - FIX: Enable nested scrolling and use layout_weight -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/studentsRecyclerView"
                 android:layout_width="match_parent"
@@ -152,7 +151,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation_view"
         android:layout_width="280dp"
