@@ -93,8 +93,7 @@ public class CreateClass extends AppCompatActivity {
                 navigateToUserHome();
                 return true;
             } else if (itemId == R.id.menu_profile) {
-                drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Profile feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(CreateClass.this, ProfilePage.class));
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
