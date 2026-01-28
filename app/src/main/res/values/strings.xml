@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AuthTest</string>
+    <string name="app_name">Checkmate</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="create_an_account">Create an account</string>
