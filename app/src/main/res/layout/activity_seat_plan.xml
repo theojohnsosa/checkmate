@@ -6,7 +6,6 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#0F0F0F"
     android:fitsSystemWindows="true"
     tools:context=".SeatPlan">
@@ -18,7 +17,8 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
             android:background="#FFFFFF">
 
             <ImageView
@@ -67,7 +67,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:paddingBottom="20dp" >
 
             <LinearLayout
@@ -95,10 +96,10 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:padding="0dp" >
+                android:orientation="horizontal">
 
                 <include
                     android:id="@+id/seatPlanCard1"
@@ -135,10 +136,10 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:padding="0dp" >
+                android:orientation="horizontal">
 
                 <include
                     android:id="@+id/seatPlanCard9"
@@ -175,10 +176,10 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:padding="0dp" >
+                android:orientation="horizontal">
 
                 <include
                     android:id="@+id/seatPlanCard17"
@@ -215,10 +216,10 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:padding="0dp" >
+                android:orientation="horizontal">
 
                 <include
                     android:id="@+id/seatPlanCard25"
@@ -255,10 +256,10 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:padding="0dp" >
+                android:orientation="horizontal">
 
                 <include
                     android:id="@+id/seatPlanCard33"

@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:text="User Name"
         android:textColor="#FFFFFF"
-        android:textSize="30sp"
+        android:textSize="24sp"
         android:textStyle="bold" />
 
     <TextView
@@ -30,6 +30,6 @@
         android:layout_height="wrap_content"
         android:text="user@example.com"
         android:textColor="#828282"
-        android:textSize="16sp" />
+        android:textSize="12sp" />
 
 </LinearLayout>
