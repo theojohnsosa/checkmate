@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -106,7 +107,12 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
+                Log.d("Navigation", "Streak item clicked, itemId: " + itemId);
+                Log.d("Navigation", "R.id.menu_streak value: " + R.id.menu_streak);
+                Log.d("Navigation", "Starting AttendanceStreak activity");
+                Intent streakIntent = new Intent(TeacherHome.this, AttendanceStreak.class);
+                startActivity(streakIntent);
+                Toast.makeText(TeacherHome.this, "Opening Attendance Streak", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);

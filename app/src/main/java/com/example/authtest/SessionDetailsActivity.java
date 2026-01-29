@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.se.omapi.Session;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -127,7 +128,7 @@ public class SessionDetailsActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(SessionDetailsActivity.this, AttendanceStreak.class));
                 return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);

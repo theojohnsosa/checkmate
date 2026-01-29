@@ -85,11 +85,11 @@ public class AddStudentsForm extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(AddStudentsForm.this, AttendanceStreak.class));
                 return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Archive feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(AddStudentsForm.this, ArchiveActivity.class));
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);

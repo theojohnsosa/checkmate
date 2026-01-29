@@ -220,7 +220,7 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(SettingsActivity.this, AttendanceStreak.class));
                 return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);

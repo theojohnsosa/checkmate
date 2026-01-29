@@ -72,19 +72,23 @@ public class SeatPlan extends AppCompatActivity {
                 navigateToUserHome();
                 return true;
             } else if (itemId == R.id.menu_profile) {
-                startActivity(new Intent(this, ProfilePage.class));
+                startActivity(new Intent(SeatPlan.this, ProfilePage.class));
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Streak feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(SeatPlan.this, AttendanceStreak.class));
+                return true;
+            } else if (itemId == R.id.menu_attendance_history) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(SeatPlan.this, AttendanceHistoryActivity.class));
                 return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(this, "Archive feature coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(SeatPlan.this, ArchiveActivity.class));
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                startActivity(new Intent(this, SettingsActivity.class));
+                startActivity(new Intent(SeatPlan.this, SettingsActivity.class));
                 return true;
             } else if (itemId == R.id.menu_logout) {
                 LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,
