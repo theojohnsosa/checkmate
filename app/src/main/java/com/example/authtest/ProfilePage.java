@@ -3,118 +3,68 @@ package com.example.authtest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Switch;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
-import android.widget.LinearLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class SettingsActivity extends AppCompatActivity {
+public class ProfilePage extends AppCompatActivity {
 
-    private Switch appearanceToggle;
-    private Switch notificationsToggle;
-    private Switch doNotDisturbToggle;
-    private LinearLayout appIconButton;
-    private LinearLayout shareFeedbackButton;
-    private LinearLayout termsOfServicesButton;
-    private LinearLayout privacyPolicyButton;
-    private LinearLayout faqsButton;
-    private AppCompatButton logoutButton;
-    private AppCompatButton backButton;
+    private DrawerLayout drawerLayout;
+    private ImageView hamburgerIcon;
+    private NavigationView navigationView;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
+    private AppCompatButton backButton;
+    private TextView profileUserName;
+    private TextView profileEmail;
+    private TextView profileSchoolNumber;
+    private TextView profileDepartment;
+    private TextView profileUserType;
+    private TextView profileYear;
+    private Button logoutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
-
+        setContentView(R.layout.activity_profile_page);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-
-        drawerLayout = findViewById(R.id.main);
-        navigationView = findViewById(R.id.navigation_view);
-
-        findViewById(R.id.hamburger_icon).setOnClickListener(v -> {
-            drawerLayout.openDrawer(GravityCompat.START);
-        });
-
+        initializeViews();
+        setupBackButton();
+        setupBackPressHandler();
+        setupListeners();
         setupNavigationDrawer();
         loadUserInfoInDrawer();
-        setupBackPressHandler();
-        initializeViews();
-        setupToggleListeners();
-        setupButtonListeners();
-        setupBackButton();
+        loadUserProfileInfo();
     }
 
     private void initializeViews() {
-        appearanceToggle = findViewById(R.id.appearanceToggle);
-        notificationsToggle = findViewById(R.id.notificationsToggle);
-        doNotDisturbToggle = findViewById(R.id.doNotDisturbToggle);
-        appIconButton = findViewById(R.id.appIconButton);
-        shareFeedbackButton = findViewById(R.id.shareFeedbackButton);
-        termsOfServicesButton = findViewById(R.id.termsOfServicesButton);
-        privacyPolicyButton = findViewById(R.id.privacyPolicyButton);
-        faqsButton = findViewById(R.id.faqsButton);
-        logoutButton = findViewById(R.id.logoutButton);
+        drawerLayout = findViewById(R.id.main);
+        hamburgerIcon = findViewById(R.id.hamburger_icon);
+        navigationView = findViewById(R.id.navigation_view_profile);
         backButton = findViewById(R.id.backButton);
+        profileUserName = findViewById(R.id.profile_user_name);
+        profileEmail = findViewById(R.id.profile_email);
+        profileSchoolNumber = findViewById(R.id.profile_school_number);
+        profileDepartment = findViewById(R.id.profile_department);
+        profileUserType = findViewById(R.id.profile_user_type);
+        profileYear = findViewById(R.id.profile_year);
+        logoutButton = findViewById(R.id.logoutButton);
     }
-
-    private void setupToggleListeners() {
-        appearanceToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Toast.makeText(this, "Appearance feature coming soon", Toast.LENGTH_SHORT).show();
-        });
-
-        notificationsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Toast.makeText(this, "Notifications feature coming soon", Toast.LENGTH_SHORT).show();
-        });
-
-        doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Toast.makeText(this, "Do Not Disturb feature coming soon", Toast.LENGTH_SHORT).show();
-        });
-    }
-
-    private void setupButtonListeners() {
-        appIconButton.setOnClickListener(view -> {
-            openAppIcon();
-        });
-
-        shareFeedbackButton.setOnClickListener(view -> {
-            shareFeeback();
-        });
-
-        termsOfServicesButton.setOnClickListener(view -> {
-            openTermsOfServices();
-        });
-
-        privacyPolicyButton.setOnClickListener(view -> {
-            openPrivacyPolicy();
-        });
-
-        faqsButton.setOnClickListener(view -> {
-            openFAQs();
-        });
-
-        logoutButton.setOnClickListener(view -> {
-            showLogoutConfirmation();
-        });
-    }
-
     private void setupBackButton() {
-        backButton.setOnClickListener(view -> {
-            finish();
-        });
+        backButton.setOnClickListener(v -> finish());
     }
 
     private void setupBackPressHandler() {
@@ -129,10 +79,22 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
         };
-        getOnBackPressedDispatcher()
-                .addCallback(this, callback);
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
+    private void setupListeners() {
+        hamburgerIcon.setOnClickListener(v -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
 
+        logoutButton.setOnClickListener(v -> {
+            LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(
+                    this,
+                    this::logout,
+                    () -> {}
+            );
+            confirmDialog.show();
+        });
+    }
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -142,7 +104,6 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_profile) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                startActivity(new Intent(SettingsActivity.this, ProfilePage.class));
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
@@ -150,14 +111,15 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                startActivity(new Intent(SettingsActivity.this, AttendanceHistoryActivity.class));
+                startActivity(new Intent(ProfilePage.this, AttendanceHistoryActivity.class));
                 return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                startActivity(new Intent(SettingsActivity.this, ArchiveActivity.class));
+                startActivity(new Intent(ProfilePage.this, ArchiveActivity.class));
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             } else if (itemId == R.id.menu_logout) {
                 LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,
@@ -192,23 +154,31 @@ public class SettingsActivity extends AppCompatActivity {
 
                         if (userType != null) {
                             if ("Student".equalsIgnoreCase(userType.trim())) {
-                                startActivity(new Intent(SettingsActivity.this, StudentHome.class));
+                                startActivity(new Intent(ProfilePage.this, StudentHome.class));
                             } else if ("Teacher".equalsIgnoreCase(userType.trim())) {
-                                startActivity(new Intent(SettingsActivity.this, TeacherHome.class));
+                                startActivity(new Intent(ProfilePage.this, TeacherHome.class));
                             } else {
-                                Toast.makeText(SettingsActivity.this, "Unknown user type: " + userType, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ProfilePage.this, "Unknown user type: " + userType, Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            Toast.makeText(SettingsActivity.this, "User type not found in document", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ProfilePage.this, "User type not found in document", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(SettingsActivity.this, "User document not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProfilePage.this, "User document not found", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
                     drawerLayout.closeDrawer(GravityCompat.START);
-                    Toast.makeText(SettingsActivity.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProfilePage.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private void logout() {
+        mAuth.signOut();
+        Intent intent = new Intent(ProfilePage.this, SignIn.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void loadUserInfoInDrawer() {
@@ -246,49 +216,53 @@ public class SettingsActivity extends AppCompatActivity {
             userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
         }
     }
+    private void loadUserProfileInfo() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            profileEmail.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "N/A");
 
-    private void openAppIcon() {
-        AppIconSelectionDialog iconDialog = new AppIconSelectionDialog(
-                this,
-                () -> {
-                },
-                () -> {
-                }
-        );
-        iconDialog.show();
-    }
+            db.collection("users")
+                    .document(currentUser.getUid())
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String firstName = documentSnapshot.getString("firstName");
+                            String lastName = documentSnapshot.getString("lastName");
 
-    private void shareFeeback() {
-        Toast.makeText(this, "Share Feedback feature coming soon", Toast.LENGTH_SHORT).show();
-    }
+                            String fullName = "";
+                            if (firstName != null && !firstName.isEmpty()) {
+                                fullName = firstName;
+                            }
+                            if (lastName != null && !lastName.isEmpty()) {
+                                fullName += (fullName.isEmpty() ? "" : " ") + lastName;
+                            }
 
-    private void openTermsOfServices() {
-        Toast.makeText(this, "Terms of Services feature coming soon", Toast.LENGTH_SHORT).show();
-    }
+                            profileUserName.setText(fullName.isEmpty() ? "User" : fullName);
 
-    private void openPrivacyPolicy() {
-        Toast.makeText(this, "Privacy Policy feature coming soon", Toast.LENGTH_SHORT).show();
-    }
+                            String schoolNumber = documentSnapshot.getString("schoolNumber");
+                            String department = documentSnapshot.getString("department");
+                            String userType = documentSnapshot.getString("userType");
+                            String year = documentSnapshot.getString("yearLevel");
 
-    private void openFAQs() {
-        Toast.makeText(this, "FAQs feature coming soon", Toast.LENGTH_SHORT).show();
-    }
-
-    private void logout() {
-        mAuth.signOut();
-        Intent intent = new Intent(SettingsActivity.this, SignIn.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
-    }
-
-    private void showLogoutConfirmation() {
-        LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(
-                this,
-                this::logout,
-                () -> {
-                }
-        );
-        confirmDialog.show();
+                            profileSchoolNumber.setText(schoolNumber != null && !schoolNumber.isEmpty() ? schoolNumber : "N/A");
+                            profileDepartment.setText(department != null && !department.isEmpty() ? department : "N/A");
+                            profileUserType.setText(userType != null && !userType.isEmpty() ? userType : "N/A");
+                            profileYear.setText(year != null && !year.isEmpty() ? year : "N/A");
+                        } else {
+                            profileUserName.setText("User");
+                            profileSchoolNumber.setText("N/A");
+                            profileDepartment.setText("N/A");
+                            profileUserType.setText("N/A");
+                            profileYear.setText("N/A");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        profileUserName.setText("User");
+                        profileSchoolNumber.setText("N/A");
+                        profileDepartment.setText("N/A");
+                        profileUserType.setText("N/A");
+                        profileYear.setText("N/A");
+                    });
+        }
     }
 }
