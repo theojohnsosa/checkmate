@@ -1,7 +1,10 @@
 package com.example.authtest;
 
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -33,6 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
+    private NotificationManager notificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +45,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
@@ -56,6 +61,7 @@ public class SettingsActivity extends AppCompatActivity {
         setupToggleListeners();
         setupButtonListeners();
         setupBackButton();
+        loadDNDState();
     }
 
     private void initializeViews() {
@@ -81,8 +87,76 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Toast.makeText(this, "Do Not Disturb feature coming soon", Toast.LENGTH_SHORT).show();
+            toggleDoNotDisturb(isChecked);
         });
+    }
+
+    /**
+     * Toggles the Do Not Disturb mode on the device
+     * @param enable true to enable DND, false to disable
+     */
+    private void toggleDoNotDisturb(boolean enable) {
+        // Check if app has permission to access DND settings (API 31+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!notificationManager.isNotificationPolicyAccessGranted()) {
+                // Permission not granted, open settings
+                showDNDPermissionDialog(enable);
+                return;
+            }
+        }
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (enable) {
+                    // Enable Do Not Disturb
+                    notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+                    Toast.makeText(this, "Do Not Disturb enabled", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Disable Do Not Disturb
+                    notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL);
+                    Toast.makeText(this, "Do Not Disturb disabled", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error changing Do Not Disturb: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            // Revert the toggle
+            doNotDisturbToggle.setOnCheckedChangeListener(null);
+            doNotDisturbToggle.setChecked(!enable);
+            doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> toggleDoNotDisturb(isChecked));
+        }
+    }
+
+    /**
+     * Shows a dialog to guide user to grant DND permission
+     */
+    private void showDNDPermissionDialog(boolean shouldEnable) {
+        // Revert toggle
+        doNotDisturbToggle.setOnCheckedChangeListener(null);
+        doNotDisturbToggle.setChecked(!shouldEnable);
+        doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> toggleDoNotDisturb(isChecked));
+
+        Toast.makeText(this, "Please grant Do Not Disturb permission in Settings", Toast.LENGTH_LONG).show();
+
+        // Open notification settings
+        Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+        startActivity(intent);
+    }
+
+    /**
+     * Loads the current DND state from the device and updates the toggle
+     */
+    private void loadDNDState() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            doNotDisturbToggle.setOnCheckedChangeListener(null); // Disable listener to prevent triggering event
+
+            int interruptionFilter = notificationManager.getCurrentInterruptionFilter();
+            boolean isDNDEnabled = interruptionFilter == NotificationManager.INTERRUPTION_FILTER_NONE ||
+                    interruptionFilter == NotificationManager.INTERRUPTION_FILTER_PRIORITY ||
+                    interruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALARMS;
+
+            doNotDisturbToggle.setChecked(isDNDEnabled);
+            doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> toggleDoNotDisturb(isChecked));
+        }
     }
 
     private void setupButtonListeners() {
