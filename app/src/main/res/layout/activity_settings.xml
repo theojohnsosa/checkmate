@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:paddingHorizontal="20dp"
             android:paddingTop="24dp"
-            android:paddingBottom="16dp">
+            android:paddingBottom="15dp">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/backButton"
@@ -60,32 +60,6 @@
                 android:textColor="#FFFFFF" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="0dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="15dp" >
-
-            <TextView
-                android:text="Settings"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="40sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:text="Manage your preferences and account"
-                android:textColor="#828282"
-                android:textSize="12sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -97,8 +71,30 @@
                 android:orientation="vertical"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:paddingTop="20dp"
                 android:paddingBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp" >
+
+                    <TextView
+                        android:text="Settings"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"
+                        android:textSize="40sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:text="Manage your preferences and account"
+                        android:textColor="#828282"
+                        android:textSize="12sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
