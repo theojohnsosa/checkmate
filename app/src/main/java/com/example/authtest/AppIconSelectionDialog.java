@@ -1,0 +1,201 @@
+package com.example.authtest;
+
+import android.app.Dialog;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.Toast;
+import androidx.appcompat.widget.AppCompatButton;
+import android.util.Log;
+
+public class AppIconSelectionDialog extends Dialog {
+
+    private final Context context;
+    private final Runnable onConfirm;
+    private final Runnable onCancel;
+    private static final String TAG = "AppIconDialog";
+
+    private static final String[] ALIAS_NAMES = {
+            "IconWhiteAlias",
+            "IconBlueAlias",
+            "IconRedAlias",
+            "IconYellowAlias",
+            "IconGreenAlias"
+    };
+
+    private static final String[] ICON_DISPLAY_NAMES = {
+            "White", "Blue", "Red", "Yellow", "Green"
+    };
+
+    private static final int[] ICON_BUTTON_IDS = {
+            R.id.iconButton1, R.id.iconButton2, R.id.iconButton3,
+            R.id.iconButton4, R.id.iconButton5
+    };
+
+    private static final int[] CHECKMARK_IDS = {
+            R.id.checkmark1, R.id.checkmark2, R.id.checkmark3,
+            R.id.checkmark4, R.id.checkmark5
+    };
+
+    private int selectedIconIndex = -1;
+    private int currentlyEnabledIndex = -1;
+
+    public AppIconSelectionDialog(Context context, Runnable onConfirm, Runnable onCancel) {
+        super(context);
+        this.context = context;
+        this.onConfirm = onConfirm;
+        this.onCancel = onCancel;
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.dialog_app_icon_selection);
+        setCancelable(true);
+
+        Window window = getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setLayout(
+                    (int) (context.getResources().getDisplayMetrics().widthPixels * 0.92),
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+        }
+
+        findCurrentIcon();
+        setupIconButtonListeners();
+        setupActionButtons();
+    }
+
+    private void findCurrentIcon() {
+        PackageManager pm = context.getPackageManager();
+        String packageName = context.getPackageName();
+
+        for (int i = 0; i < ALIAS_NAMES.length; i++) {
+            String fullAliasName = packageName + "." + ALIAS_NAMES[i];
+            ComponentName cn = new ComponentName(packageName, fullAliasName);
+
+            int state = pm.getComponentEnabledSetting(cn);
+
+            if (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                currentlyEnabledIndex = i;
+                selectedIconIndex = i;
+                break;
+            }
+        }
+
+        if (selectedIconIndex == -1) {
+            selectedIconIndex = 0;
+            currentlyEnabledIndex = 0;
+        }
+
+        updateCheckmarks();
+    }
+
+    private void setupIconButtonListeners() {
+        for (int i = 0; i < ICON_BUTTON_IDS.length; i++) {
+            final int index = i;
+            FrameLayout btn = findViewById(ICON_BUTTON_IDS[i]);
+
+            if (btn == null) {
+                continue;
+            }
+
+            btn.setOnClickListener(v -> {
+                if (selectedIconIndex == index) {
+                    Toast.makeText(context, "This icon is already selected", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                selectedIconIndex = index;
+                updateCheckmarks();
+            });
+        }
+    }
+
+    private void setupActionButtons() {
+        AppCompatButton cancelButton = findViewById(R.id.cancelButton);
+        AppCompatButton selectButton = findViewById(R.id.selectButton);
+
+        if (cancelButton == null) {
+            return;
+        }
+
+        if (selectButton == null) {
+            return;
+        }
+
+        cancelButton.setOnClickListener(v -> {
+            dismiss();
+            if (onCancel != null) {
+                onCancel.run();
+            }
+        });
+
+        selectButton.setOnClickListener(v -> {
+            if (selectedIconIndex == currentlyEnabledIndex) {
+                Toast.makeText(context, "This icon is already active", Toast.LENGTH_SHORT).show();
+                dismiss();
+                if (onCancel != null) {
+                    onCancel.run();
+                }
+                return;
+            }
+
+            changeIcon();
+            dismiss();
+
+            if (onConfirm != null) {
+                onConfirm.run();
+            }
+        });
+    }
+
+    private void updateCheckmarks() {
+        for (int i = 0; i < CHECKMARK_IDS.length; i++) {
+            ImageView checkmark = findViewById(CHECKMARK_IDS[i]);
+            if (checkmark != null) {
+                if (i == selectedIconIndex) {
+                    checkmark.setVisibility(View.VISIBLE);
+                } else {
+                    checkmark.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    private void changeIcon() {
+        PackageManager pm = context.getPackageManager();
+        String packageName = context.getPackageName();
+
+        try {
+            for (int i = 0; i < ALIAS_NAMES.length; i++) {
+                String fullAliasName = packageName + "." + ALIAS_NAMES[i];
+                ComponentName cn = new ComponentName(packageName, fullAliasName);
+
+                pm.setComponentEnabledSetting(cn,
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                        PackageManager.DONT_KILL_APP);
+
+            }
+
+            String selectedFullAliasName = packageName + "." + ALIAS_NAMES[selectedIconIndex];
+            ComponentName selectedCn = new ComponentName(packageName, selectedFullAliasName);
+
+            pm.setComponentEnabledSetting(selectedCn,
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    PackageManager.DONT_KILL_APP);
+
+            currentlyEnabledIndex = selectedIconIndex;
+
+            Toast.makeText(context, ICON_DISPLAY_NAMES[selectedIconIndex] + " icon activated!\n\nCheck your home screen.", Toast.LENGTH_LONG).show();
+
+        } catch (Exception e) {
+            Toast.makeText(context, "Error changing icon: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+}

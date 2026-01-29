@@ -77,30 +77,44 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         notificationsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Toggle functionality will be added later
+            Toast.makeText(this, "Notifications feature coming soon", Toast.LENGTH_SHORT).show();
         });
 
         doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Toggle functionality will be added later
+            Toast.makeText(this, "Do Not Disturb feature coming soon", Toast.LENGTH_SHORT).show();
         });
     }
 
     private void setupButtonListeners() {
-        appIconButton.setOnClickListener(v -> openAppIcon());
+        appIconButton.setOnClickListener(view -> {
+            openAppIcon();
+        });
 
-        shareFeedbackButton.setOnClickListener(v -> shareFeeback());
+        shareFeedbackButton.setOnClickListener(view -> {
+            shareFeeback();
+        });
 
-        termsOfServicesButton.setOnClickListener(v -> openTermsOfServices());
+        termsOfServicesButton.setOnClickListener(view -> {
+            openTermsOfServices();
+        });
 
-        privacyPolicyButton.setOnClickListener(v -> openPrivacyPolicy());
+        privacyPolicyButton.setOnClickListener(view -> {
+            openPrivacyPolicy();
+        });
 
-        faqsButton.setOnClickListener(v -> openFAQs());
+        faqsButton.setOnClickListener(view -> {
+            openFAQs();
+        });
 
-        logoutButton.setOnClickListener(v -> showLogoutConfirmation());
+        logoutButton.setOnClickListener(view -> {
+            showLogoutConfirmation();
+        });
     }
 
     private void setupBackButton() {
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(view -> {
+            finish();
+        });
     }
 
     private void setupBackPressHandler() {
@@ -115,7 +129,8 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
         };
-        getOnBackPressedDispatcher().addCallback(this, callback);
+        getOnBackPressedDispatcher()
+                .addCallback(this, callback);
     }
 
     private void setupNavigationDrawer() {
@@ -233,7 +248,14 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void openAppIcon() {
-        Toast.makeText(this, "App Icon feature coming soon", Toast.LENGTH_SHORT).show();
+        AppIconSelectionDialog iconDialog = new AppIconSelectionDialog(
+                this,
+                () -> {
+                },
+                () -> {
+                }
+        );
+        iconDialog.show();
     }
 
     private void shareFeeback() {
@@ -265,7 +287,6 @@ public class SettingsActivity extends AppCompatActivity {
                 this,
                 this::logout,
                 () -> {
-                    // Dialog dismissed, stay on settings
                 }
         );
         confirmDialog.show();
