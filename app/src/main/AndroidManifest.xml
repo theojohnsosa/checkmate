@@ -14,6 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AuthTest">
+
         <activity
             android:name=".SplashScreen"
             android:exported="true">
@@ -29,37 +30,37 @@
             android:name=".SignUp"
             android:exported="false" />
         <activity
-            android:name=".ProfilePage"
-            android:exported="false" />
-        <activity
-            android:name=".SeatPlan"
-            android:exported="false" />
-        <activity
-            android:name=".StudentHome"
-            android:exported="false" />
-        <activity
-            android:name=".AddStudentsForm"
-            android:exported="false" />
-        <activity
-            android:name=".ClassInformation"
+            android:name=".TeacherHome"
             android:exported="false" />
         <activity
             android:name=".CreateClass"
             android:exported="false" />
         <activity
-            android:name=".TeacherHome"
+            android:name=".ClassInformation"
             android:exported="false" />
         <activity
-            android:name=".SessionDetailsActivity"
+            android:name=".AddStudentsForm"
+            android:exported="false" />
+        <activity
+            android:name=".StudentHome"
             android:exported="false" />
         <activity
             android:name=".ArchiveActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfilePage"
+            android:exported="false" />
+        <activity
+            android:name=".SessionDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".AttendanceHistoryActivity"
             android:exported="false" />
         <activity
             android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SeatPlan"
             android:exported="false" />
         <activity
             android:name=".AttendanceStreak"
