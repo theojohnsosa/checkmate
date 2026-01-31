@@ -1,4 +1,4 @@
-# Checkmate - Classroom Attendance Management System
+# Checkmate - Classroom Attendance Tracker App
 
 A mobile-first attendance tracking application built with Android that streamlines classroom check-ins while maintaining security and accuracy. Checkmate simplifies attendance management for educational institutions with role-based access and intelligent fraud detection.
 
