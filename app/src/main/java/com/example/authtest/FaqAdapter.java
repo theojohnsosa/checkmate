@@ -66,13 +66,14 @@ public class FaqAdapter extends RecyclerView.Adapter<FaqAdapter.FAQViewHolder> {
 
             expandIcon.setRotation(isExpanded ? 90 : 0);
 
-            faqItemContainer.setOnClickListener(v -> {
+            faqItemContainer.setOnClickListener(view -> {
                 int previousExpandedPosition = FaqAdapter.this.expandedPosition;
                 FaqAdapter.this.expandedPosition = isExpanded ? -1 : position;
 
                 if (previousExpandedPosition != -1) {
                     notifyItemChanged(previousExpandedPosition);
                 }
+
                 notifyItemChanged(position);
             });
         }
