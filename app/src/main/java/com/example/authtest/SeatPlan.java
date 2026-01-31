@@ -11,6 +11,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -121,7 +122,7 @@ public class SeatPlan extends AppCompatActivity {
 
     //removing seat colors
     private void clearSeatColors() {
-        int emptyColor = getResources().getColor(android.R.color.darker_gray);
+        int emptyColor = ContextCompat.getColor(this,R.color.empty_seat);
         for (CardView seat : seatCards) {
             seat.setCardBackgroundColor(emptyColor);
         }
@@ -129,9 +130,8 @@ public class SeatPlan extends AppCompatActivity {
 
     //updation of seat colors
     private void updateSeatColors(int studentCount) {
-        int occupiedColor = getResources().getColor(android.R.color.holo_green_light);
-        int emptyColor = getResources().getColor(android.R.color.darker_gray);
-
+        int emptyColor = ContextCompat.getColor(this,R.color.empty_seat);
+        int occupiedColor = ContextCompat.getColor(this,R.color.occupied_seat);
         for (int i = 0; i < seatCards.length; i++) {
             if (i < studentCount) {
                 seatCards[i].setCardBackgroundColor(occupiedColor);
