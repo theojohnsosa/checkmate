@@ -1401,6 +1401,7 @@ public class ClassInformation extends AppCompatActivity {
         String studentId = mAuth.getCurrentUser().getUid();
         long timestamp = System.currentTimeMillis();
 
+        // Original session-based attendance record
         Map<String, Object> attendanceRecord = new HashMap<>();
         attendanceRecord.put("studentId", studentId);
         attendanceRecord.put("classId", classId);
@@ -1416,11 +1417,52 @@ public class ClassInformation extends AppCompatActivity {
                     hasMarkedAttendance = true;
                     attendanceTimestamp = formatTimestamp(timestamp);
                     showAttendanceMarkedState();
+
+                    // ALSO save to attendance collection for streak tracking
+                    saveAttendanceForStreak(studentId, timestamp);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to mark attendance: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
+    private void saveAttendanceForStreak(String studentId, long timestamp) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String today = dateFormat.format(new Date(timestamp));
+
+        // Check if already saved today (prevent duplicates if student marks in multiple classes)
+        db.collection("attendance")
+                .whereEqualTo("userId", studentId)
+                .whereEqualTo("date", today)
+                .whereEqualTo("classId", classId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        // Not saved yet for this class today, create new record
+                        Map<String, Object> streakAttendance = new HashMap<>();
+                        streakAttendance.put("userId", studentId);
+                        streakAttendance.put("date", today);
+                        streakAttendance.put("status", "present");
+                        streakAttendance.put("timestamp", timestamp);
+                        streakAttendance.put("classId", classId);
+
+                        db.collection("attendance")
+                                .add(streakAttendance)
+                                .addOnSuccessListener(doc -> {
+                                    android.util.Log.d(TAG, "✅ Attendance saved for streak: " + today);
+                                })
+                                .addOnFailureListener(e -> {
+                                    android.util.Log.e(TAG, "❌ Failed to save streak attendance", e);
+                                });
+                    } else {
+                        android.util.Log.d(TAG, "ℹ️ Attendance already recorded for this class today");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e(TAG, "Error checking existing attendance", e);
+                });
+    }
+
 
     private boolean isCurrentTimeWithinClassTime() {
         if (classStartTime == null || classStartTime.isEmpty()) {
