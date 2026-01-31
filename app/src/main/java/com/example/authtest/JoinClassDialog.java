@@ -44,9 +44,11 @@ public class JoinClassDialog extends Dialog {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-        cancelButton.setOnClickListener(v -> dismiss());
+        cancelButton.setOnClickListener(view -> {
+            dismiss();
+        });
 
-        joinButton.setOnClickListener(v -> {
+        joinButton.setOnClickListener(view -> {
             String classCode = codeInput.getText().toString().trim().toUpperCase();
 
             if (classCode.isEmpty()) {
@@ -98,11 +100,7 @@ public class JoinClassDialog extends Dialog {
                         List<String> allowedEmails = classModel.getAllowedStudentEmails();
 
                         if (allowedEmails == null || allowedEmails.isEmpty()) {
-                            Toast.makeText(
-                                    context,
-                                    "No students have been added to this class yet. Contact your teacher.",
-                                    Toast.LENGTH_LONG
-                            ).show();
+                            Toast.makeText(context, "No students have been added to this class yet. Contact your teacher.", Toast.LENGTH_LONG).show();
                             joinButton.setEnabled(true);
                             return;
                         }
@@ -116,11 +114,7 @@ public class JoinClassDialog extends Dialog {
                         }
 
                         if (!isAllowed) {
-                            Toast.makeText(
-                                    context,
-                                    "You are not authorized to join this class. Contact your teacher.",
-                                    Toast.LENGTH_LONG
-                            ).show();
+                            Toast.makeText(context, "You are not authorized to join this class. Contact your teacher.", Toast.LENGTH_LONG).show();
                             joinButton.setEnabled(true);
                             return;
                         }
