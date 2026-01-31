@@ -173,7 +173,10 @@ public class SeatPlan extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_logout) {
                 LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,
-                        () -> drawerLayout.closeDrawer(GravityCompat.START));
+                        () -> {
+                            drawerLayout.closeDrawer(GravityCompat.START);
+                        }
+                );
                 confirmDialog.show();
                 return true;
             }
@@ -190,20 +193,32 @@ public class SeatPlan extends AppCompatActivity {
             return;
         }
 
-        db.collection("users").document(currentUser.getUid())
+        db.collection("users")
+                .document(currentUser.getUid())
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     drawerLayout.closeDrawer(GravityCompat.START);
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
-                        if ("Student".equalsIgnoreCase(userType)) {
-                            startActivity(new Intent(SeatPlan.this, StudentHome.class));
-                            finish();
-                        } else if ("Teacher".equalsIgnoreCase(userType)) {
-                            startActivity(new Intent(SeatPlan.this, TeacherHome.class));
-                            finish();
+
+                        if (userType != null) {
+                            if ("Student".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(SeatPlan.this, StudentHome.class));
+                            } else if ("Teacher".equalsIgnoreCase(userType.trim())) {
+                                startActivity(new Intent(SeatPlan.this, TeacherHome.class));
+                            } else {
+                                Toast.makeText(SeatPlan.this, "Unknown user type: " + userType, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(SeatPlan.this, "User type not found in document", Toast.LENGTH_SHORT).show();
                         }
+                    } else {
+                        Toast.makeText(SeatPlan.this, "User document not found", Toast.LENGTH_SHORT).show();
                     }
+                })
+                .addOnFailureListener(e -> {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    Toast.makeText(SeatPlan.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -216,17 +231,18 @@ public class SeatPlan extends AppCompatActivity {
     }
 
     private void setupBackPressHandler() {
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    drawerLayout.closeDrawer(GravityCompat.START);
-                } else {
-                    setEnabled(false);
-                    getOnBackPressedDispatcher().onBackPressed();
-                }
-            }
-        });
+        getOnBackPressedDispatcher().addCallback(this,
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                            drawerLayout.closeDrawer(GravityCompat.START);
+                        } else {
+                            setEnabled(false);
+                            getOnBackPressedDispatcher().onBackPressed();
+                        }
+                    }
+                });
     }
 
     private void loadUserInfoInDrawer() {
@@ -236,18 +252,34 @@ public class SeatPlan extends AppCompatActivity {
             TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
             TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
 
-            db.collection("users").document(currentUser.getUid())
+            db.collection("users")
+                    .document(currentUser.getUid())
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
                             String lastName = documentSnapshot.getString("lastName");
-                            String fullName = (firstName != null ? firstName : "") +
-                                    (lastName != null ? " " + lastName : "");
+                            String fullName = "";
+
+                            if (firstName != null && !firstName.isEmpty()) {
+                                fullName = firstName;
+                            }
+
+                            if (lastName != null && !lastName.isEmpty()) {
+                                fullName += (fullName.isEmpty() ? "" : " ") + lastName;
+                            }
+
                             userNameTextView.setText(fullName.isEmpty() ? "User" : fullName);
+                        } else {
+                            userNameTextView.setText("User");
                         }
-                        userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
+                    })
+                    .addOnFailureListener(e -> {
+                        userNameTextView.setText("User");
                     });
+
+            userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
         }
     }
+
 }
