@@ -38,11 +38,6 @@ public class SignUp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_sign_up);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -313,7 +308,7 @@ public class SignUp extends AppCompatActivity {
             return false;
         }
 
-        String pattern = "^(201[9]|202[0-5])-[1-9]{7}$";
+        String pattern = "^(201[9]|202[0-5])-[0-9]{7}$";
 
         return schoolNumber.matches(pattern);
     }
