@@ -51,7 +51,7 @@ public class AddStudentsForm extends AppCompatActivity {
         navigationView = findViewById(R.id.navigation_view);
 
         ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
-        hamburgerIcon.setOnClickListener(v ->
+        hamburgerIcon.setOnClickListener(view ->
                 drawerLayout.openDrawer(GravityCompat.START)
         );
 
