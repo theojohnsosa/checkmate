@@ -240,7 +240,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        clearSearchButton.setOnClickListener(v -> {
+        clearSearchButton.setOnClickListener(view -> {
             classSearchBar.setText("");
             filteredClasses.clear();
             classAdapter.setClasses(new ArrayList<>(archivedClasses));
