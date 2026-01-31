@@ -81,7 +81,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
             roomText.setText(classModel.getRoom());
 
-            cardView.setOnClickListener(v -> {
+            cardView.setOnClickListener(view -> {
                 if (listener != null) {
                     listener.onClassClick(classModel);
                 }
