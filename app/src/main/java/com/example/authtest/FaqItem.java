@@ -5,7 +5,11 @@ public class FaqItem {
     private String answer;
     private String category;
 
-    public FaqItem(String question, String answer, String category) {
+    public FaqItem(
+            String question,
+            String answer,
+            String category
+    ) {
         this.question = question;
         this.answer = answer;
         this.category = category;
