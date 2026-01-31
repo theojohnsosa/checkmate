@@ -126,6 +126,7 @@ public class ClassInformation extends AppCompatActivity {
         viewSeatPlanButton = findViewById(R.id.viewSeatPlanButton);
         viewSeatPlanButton.setOnClickListener(view -> {
             Intent intent = new Intent(this, SeatPlan.class);
+            intent.putExtra("CLASS_ID", classId);
             startActivity(intent);
         });
 

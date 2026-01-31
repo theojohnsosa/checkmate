@@ -7,63 +7,147 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.graphics.Insets;
+import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class SeatPlan extends AppCompatActivity {
 
-    private AppCompatButton backButton;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
+    private AppCompatButton backButton;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private CardView[] seatCards = new CardView[40];
+
+    private String currentClassId = null; // currently selected class
+    private final HashMap<String, List<String>> classSeatCache = new HashMap<>(); // cached seat plans
+    private ListenerRegistration classListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_seat_plan);
 
-        //for back button
-        backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(view -> {
-            finish();
-        });
-        //for database and authentication
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        //for the layout of menu button
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
-        //performs action when clicked
-        ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
-        hamburgerIcon.setOnClickListener(v ->
-                drawerLayout.openDrawer(GravityCompat.START)
-        );
 
-        //method calling
+        ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
+        hamburgerIcon.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+
         setupNavigationDrawer();
         setupBackPressHandler();
         loadUserInfoInDrawer();
 
+        backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(view -> finish());
 
+        //initialization of seatbutton
+        initializeSeatCards();
+
+        //fetch the class id from class info. java
+        currentClassId = getIntent().getStringExtra("CLASS_ID");
+
+        if (currentClassId == null || currentClassId.isEmpty()) {
+            Toast.makeText(this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        loadSeatPlanForClass(currentClassId);
     }
 
 
-    //menu function
+    //iteration of seat plan card button
+    private void initializeSeatCards() {
+        for (int i = 0; i < 40; i++) {
+            int resId = getResources().getIdentifier("seatPlanCard" + (i + 1), "id", getPackageName());
+            seatCards[i] = findViewById(resId);
+        }
+    }
+
+
+    /**
+     * Called when a class is selected
+     */
+    private void loadSeatPlanForClass(String classId) {
+        clearSeatColors();
+
+        String teacherId = mAuth.getCurrentUser().getUid();
+
+        if (classListener != null) classListener.remove();
+
+        classListener = db.collection("users")
+                .document(teacherId)
+                .collection("classes")
+                .document(classId)
+                .addSnapshotListener((documentSnapshot, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Error loading seat plan", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        List<String> students =
+                                (List<String>) documentSnapshot.get("allowedStudentEmails");
+
+                        if (students == null) students = new ArrayList<>();
+
+                        updateSeatColors(students.size());
+                    } else {
+                        updateSeatColors(0);
+                    }
+                });
+    }
+
+
+    //removing seat colors
+    private void clearSeatColors() {
+        int emptyColor = getResources().getColor(android.R.color.darker_gray);
+        for (CardView seat : seatCards) {
+            seat.setCardBackgroundColor(emptyColor);
+        }
+    }
+
+    //updation of seat colors
+    private void updateSeatColors(int studentCount) {
+        int occupiedColor = getResources().getColor(android.R.color.holo_green_light);
+        int emptyColor = getResources().getColor(android.R.color.darker_gray);
+
+        for (int i = 0; i < seatCards.length; i++) {
+            if (i < studentCount) {
+                seatCards[i].setCardBackgroundColor(occupiedColor);
+            } else {
+                seatCards[i].setCardBackgroundColor(emptyColor);
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (classListener != null) classListener.remove();
+    }
+
+
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -105,7 +189,6 @@ public class SeatPlan extends AppCompatActivity {
         });
     }
 
-    //user authentication
     private void navigateToUserHome() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -142,7 +225,6 @@ public class SeatPlan extends AppCompatActivity {
                 });
     }
 
-    //logout method
     private void logout() {
         mAuth.signOut();
         Intent intent = new Intent(SeatPlan.this, SignIn.class);
@@ -151,7 +233,6 @@ public class SeatPlan extends AppCompatActivity {
         finish();
     }
 
-    //when the menu button is click outside, the menu button will close
     private void setupBackPressHandler() {
         getOnBackPressedDispatcher().addCallback(this,
                 new OnBackPressedCallback(true) {

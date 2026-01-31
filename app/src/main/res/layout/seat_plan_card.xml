@@ -2,9 +2,9 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/seatPlanCard"
-    android:layout_width="40dp"
-    android:layout_height="55dp"
-    android:layout_margin="3dp"
+    android:layout_width="38dp"
+    android:layout_height="50dp"
+    android:layout_margin="2dp"
     app:cardBackgroundColor="#2C2C2C"
     app:cardCornerRadius="10dp" >
 
