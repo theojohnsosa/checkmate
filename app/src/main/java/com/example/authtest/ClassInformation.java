@@ -91,7 +91,7 @@ public class ClassInformation extends AppCompatActivity {
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
 
-        binding.hamburgerIcon.setOnClickListener(v -> {
+        binding.hamburgerIcon.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
 
@@ -103,7 +103,9 @@ public class ClassInformation extends AppCompatActivity {
         loadUserInfoInDrawer();
         setupBackPressHandler();
 
-        binding.backButton.setOnClickListener(v -> finish());
+        binding.backButton.setOnClickListener(view -> {
+            finish();
+        });
 
         addStudentsButton = findViewById(R.id.addStudentsButton);
 
@@ -122,7 +124,7 @@ public class ClassInformation extends AppCompatActivity {
         checkUserTypeAndSetupUI();
 
         viewSeatPlanButton = findViewById(R.id.viewSeatPlanButton);
-        viewSeatPlanButton.setOnClickListener(view ->{
+        viewSeatPlanButton.setOnClickListener(view -> {
             Intent intent = new Intent(this, SeatPlan.class);
             startActivity(intent);
         });
@@ -159,7 +161,7 @@ public class ClassInformation extends AppCompatActivity {
         }
 
         if (addStudentsButton != null && !isStudent) {
-            addStudentsButton.setOnClickListener(v -> {
+            addStudentsButton.setOnClickListener(view -> {
                 if (classId != null && !classId.isEmpty()) {
                     Intent addStudentIntent = new Intent(ClassInformation.this, AddStudentsForm.class);
                     addStudentIntent.putExtra("CLASS_ID", classId);
@@ -343,7 +345,7 @@ public class ClassInformation extends AppCompatActivity {
         }
 
         long startTime = attendanceSessionStartTime > 0 ? attendanceSessionStartTime : (endTime - 3600000);
-        String sessionId = String.valueOf(System.currentTimeMillis()); // Unique for each session
+        String sessionId = String.valueOf(System.currentTimeMillis());
 
         Map<String, Object> sessionData = new HashMap<>();
         sessionData.put("sessionId", sessionId);
@@ -548,7 +550,7 @@ public class ClassInformation extends AppCompatActivity {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        clearSearchButton.setOnClickListener(v -> {
+        clearSearchButton.setOnClickListener(view -> {
             studentSearchBar.setText("");
             filteredStudentList.clear();
             studentAdapter.setStudents(new ArrayList<>(studentList));
@@ -568,9 +570,7 @@ public class ClassInformation extends AppCompatActivity {
             String firstName = (student.getFirstName() != null ? student.getFirstName() : "").toLowerCase();
             String lastName = (student.getLastName() != null ? student.getLastName() : "").toLowerCase();
 
-            if (fullName.contains(searchQuery) ||
-                    firstName.contains(searchQuery) ||
-                    lastName.contains(searchQuery)) {
+            if (fullName.contains(searchQuery) || firstName.contains(searchQuery) || lastName.contains(searchQuery)) {
                 filteredStudentList.add(student);
             }
         }
@@ -1192,7 +1192,7 @@ public class ClassInformation extends AppCompatActivity {
         isSessionActive = classModel.isAttendanceActive();
         updateTeacherAttendanceUI(attendanceBinding);
 
-        attendanceBinding.attendanceButton.setOnClickListener(v -> {
+        attendanceBinding.attendanceButton.setOnClickListener(view -> {
             isSessionActive = !isSessionActive;
             updateTeacherAttendanceUI(attendanceBinding);
             updateAttendanceStatusInFirestore(isSessionActive);
@@ -1202,7 +1202,7 @@ public class ClassInformation extends AppCompatActivity {
     private void setupStudentView(ClassModel classModel) {
         StudentsAttendanceStatusCardBinding studentCard = binding.studentAttendanceCard;
 
-        studentCard.markAttendanceButton.setOnClickListener(v -> {
+        studentCard.markAttendanceButton.setOnClickListener(view -> {
             markAttendance();
         });
 
