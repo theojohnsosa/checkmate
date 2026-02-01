@@ -44,14 +44,14 @@ public class RemoveClassConfirmationDialog extends Dialog {
 
         messageText.setText("Are you sure you want to remove " + className + "? This action cannot be undone.");
 
-        cancelButton.setOnClickListener(v -> {
+        cancelButton.setOnClickListener(view -> {
             dismiss();
             if (onCancel != null) {
                 onCancel.run();
             }
         });
 
-        removeButton.setOnClickListener(v -> {
+        removeButton.setOnClickListener(view -> {
             dismiss();
             if (onConfirm != null) {
                 onConfirm.run();
