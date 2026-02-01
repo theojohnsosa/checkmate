@@ -45,8 +45,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="20dp"
-            android:paddingTop="24dp"
-            android:paddingBottom="16dp">
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/backButton"
@@ -164,7 +164,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
-                    android:layout_marginBottom="15dp" >
+                    android:layout_marginBottom="10dp" >
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -285,6 +285,35 @@
                             layout="@layout/streak_card" />
                         
                     </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <include
+                            android:id="@+id/monday_week5"
+                            layout="@layout/streak_card" />
+
+                        <include
+                            android:id="@+id/tuesday_week5"
+                            layout="@layout/streak_card" />
+
+                        <include
+                            android:id="@+id/wednesday_week5"
+                            layout="@layout/streak_card" />
+
+                        <include
+                            android:id="@+id/thursday_week5"
+                            layout="@layout/streak_card" />
+
+                        <include
+                            android:id="@+id/friday_week5"
+                            layout="@layout/streak_card" />
+
+                        <include
+                            android:id="@+id/saturday_week5"
+                            layout="@layout/streak_card" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -295,7 +324,7 @@
                     android:textColor="#888888"
                     android:textSize="14sp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="20dp" />
+                    android:layout_marginBottom="10dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

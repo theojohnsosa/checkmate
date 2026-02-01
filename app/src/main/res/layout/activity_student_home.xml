@@ -193,7 +193,6 @@
                     android:text="Join Class"
                     android:textAllCaps="false"
                     android:textStyle="bold" />
-
             </LinearLayout>
 
         </FrameLayout>

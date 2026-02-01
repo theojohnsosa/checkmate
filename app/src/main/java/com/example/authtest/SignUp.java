@@ -312,7 +312,6 @@ public class SignUp extends AppCompatActivity {
 
         return schoolNumber.matches(pattern);
     }
-
     private void saveUserToFirestore(
             String userId,
             String firstName,
