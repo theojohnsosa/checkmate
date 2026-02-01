@@ -121,14 +121,14 @@ public class ClassInformation extends AppCompatActivity {
 
         setupRecentSessionsRecyclerView();
 
-        checkUserTypeAndSetupUI();
-
         viewSeatPlanButton = findViewById(R.id.viewSeatPlanButton);
         viewSeatPlanButton.setOnClickListener(view -> {
             Intent intent = new Intent(this, SeatPlan.class);
             intent.putExtra("CLASS_ID", classId);
             startActivity(intent);
         });
+
+        checkUserTypeAndSetupUI();
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("CLASS_MODEL")) {
@@ -1799,12 +1799,16 @@ public class ClassInformation extends AppCompatActivity {
                 if (addStudentsButton != null) {
                     addStudentsButton.setVisibility(View.GONE);
                 }
+                if (viewSeatPlanButton != null) {
+                    viewSeatPlanButton.setVisibility(View.GONE);
+                }
                 if (studentsAttendedHeader != null) {
                     studentsAttendedHeader.setVisibility(View.GONE);
                 }
                 if (studentsRecyclerView != null) {
                     studentsRecyclerView.setVisibility(View.GONE);
                 }
+
             } else {
                 isStudent = false;
                 binding.attendanceCard.getRoot().setVisibility(View.VISIBLE);
@@ -1812,6 +1816,9 @@ public class ClassInformation extends AppCompatActivity {
                 binding.attendanceStatsCard.getRoot().setVisibility(View.VISIBLE);
                 if (addStudentsButton != null) {
                     addStudentsButton.setVisibility(View.VISIBLE);
+                }
+                if (viewSeatPlanButton != null) {
+                    viewSeatPlanButton.setVisibility(View.VISIBLE);
                 }
             }
         }
