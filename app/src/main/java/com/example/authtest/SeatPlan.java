@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -14,15 +13,11 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,9 +30,8 @@ public class SeatPlan extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private CardView[] seatCards = new CardView[40];
-
-    private String currentClassId = null; // currently selected class
-    private final HashMap<String, List<String>> classSeatCache = new HashMap<>(); // cached seat plans
+    private String currentClassId = null; // Currently selected class
+    private final HashMap<String, List<String>> classSeatCache = new HashMap<>(); // Cached seat plans
     private ListenerRegistration classListener;
 
     @Override
@@ -52,7 +46,9 @@ public class SeatPlan extends AppCompatActivity {
         navigationView = findViewById(R.id.navigation_view);
 
         ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
-        hamburgerIcon.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+        hamburgerIcon.setOnClickListener(view -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
 
         setupNavigationDrawer();
         setupBackPressHandler();
@@ -61,10 +57,10 @@ public class SeatPlan extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> finish());
 
-        //initialization of seatbutton
+        // Initialization of seatbutton
         initializeSeatCards();
 
-        //fetch the class id from class info. java
+        // Fetch the class id from class info. java
         currentClassId = getIntent().getStringExtra("CLASS_ID");
 
         if (currentClassId == null || currentClassId.isEmpty()) {
@@ -76,8 +72,7 @@ public class SeatPlan extends AppCompatActivity {
         loadSeatPlanForClass(currentClassId);
     }
 
-
-    //iteration of seat plan card button
+    // Iteration of seat plan card button
     private void initializeSeatCards() {
         for (int i = 0; i < 40; i++) {
             int resId = getResources().getIdentifier("seatPlanCard" + (i + 1), "id", getPackageName());
@@ -85,16 +80,14 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
-
-    /**
-     * Called when a class is selected
-     */
+    // Called when a class is selected
     private void loadSeatPlanForClass(String classId) {
         clearSeatColors();
-
         String teacherId = mAuth.getCurrentUser().getUid();
 
-        if (classListener != null) classListener.remove();
+        if (classListener != null) {
+            classListener.remove();
+        }
 
         classListener = db.collection("users")
                 .document(teacherId)
@@ -119,8 +112,7 @@ public class SeatPlan extends AppCompatActivity {
                 });
     }
 
-
-    //removing seat colors
+    // Removing seat colors
     private void clearSeatColors() {
         int emptyColor = ContextCompat.getColor(this,R.color.empty_seat);
         for (CardView seat : seatCards) {
@@ -128,7 +120,7 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
-    //updation of seat colors
+    // Updation of seat colors
     private void updateSeatColors(int studentCount) {
         int emptyColor = ContextCompat.getColor(this,R.color.empty_seat);
         int occupiedColor = ContextCompat.getColor(this,R.color.occupied_seat);
@@ -146,7 +138,6 @@ public class SeatPlan extends AppCompatActivity {
         super.onDestroy();
         if (classListener != null) classListener.remove();
     }
-
 
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
