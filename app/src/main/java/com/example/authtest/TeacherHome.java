@@ -65,12 +65,17 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
 
         setupSwipeToDeleteClass();
 
-        binding.hamburgerIcon.setOnClickListener(v -> {
+        binding.hamburgerIcon.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
 
-        binding.createClassButton.setOnClickListener(v -> openCreateClass());
-        binding.ctaButton.setOnClickListener(v -> openCreateClass());
+        binding.createClassButton.setOnClickListener(view -> {
+            openCreateClass();
+        });
+
+        binding.ctaButton.setOnClickListener(view -> {
+            openCreateClass();
+        });
 
         setupNavigationDrawer();
         loadUserInfoInDrawer();
@@ -256,7 +261,7 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        clearSearchButton.setOnClickListener(v -> {
+        clearSearchButton.setOnClickListener(view -> {
             classSearchBar.setText("");
             filteredClasses.clear();
             classAdapter.setClasses(new ArrayList<>(classList));

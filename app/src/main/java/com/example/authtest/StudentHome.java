@@ -58,7 +58,7 @@ public class StudentHome extends AppCompatActivity {
         classSearchBar = findViewById(R.id.classSearchBar);
         clearSearchButton = findViewById(R.id.clearSearchButton);
 
-        binding.hamburgerIcon.setOnClickListener(v -> {
+        binding.hamburgerIcon.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
 
@@ -72,12 +72,12 @@ public class StudentHome extends AppCompatActivity {
         setupClassSearch();
         loadClasses();
 
-        binding.joinClassButton.setOnClickListener(v -> {
+        binding.joinClassButton.setOnClickListener(view -> {
             JoinClassDialog dialog = new JoinClassDialog(this, this::loadClasses);
             dialog.show();
         });
 
-        binding.ctaButton.setOnClickListener(v -> {
+        binding.ctaButton.setOnClickListener(view -> {
             JoinClassDialog dialog = new JoinClassDialog(this, this::loadClasses);
             dialog.show();
         });
@@ -127,7 +127,7 @@ public class StudentHome extends AppCompatActivity {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        clearSearchButton.setOnClickListener(v -> {
+        clearSearchButton.setOnClickListener(view -> {
             classSearchBar.setText("");
             filteredClasses.clear();
             classAdapter.setClasses(new ArrayList<>(classList));
@@ -393,11 +393,12 @@ public class StudentHome extends AppCompatActivity {
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
                             String lastName = documentSnapshot.getString("lastName");
-
                             String fullName = "";
+
                             if (firstName != null && !firstName.isEmpty()) {
                                 fullName = firstName;
                             }
+
                             if (lastName != null && !lastName.isEmpty()) {
                                 fullName += (fullName.isEmpty() ? "" : " ") + lastName;
                             }
