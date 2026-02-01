@@ -35,6 +35,9 @@ public class SeatPlan extends AppCompatActivity {
     private final HashMap<String, List<String>> classSeatCache = new HashMap<>();
     private ListenerRegistration classListener;
     private List<StudentAttendanceModel> sortedStudentList = new ArrayList<>();
+    private TextView occupiedText;
+    private TextView vacantText;
+    private static final int totalSeats = 40;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +76,9 @@ public class SeatPlan extends AppCompatActivity {
         }
 
         loadSeatPlanForClass(currentClassId);
+
+        occupiedText = findViewById(R.id.occupiedText);
+        vacantText = findViewById(R.id.vacantText);
     }
 
     // Iteration of seat plan card button
@@ -80,6 +86,9 @@ public class SeatPlan extends AppCompatActivity {
         for (int i = 0; i < 40; i++) {
             int resId = getResources().getIdentifier("seatPlanCard" + (i + 1), "id", getPackageName());
             seatCards[i] = findViewById(resId);
+            TextView occupied = findViewById(R.id.occupiedText);
+            TextView vacant = findViewById(R.id.vacantText);
+
 
             // Add click listener to each seat card
             final int seatNumber = i + 1;
@@ -93,6 +102,8 @@ public class SeatPlan extends AppCompatActivity {
         // Check if there's a student assigned to this seat
         if (seatNumber <= sortedStudentList.size()) {
             StudentAttendanceModel student = sortedStudentList.get(seatNumber - 1);
+            TextView occupied = findViewById(R.id.occupiedText);
+            TextView vacant = findViewById(R.id.vacantText);
 
             // Show dialog with student info
             StudentSeatDialog dialog = new StudentSeatDialog(this, student);
@@ -317,6 +328,15 @@ public class SeatPlan extends AppCompatActivity {
                 seatCards[i].setCardBackgroundColor(emptyColor);
             }
         }
+        updateSeatCounters(studentCount);
+    }
+    private void updateSeatCounters(int occupiedCount) {
+        int vacantCount = totalSeats - occupiedCount;
+
+        String occupied = " Occupied";
+        String vacant = " Vacant";
+        occupiedText.setText(occupiedCount  + occupied);
+        vacantText.setText(vacantCount +  vacant);
     }
 
     @Override
