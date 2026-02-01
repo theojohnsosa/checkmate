@@ -20,7 +20,7 @@ public class ClassModel implements Serializable {
     private boolean isAttendanceActive = false;
     private String teacherId;
     private boolean isArchived = false;
-    private long createdAt = 0; // NEW: For tracking when class was created
+    private long createdAt = 0;
 
     public ClassModel() {
         this.allowedStudentEmails = new ArrayList<>();
@@ -29,9 +29,18 @@ public class ClassModel implements Serializable {
         this.createdAt = 0;
     }
 
-    public ClassModel(String className, String classCode, String subjectCode,
-                      String classDays, String startTime, String endTime,
-                      String room, String teacher, int students, String teacherId) {
+    public ClassModel(
+            String className,
+            String classCode,
+            String subjectCode,
+            String classDays,
+            String startTime,
+            String endTime,
+            String room,
+            String teacher,
+            int students,
+            String teacherId
+    ) {
         this.className = className;
         this.classCode = classCode;
         this.subjectCode = subjectCode;
@@ -120,7 +129,6 @@ public class ClassModel implements Serializable {
         isArchived = archived;
     }
 
-    // NEW: Getters and setters for createdAt
     public long getCreatedAt() {
         return createdAt;
     }

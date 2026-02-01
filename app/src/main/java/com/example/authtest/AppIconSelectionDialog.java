@@ -13,7 +13,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.widget.AppCompatButton;
-import android.util.Log;
 
 public class AppIconSelectionDialog extends Dialog {
 
@@ -22,7 +21,7 @@ public class AppIconSelectionDialog extends Dialog {
     private final Runnable onCancel;
     private static final String TAG = "AppIconDialog";
 
-    private static final String[] ALIAS_NAMES = {
+    private static final String[] AliasNames = {
             "IconWhiteAlias",
             "IconBlueAlias",
             "IconRedAlias",
@@ -30,16 +29,20 @@ public class AppIconSelectionDialog extends Dialog {
             "IconGreenAlias"
     };
 
-    private static final String[] ICON_DISPLAY_NAMES = {
-            "White", "Blue", "Red", "Yellow", "Green"
+    private static final String[] IconDisplayNames = {
+            "White",
+            "Blue",
+            "Red",
+            "Yellow",
+            "Green"
     };
 
-    private static final int[] ICON_BUTTON_IDS = {
+    private static final int[] IconButtonIds = {
             R.id.iconButton1, R.id.iconButton2, R.id.iconButton3,
             R.id.iconButton4, R.id.iconButton5
     };
 
-    private static final int[] CHECKMARK_IDS = {
+    private static final int[] CheckmarkIds = {
             R.id.checkmark1, R.id.checkmark2, R.id.checkmark3,
             R.id.checkmark4, R.id.checkmark5
     };
@@ -75,8 +78,8 @@ public class AppIconSelectionDialog extends Dialog {
         PackageManager pm = context.getPackageManager();
         String packageName = context.getPackageName();
 
-        for (int i = 0; i < ALIAS_NAMES.length; i++) {
-            String fullAliasName = packageName + "." + ALIAS_NAMES[i];
+        for (int i = 0; i < AliasNames.length; i++) {
+            String fullAliasName = packageName + "." + AliasNames[i];
             ComponentName cn = new ComponentName(packageName, fullAliasName);
 
             int state = pm.getComponentEnabledSetting(cn);
@@ -97,15 +100,15 @@ public class AppIconSelectionDialog extends Dialog {
     }
 
     private void setupIconButtonListeners() {
-        for (int i = 0; i < ICON_BUTTON_IDS.length; i++) {
+        for (int i = 0; i < IconButtonIds.length; i++) {
             final int index = i;
-            FrameLayout btn = findViewById(ICON_BUTTON_IDS[i]);
+            FrameLayout btn = findViewById(IconButtonIds[i]);
 
             if (btn == null) {
                 continue;
             }
 
-            btn.setOnClickListener(v -> {
+            btn.setOnClickListener(view -> {
                 if (selectedIconIndex == index) {
                     Toast.makeText(context, "This icon is already selected", Toast.LENGTH_SHORT).show();
                     return;
@@ -129,14 +132,14 @@ public class AppIconSelectionDialog extends Dialog {
             return;
         }
 
-        cancelButton.setOnClickListener(v -> {
+        cancelButton.setOnClickListener(view -> {
             dismiss();
             if (onCancel != null) {
                 onCancel.run();
             }
         });
 
-        selectButton.setOnClickListener(v -> {
+        selectButton.setOnClickListener(view -> {
             if (selectedIconIndex == currentlyEnabledIndex) {
                 Toast.makeText(context, "This icon is already active", Toast.LENGTH_SHORT).show();
                 dismiss();
@@ -156,8 +159,8 @@ public class AppIconSelectionDialog extends Dialog {
     }
 
     private void updateCheckmarks() {
-        for (int i = 0; i < CHECKMARK_IDS.length; i++) {
-            ImageView checkmark = findViewById(CHECKMARK_IDS[i]);
+        for (int i = 0; i < CheckmarkIds.length; i++) {
+            ImageView checkmark = findViewById(CheckmarkIds[i]);
             if (checkmark != null) {
                 if (i == selectedIconIndex) {
                     checkmark.setVisibility(View.VISIBLE);
@@ -173,8 +176,8 @@ public class AppIconSelectionDialog extends Dialog {
         String packageName = context.getPackageName();
 
         try {
-            for (int i = 0; i < ALIAS_NAMES.length; i++) {
-                String fullAliasName = packageName + "." + ALIAS_NAMES[i];
+            for (int i = 0; i < AliasNames.length; i++) {
+                String fullAliasName = packageName + "." + AliasNames[i];
                 ComponentName cn = new ComponentName(packageName, fullAliasName);
 
                 pm.setComponentEnabledSetting(cn,
@@ -183,7 +186,7 @@ public class AppIconSelectionDialog extends Dialog {
 
             }
 
-            String selectedFullAliasName = packageName + "." + ALIAS_NAMES[selectedIconIndex];
+            String selectedFullAliasName = packageName + "." + AliasNames[selectedIconIndex];
             ComponentName selectedCn = new ComponentName(packageName, selectedFullAliasName);
 
             pm.setComponentEnabledSetting(selectedCn,
@@ -192,7 +195,7 @@ public class AppIconSelectionDialog extends Dialog {
 
             currentlyEnabledIndex = selectedIconIndex;
 
-            Toast.makeText(context, ICON_DISPLAY_NAMES[selectedIconIndex] + " icon activated!\n\nCheck your home screen.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, IconDisplayNames[selectedIconIndex] + " icon activated!\n\nCheck your home screen.", Toast.LENGTH_LONG).show();
 
         } catch (Exception e) {
             Toast.makeText(context, "Error changing icon: " + e.getMessage(), Toast.LENGTH_LONG).show();

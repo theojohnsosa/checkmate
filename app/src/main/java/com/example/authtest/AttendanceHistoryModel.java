@@ -9,8 +9,14 @@ public class AttendanceHistoryModel {
     private String endTime;
     private long dateAdded;
 
-    public AttendanceHistoryModel(String classId, String className, String classCode,
-                                  String subjectCode, String startTime, String endTime, long dateAdded) {
+    public AttendanceHistoryModel(
+            String classId,
+            String className,
+            String classCode,
+            String subjectCode,
+            String startTime,
+            String endTime,
+            long dateAdded) {
         this.classId = classId;
         this.className = className;
         this.classCode = classCode;

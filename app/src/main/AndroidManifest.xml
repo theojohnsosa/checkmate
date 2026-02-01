@@ -15,11 +15,78 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AuthTest">
 
+        <activity-alias
+            android:name=".IconWhiteAlias"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@drawable/ic_app_icon_white"
+            android:label="@string/app_name"
+            android:targetActivity=".SplashScreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconRedAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_app_icon_red"
+            android:label="@string/app_name"
+            android:targetActivity=".SplashScreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconBlueAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_app_icon_blue"
+            android:label="@string/app_name"
+            android:targetActivity=".SplashScreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconYellowAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_app_icon_yellow"
+            android:label="@string/app_name"
+            android:targetActivity=".SplashScreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconGreenAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_app_icon_green"
+            android:label="@string/app_name"
+            android:targetActivity=".SplashScreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
         <activity
             android:name=".SplashScreen"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -65,72 +132,9 @@
         <activity
             android:name=".AttendanceStreak"
             android:exported="false" />
-
-        <activity-alias
-            android:name=".IconWhiteAlias"
-            android:enabled="true"
-            android:exported="true"
-            android:icon="@drawable/ic_app_icon_white"
-            android:label="@string/app_name"
-            android:targetActivity=".SplashScreen">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <activity-alias
-            android:name=".IconBlueAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@drawable/ic_app_icon_blue"
-            android:label="@string/app_name"
-            android:targetActivity=".SplashScreen">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <activity-alias
-            android:name=".IconRedAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@drawable/ic_app_icon_red"
-            android:label="@string/app_name"
-            android:targetActivity=".SplashScreen">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <activity-alias
-            android:name=".IconYellowAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@drawable/ic_app_icon_yellow"
-            android:label="@string/app_name"
-            android:targetActivity=".SplashScreen">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <activity-alias
-            android:name=".IconGreenAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@drawable/ic_app_icon_green"
-            android:label="@string/app_name"
-            android:targetActivity=".SplashScreen">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
+        <activity
+            android:name=".Faqs"
+            android:exported="false" />
     </application>
 
 </manifest>

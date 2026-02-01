@@ -45,7 +45,7 @@ public class CreateClass extends AppCompatActivity {
         navigationView = findViewById(R.id.navigation_view);
 
         ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
-        hamburgerIcon.setOnClickListener(v ->
+        hamburgerIcon.setOnClickListener(view ->
                 drawerLayout.openDrawer(GravityCompat.START)
         );
 
@@ -55,9 +55,11 @@ public class CreateClass extends AppCompatActivity {
         bindViews();
         setupTimeDropdowns();
 
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(view -> {
+            finish();
+        });
 
-        createClassButton.setOnClickListener(v -> {
+        createClassButton.setOnClickListener(view -> {
             if (validateInputs()) {
                 createClassButton.setEnabled(false);
                 createClassButton.setText("Checking...");
@@ -240,7 +242,9 @@ public class CreateClass extends AppCompatActivity {
     }
 
     private String resolveTeacherName(FirebaseUser user) {
-        if (user == null) return "Instructor";
+        if (user == null) {
+            return "Instructor";
+        }
 
         String displayName = user.getDisplayName();
 
@@ -289,14 +293,17 @@ public class CreateClass extends AppCompatActivity {
             times.add(hour + ":00 " + period);
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, times);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, times);
 
         startTimeInput.setAdapter(adapter);
         endTimeInput.setAdapter(adapter);
 
-        startTimeInput.setOnClickListener(v -> startTimeInput.showDropDown());
-        endTimeInput.setOnClickListener(v -> endTimeInput.showDropDown());
+        startTimeInput.setOnClickListener(view -> {
+            startTimeInput.showDropDown();
+        });
+        endTimeInput.setOnClickListener(view -> {
+            endTimeInput.showDropDown();
+        });
     }
 
     private String getSelectedDays() {

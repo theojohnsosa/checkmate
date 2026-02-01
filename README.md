@@ -1,6 +1,6 @@
-# Checkmate - Classroom Attendance Management System
+# Checkmate - Classroom Attendance Tracker App
 
-A mobile-first attendance tracking application built with Android that streamlines classroom check-ins while maintaining security and accuracy. Checkmate simplifies attendance management for educational institutions with role-based access and intelligent fraud detection.
+Checkmate is a classroom attendance app for Android where teachers create classes and manage attendance, and students check in during active sessions. It replaces manual roll calls with a fast, organized, and time-controlled digital system.
 
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat-square&logo=java&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=flat-square&logo=android&logoColor=white)
@@ -46,6 +46,13 @@ A mobile-first attendance tracking application built with Android that streamlin
 - **Session Management** - Remove sessions with confirmation to prevent accidental data loss
 - **Comprehensive Analytics** - Detailed attendance cards, history models, and streak tracking
 
+### User Support
+
+- **FAQs Section** - Searchable and categorized frequently asked questions for both teachers and students
+- **Multi-filter Search** - Filter FAQs by categories (General, Account, Teachers, Students, Troubleshooting)
+- **Quick Search** - Full-text search across question and answer content
+- **Empty State Handling** - Friendly messages when no results match the search criteria
+
 ## Architecture
 
 Checkmate follows a layered architecture pattern with clear separation of concerns:
@@ -72,6 +79,8 @@ The app uses an Activity-based architecture with Fragment support through Adapte
 | **Design Pattern** | Material Design |
 | **Min API Level** | 21 |
 | **Architecture** | Activity & Adapter Pattern |
+| **Database** | Firebase Firestore |
+| **Authentication** | Firebase Auth |
 
 ## Installation
 
@@ -129,6 +138,13 @@ cd checkmate
 4. **View History** - Navigate to attendance history to see past records and streaks
 5. **Check Profile** - Update your profile information in settings
 
+### Accessing FAQs
+
+1. **From Navigation Drawer** - Open the navigation menu and tap "FAQs"
+2. **Search Questions** - Use the search bar to find answers by keyword
+3. **Filter by Category** - Select from categories: General, Account, Teachers, Students, or Troubleshooting
+4. **Expand Answers** - Tap any FAQ item to view the full question and answer
+
 ## Project Structure
 
 ```
@@ -146,16 +162,20 @@ checkmate/
 │   │   ├── SeatPlan.java
 │   │   ├── SettingsActivity.java
 │   │   ├── ProfilePage.java
-│   │   └── ArchiveActivity.java
+│   │   ├── ArchiveActivity.java
+│   │   ├── AttendanceStreak.java
+│   │   └── Faqs.java
 │   ├── Adapters/
 │   │   ├── ClassAdapter.java
 │   │   ├── StudentAttendanceAdapter.java
 │   │   ├── RecentSessionAdapter.java
-│   │   └── AttendanceHistoryAdapter.java
+│   │   ├── AttendanceHistoryAdapter.java
+│   │   └── FaqAdapter.java
 │   ├── Models/
 │   │   ├── ClassModel.java
 │   │   ├── StudentAttendanceModel.java
-│   │   └── AttendanceHistoryModel.java
+│   │   ├── AttendanceHistoryModel.java
+│   │   └── FaqItem.java
 │   └── Dialogs/
 │       ├── JoinClassDialog.java
 │       ├── AddStudentsForm.java
@@ -166,6 +186,7 @@ checkmate/
 │       └── LogoutConfirmationDialog.java
 ├── res/layout/
 │   ├── activity_*.xml
+│   ├── activity_faqs.xml
 │   ├── dialog_*.xml
 │   ├── *_card.xml
 │   └── *_item.xml
@@ -183,10 +204,12 @@ checkmate/
 - **CreateClass** - Class creation form
 - **SessionDetailsActivity** - Detailed attendance session view
 - **AttendanceHistoryActivity** - Attendance records with filtering
+- **AttendanceStreak** - Attendance streak tracking and visualization
 - **SeatPlan** - Visual classroom layout
 - **SettingsActivity** - User preferences and app configuration
 - **ProfilePage** - User profile management
 - **ArchiveActivity** - Archived classes and sessions management
+- **Faqs** - Searchable FAQ section with category filtering and navigation drawer integration
 
 ### Adapters
 
@@ -194,6 +217,7 @@ checkmate/
 - **StudentAttendanceAdapter** - Shows attendance list for a session
 - **RecentSessionAdapter** - Displays recent attendance sessions
 - **AttendanceHistoryAdapter** - Lists historical attendance records
+- **FaqAdapter** - Renders FAQ items with expandable question-answer pairs
 
 ### Models
 
@@ -201,6 +225,7 @@ checkmate/
 - **StudentAttendanceModel** - Attendance record for a student
 - **AttendanceHistoryModel** - Historical attendance data
 - **AttendanceStreak** - Tracks consecutive attendance
+- **FaqItem** - Represents a single FAQ with question, answer, and category
 
 ### Dialogs
 
@@ -208,6 +233,38 @@ checkmate/
 - **AddStudentsForm** - Student addition form
 - **Confirmation Dialogs** - Safe operations for delete/remove actions
 - **AppIconSelectionDialog** - Custom app icon selection
+
+## Features Deep Dive
+
+### FAQs Activity
+
+The FAQs section provides comprehensive support documentation with the following features:
+
+**Search Functionality**
+- Real-time full-text search across questions and answers
+- Auto-clearing search field with visual feedback
+
+**Category Filtering**
+- All - Display all FAQs
+- General Information - Basic app information
+- Account and Access - Account-related questions
+- For Teachers - Teacher-specific FAQs
+- For Students - Student-specific FAQs
+- General Troubleshooting - Common issues and solutions
+
+**User Experience**
+- Empty state message when no results are found
+- Navigation drawer integration for quick access
+- Back button for easy navigation
+- Smooth filtering between categories
+- Header with app logo and hamburger menu
+
+**Content Categories**
+- Account creation and management
+- Device and connectivity requirements
+- Class creation and student management
+- Attendance tracking and marking
+- Troubleshooting common issues
 
 ## Contributing
 
@@ -223,13 +280,15 @@ Please ensure your code follows the existing code style and includes appropriate
 
 ## Future Enhancements
 
-- Cloud database integration (Firebase)
+- Cloud database integration (Firebase) - In Progress
 - Biometric authentication
 - Push notifications for attendance reminders
 - Parent/Guardian portal
 - Detailed analytics dashboard
 - Offline mode support
 - QR code-based check-in
+- Multi-language support for FAQs
+- FAQ feedback and rating system
 
 ## License
 
@@ -237,7 +296,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Authors
 
-- **Theo John Sosa** - Initial work - [theojohnsosa](https://github.com/theojohnsosa)
+- **Theojohn Sosa** - Initial work - [theojohnsosa](https://github.com/theojohnsosa)
 
 ## Support
 
@@ -245,4 +304,4 @@ For issues, feature requests, or questions, please open an issue on the [GitHub 
 
 ---
 
-Made with ❤️ by Theo John Sosa
+Made with ❤️ by Checkmate Team

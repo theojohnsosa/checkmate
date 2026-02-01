@@ -345,7 +345,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void openFAQs() {
-        Toast.makeText(this, "FAQs feature coming soon", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(SettingsActivity.this, Faqs.class));
     }
 
     private void logout() {
