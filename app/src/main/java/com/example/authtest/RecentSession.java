@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class RecentSession implements Serializable {
+
     private String sessionId;
     private String classId;
     private long sessionStartTime;
