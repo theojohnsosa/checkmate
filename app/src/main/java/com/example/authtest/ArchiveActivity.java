@@ -67,6 +67,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
 
         setupNavigationDrawer();
         loadUserInfoInDrawer();
+        checkUserTypeAndConfigureMenu();
         setupBackPressHandler();
         setupRecyclerView();
         setupSwipeToUnarchive();
@@ -208,6 +209,31 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
 
             userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
         }
+    }
+
+    private void checkUserTypeAndConfigureMenu() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        // Hide streak menu item if user is not a student
+                        if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
+                            navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // In case of error, hide streak menu item for safety
+                    navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                });
     }
 
     private void setupRecyclerView() {

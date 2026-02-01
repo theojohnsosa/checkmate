@@ -55,6 +55,7 @@ public class SeatPlan extends AppCompatActivity {
         setupNavigationDrawer();
         setupBackPressHandler();
         loadUserInfoInDrawer();
+        checkUserTypeAndConfigureMenu();
 
         backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> finish());
@@ -208,6 +209,31 @@ public class SeatPlan extends AppCompatActivity {
                         }
                     });
         }
+    }
+
+    private void checkUserTypeAndConfigureMenu() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        // Hide streak menu item if user is not a student
+                        if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
+                            navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // In case of error, hide streak menu item for safety
+                    navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                });
     }
 
     private void checkStudentAttendance(StudentAttendanceModel student) {
