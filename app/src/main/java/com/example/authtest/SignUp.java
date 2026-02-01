@@ -9,9 +9,6 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -61,10 +58,10 @@ public class SignUp extends AppCompatActivity {
         );
         userTypeInput.setAdapter(userTypeAdapter);
 
-        userTypeInput.setOnClickListener(v -> {
+        userTypeInput.setOnClickListener(view -> {
             userTypeInput.showDropDown();
         });
-        userTypeInput.setOnFocusChangeListener((v, hasFocus) -> {
+        userTypeInput.setOnFocusChangeListener((view, hasFocus) -> {
             if (hasFocus) userTypeInput.showDropDown();
         });
         userTypeInput.setKeyListener(null);
@@ -90,10 +87,10 @@ public class SignUp extends AppCompatActivity {
         );
 
         departmentInput.setAdapter(departmentAdapter);
-        departmentInput.setOnClickListener(v -> {
+        departmentInput.setOnClickListener(view -> {
             departmentInput.showDropDown();
         });
-        departmentInput.setOnFocusChangeListener((v, hasFocus) -> {
+        departmentInput.setOnFocusChangeListener((view, hasFocus) -> {
             if (hasFocus) {
                 departmentInput.showDropDown();
             }
@@ -108,21 +105,21 @@ public class SignUp extends AppCompatActivity {
         );
         yearLevelInput.setAdapter(yearLevelAdapter);
 
-        yearLevelInput.setOnClickListener(v -> {
+        yearLevelInput.setOnClickListener(view -> {
             yearLevelInput.showDropDown();
         });
-        yearLevelInput.setOnFocusChangeListener((v, hasFocus) -> {
+        yearLevelInput.setOnFocusChangeListener((view, hasFocus) -> {
             if (hasFocus) {
                 yearLevelInput.showDropDown();
             }
         });
         yearLevelInput.setKeyListener(null);
 
-        signUpButton.setOnClickListener(v -> {
+        signUpButton.setOnClickListener(view -> {
             createAccount();
         });
 
-        hasAccountButton.setOnClickListener(v -> {
+        hasAccountButton.setOnClickListener(view -> {
             Intent intent = new Intent(SignUp.this, SignIn.class);
             startActivity(intent);
             finish();
@@ -139,14 +136,16 @@ public class SignUp extends AppCompatActivity {
         String schoolNumber = schoolNumberInput.getText().toString().trim();
         String yearLevel = yearLevelInput.getText().toString().trim();
 
-        if (!validateInputs(firstName,
+        if (!validateInputs(
+                firstName,
                 lastName,
                 schoolEmail,
                 password,
                 userType,
                 department,
                 schoolNumber,
-                yearLevel)) {
+                yearLevel
+        )) {
             return;
         }
 
@@ -251,9 +250,7 @@ public class SignUp extends AppCompatActivity {
         }
 
         if (!isValidSchoolNumber(schoolNumber)) {
-            schoolNumberInput.setError("Invalid school number format\n" +
-                    "Format: YYYY-0000000\n" +
-                    "Year: 2019-2025, Digits: 1-9 only (7 digits)");
+            schoolNumberInput.setError("Invalid school number format\n" + "Format: YYYY-0000000\n" + "Year: 2019-2025, Digits: 1-9 only (7 digits)");
             schoolNumberInput.requestFocus();
             return false;
         }
