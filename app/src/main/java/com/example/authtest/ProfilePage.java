@@ -7,13 +7,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,8 +37,10 @@ public class ProfilePage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_page);
+
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
         initializeViews();
         setupBackButton();
         setupBackPressHandler();
@@ -63,8 +63,11 @@ public class ProfilePage extends AppCompatActivity {
         profileYear = findViewById(R.id.profile_year);
         logoutButton = findViewById(R.id.logoutButton);
     }
+
     private void setupBackButton() {
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(view -> {
+            finish();
+        });
     }
 
     private void setupBackPressHandler() {
@@ -82,15 +85,17 @@ public class ProfilePage extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, callback);
     }
     private void setupListeners() {
-        hamburgerIcon.setOnClickListener(v -> {
+        hamburgerIcon.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
 
-        logoutButton.setOnClickListener(v -> {
+        logoutButton.setOnClickListener(view -> {
             LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(
                     this,
                     this::logout,
-                    () -> {}
+                    () -> {
+
+                    }
             );
             confirmDialog.show();
         });
@@ -195,11 +200,12 @@ public class ProfilePage extends AppCompatActivity {
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
                             String lastName = documentSnapshot.getString("lastName");
-
                             String fullName = "";
+
                             if (firstName != null && !firstName.isEmpty()) {
                                 fullName = firstName;
                             }
+
                             if (lastName != null && !lastName.isEmpty()) {
                                 fullName += (fullName.isEmpty() ? "" : " ") + lastName;
                             }

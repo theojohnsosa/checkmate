@@ -350,16 +350,24 @@ public class AttendanceStreak extends AppCompatActivity {
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
                             String lastName  = documentSnapshot.getString("lastName");
+
                             String fullName  = "";
-                            if (firstName != null && !firstName.isEmpty()) fullName = firstName;
-                            if (lastName != null && !lastName.isEmpty())
+                            if (firstName != null && !firstName.isEmpty()) {
+                                fullName = firstName;
+                            }
+
+                            if (lastName != null && !lastName.isEmpty()) {
                                 fullName += (fullName.isEmpty() ? "" : " ") + lastName;
+                            }
+
                             userNameTextView.setText(fullName.isEmpty() ? "User" : fullName);
                         } else {
                             userNameTextView.setText("User");
                         }
                     })
-                    .addOnFailureListener(e -> userNameTextView.setText("User"));
+                    .addOnFailureListener(e -> {
+                        userNameTextView.setText("User");
+                    });
 
             userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
         }
