@@ -101,7 +101,7 @@ public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdap
             dateText.setText(session.getDate() != null ? session.getDate() : "N/A");
             timeRangeText.setText(session.getSessionTimeRange() != null ? session.getSessionTimeRange() : "N/A");
 
-            itemView.setOnClickListener(v -> {
+            itemView.setOnClickListener(view -> {
                 if (clickListener != null) {
                     clickListener.onSessionClick(session);
                 }
