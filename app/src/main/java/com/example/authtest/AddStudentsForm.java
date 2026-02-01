@@ -40,7 +40,7 @@ public class AddStudentsForm extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         classId = getIntent().getStringExtra("CLASS_ID");
-        
+
         if (classId == null || classId.isEmpty()) {
             Toast.makeText(this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
             finish();
@@ -58,6 +58,7 @@ public class AddStudentsForm extends AppCompatActivity {
         setupNavigationDrawer();
         setupBackPressHandler();
         loadUserInfoInDrawer();
+        checkUserTypeAndConfigureMenu();
 
         backButton = findViewById(R.id.backButton);
         addStudentButton = findViewById(R.id.addStudentToClassButton);
@@ -70,6 +71,31 @@ public class AddStudentsForm extends AppCompatActivity {
         addStudentButton.setOnClickListener(view -> {
             addStudentToClass();
         });
+    }
+
+    private void checkUserTypeAndConfigureMenu() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        // Hide streak menu item if user is not a student
+                        if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
+                            navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // In case of error, hide streak menu item for safety
+                    navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                });
     }
 
     private void setupNavigationDrawer() {

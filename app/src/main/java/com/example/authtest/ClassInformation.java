@@ -102,6 +102,7 @@ public class ClassInformation extends AppCompatActivity {
         setupNavigationDrawer();
         loadUserInfoInDrawer();
         setupBackPressHandler();
+        checkUserTypeAndConfigureMenu();
 
         binding.backButton.setOnClickListener(view -> {
             finish();
@@ -199,6 +200,30 @@ public class ClassInformation extends AppCompatActivity {
         setupSwipeToDeleteSessions();
     }
 
+    private void checkUserTypeAndConfigureMenu() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        // Hide streak menu item if user is not a student
+                        if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
+                            navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // In case of error, hide streak menu item for safety
+                    navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                });
+    }
     private void setupSwipeToDeleteSessions() {
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             private final ColorDrawable background = new ColorDrawable(Color.parseColor("#C92A2A"));

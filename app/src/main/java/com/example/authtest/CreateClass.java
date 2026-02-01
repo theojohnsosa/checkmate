@@ -54,6 +54,7 @@ public class CreateClass extends AppCompatActivity {
         loadUserInfoInDrawer();
         bindViews();
         setupTimeDropdowns();
+        checkUserTypeAndConfigureMenu();
 
         backButton.setOnClickListener(view -> {
             finish();
@@ -162,6 +163,31 @@ public class CreateClass extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     drawerLayout.closeDrawer(GravityCompat.START);
                     Toast.makeText(CreateClass.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void checkUserTypeAndConfigureMenu() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        // Hide streak menu item if user is not a student
+                        if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
+                            navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // In case of error, hide streak menu item for safety
+                    navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                 });
     }
 
