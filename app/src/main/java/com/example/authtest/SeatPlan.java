@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,9 +31,10 @@ public class SeatPlan extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private CardView[] seatCards = new CardView[40];
-    private String currentClassId = null; // Currently selected class
-    private final HashMap<String, List<String>> classSeatCache = new HashMap<>(); // Cached seat plans
+    private String currentClassId = null;
+    private final HashMap<String, List<String>> classSeatCache = new HashMap<>();
     private ListenerRegistration classListener;
+    private List<StudentAttendanceModel> sortedStudentList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +59,10 @@ public class SeatPlan extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(view -> finish());
 
-        // Initialization of seatbutton
+        // Initialization of seat buttons
         initializeSeatCards();
 
-        // Fetch the class id from class info. java
+        // Fetch the class id from class info
         currentClassId = getIntent().getStringExtra("CLASS_ID");
 
         if (currentClassId == null || currentClassId.isEmpty()) {
@@ -77,6 +79,25 @@ public class SeatPlan extends AppCompatActivity {
         for (int i = 0; i < 40; i++) {
             int resId = getResources().getIdentifier("seatPlanCard" + (i + 1), "id", getPackageName());
             seatCards[i] = findViewById(resId);
+
+            // Add click listener to each seat card
+            final int seatNumber = i + 1;
+            seatCards[i].setOnClickListener(view -> {
+                onSeatClicked(seatNumber);
+            });
+        }
+    }
+
+    private void onSeatClicked(int seatNumber) {
+        // Check if there's a student assigned to this seat
+        if (seatNumber <= sortedStudentList.size()) {
+            StudentAttendanceModel student = sortedStudentList.get(seatNumber - 1);
+
+            // Show dialog with student info
+            StudentSeatDialog dialog = new StudentSeatDialog(this, student);
+            dialog.show();
+        } else {
+            Toast.makeText(this, "Seat " + seatNumber + " is empty", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -105,16 +126,155 @@ public class SeatPlan extends AppCompatActivity {
 
                         if (students == null) students = new ArrayList<>();
 
-                        updateSeatColors(students.size());
+                        fetchAndSortStudents(students);
                     } else {
                         updateSeatColors(0);
                     }
                 });
     }
 
+    private void fetchAndSortStudents(List<String> allowedEmails) {
+        if (allowedEmails == null || allowedEmails.isEmpty()) {
+            updateSeatColors(0);
+            return;
+        }
+
+        List<StudentAttendanceModel> studentList = new ArrayList<>();
+        final int[] loadedCount = {0};
+        final int totalEmails = allowedEmails.size();
+
+        for (String email : allowedEmails) {
+            String cleanEmail = email.toLowerCase().trim();
+
+            db.collection("users")
+                    .whereEqualTo("schoolEmail", cleanEmail)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        if (!querySnapshot.isEmpty()) {
+                            var userDoc = querySnapshot.getDocuments().get(0);
+                            String firstName = userDoc.getString("firstName");
+                            String lastName = userDoc.getString("lastName");
+                            String studentId = userDoc.getId();
+
+                            StudentAttendanceModel student = new StudentAttendanceModel(
+                                    studentId,
+                                    cleanEmail,
+                                    firstName != null ? firstName : "Unknown",
+                                    lastName != null ? lastName : "User"
+                            );
+                            studentList.add(student);
+                            checkStudentAttendance(student);
+                        } else {
+                            // Try alternative email field
+                            db.collection("users")
+                                    .whereEqualTo("email", cleanEmail)
+                                    .limit(1)
+                                    .get()
+                                    .addOnSuccessListener(altQuerySnapshot -> {
+                                        if (!altQuerySnapshot.isEmpty()) {
+                                            var userDoc = altQuerySnapshot.getDocuments().get(0);
+                                            String firstName = userDoc.getString("firstName");
+                                            String lastName = userDoc.getString("lastName");
+                                            String studentId = userDoc.getId();
+
+                                            StudentAttendanceModel student = new StudentAttendanceModel(
+                                                    studentId,
+                                                    cleanEmail,
+                                                    firstName != null ? firstName : "Unknown",
+                                                    lastName != null ? lastName : "User"
+                                            );
+                                            studentList.add(student);
+                                            checkStudentAttendance(student);
+                                        }
+
+                                        loadedCount[0]++;
+                                        if (loadedCount[0] == totalEmails) {
+                                            sortAndUpdateSeats(studentList);
+                                        }
+                                    });
+                            return;
+                        }
+
+                        loadedCount[0]++;
+                        if (loadedCount[0] == totalEmails) {
+                            sortAndUpdateSeats(studentList);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        loadedCount[0]++;
+                        if (loadedCount[0] == totalEmails) {
+                            sortAndUpdateSeats(studentList);
+                        }
+                    });
+        }
+    }
+
+    private void checkStudentAttendance(StudentAttendanceModel student) {
+        if (currentClassId == null || student.getStudentId() == null) {
+            student.setAttendanceStatus("Not Marked");
+            return;
+        }
+
+        db.collection("allClasses")
+                .document(currentClassId)
+                .collection("attendanceRecords")
+                .document(student.getStudentId())
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        Boolean marked = doc.getBoolean("marked");
+                        Long timestamp = doc.getLong("timestamp");
+
+                        if (marked != null && marked && timestamp != null) {
+                            student.setMarked(true);
+                            student.setTimestamp(timestamp);
+                            String status = getAttendanceStatus(timestamp);
+                            student.setAttendanceStatus(status);
+                        } else {
+                            student.setAttendanceStatus("Not Marked");
+                        }
+                    } else {
+                        student.setAttendanceStatus("Not Marked");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    student.setAttendanceStatus("Not Marked");
+                });
+    }
+
+    private String getAttendanceStatus(long markedTimestamp) {
+        // You can implement this similar to ClassInformation
+        // For now, return a simple status
+        return "Present";
+    }
+
+    private void sortAndUpdateSeats(List<StudentAttendanceModel> studentList) {
+        // Sort by lastName, then firstName
+        Collections.sort(studentList, (student1, student2) -> {
+            String lastName1 = student1.getLastName() != null ? student1.getLastName().toLowerCase() : "";
+            String lastName2 = student2.getLastName() != null ? student2.getLastName().toLowerCase() : "";
+
+            int lastNameComparison = lastName1.compareToIgnoreCase(lastName2);
+
+            if (lastNameComparison == 0) {
+                String firstName1 = student1.getFirstName() != null ? student1.getFirstName().toLowerCase() : "";
+                String firstName2 = student2.getFirstName() != null ? student2.getFirstName().toLowerCase() : "";
+                return firstName1.compareToIgnoreCase(firstName2);
+            }
+
+            return lastNameComparison;
+        });
+
+        // Save sorted list for seat clicks
+        sortedStudentList = new ArrayList<>(studentList);
+
+        updateSeatColors(studentList.size());
+    }
+
     // Removing seat colors
     private void clearSeatColors() {
-        int emptyColor = ContextCompat.getColor(this,R.color.empty_seat);
+        int emptyColor = ContextCompat.getColor(this, R.color.empty_seat);
         for (CardView seat : seatCards) {
             seat.setCardBackgroundColor(emptyColor);
         }
@@ -122,8 +282,8 @@ public class SeatPlan extends AppCompatActivity {
 
     // Updation of seat colors
     private void updateSeatColors(int studentCount) {
-        int emptyColor = ContextCompat.getColor(this,R.color.empty_seat);
-        int occupiedColor = ContextCompat.getColor(this,R.color.occupied_seat);
+        int emptyColor = ContextCompat.getColor(this, R.color.empty_seat);
+        int occupiedColor = ContextCompat.getColor(this, R.color.occupied_seat);
         for (int i = 0; i < seatCards.length; i++) {
             if (i < studentCount) {
                 seatCards[i].setCardBackgroundColor(occupiedColor);
@@ -275,5 +435,4 @@ public class SeatPlan extends AppCompatActivity {
             userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
         }
     }
-
 }
