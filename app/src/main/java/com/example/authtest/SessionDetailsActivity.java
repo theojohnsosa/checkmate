@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.se.omapi.Session;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -83,6 +82,7 @@ public class SessionDetailsActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.navigation_view);
 
         ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
+
         if (hamburgerIcon != null) {
             hamburgerIcon.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
         }
@@ -105,8 +105,11 @@ public class SessionDetailsActivity extends AppCompatActivity {
         studentsAttendedHeader = findViewById(R.id.studentsAttendedHeader);
 
         View backButton = findViewById(R.id.backButton);
+
         if (backButton != null) {
-            backButton.setOnClickListener(v -> finish());
+            backButton.setOnClickListener(view -> {
+                finish();
+            });
         }
 
         setupStudentListRecyclerView();
@@ -279,7 +282,7 @@ public class SessionDetailsActivity extends AppCompatActivity {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        clearSearchButton.setOnClickListener(v -> {
+        clearSearchButton.setOnClickListener(view -> {
             studentSearchBar.setText("");
             filteredStudentList.clear();
             studentAdapter.setStudents(new ArrayList<>(studentList));
@@ -329,8 +332,12 @@ public class SessionDetailsActivity extends AppCompatActivity {
                     RemoveStudentConfirmationDialog confirmDialog = new RemoveStudentConfirmationDialog(
                             SessionDetailsActivity.this,
                             student.getFullName(),
-                            () -> removeStudentFromSession(student, position),
-                            () -> studentAdapter.notifyItemChanged(position)
+                            () -> {
+                                removeStudentFromSession(student, position);
+                            },
+                            () -> {
+                                studentAdapter.notifyItemChanged(position);
+                            }
                     );
                     confirmDialog.show();
                 } else {
@@ -575,7 +582,6 @@ public class SessionDetailsActivity extends AppCompatActivity {
     private void updateUI() {
         if (statsCard != null) {
             statsCard.setVisibility(View.VISIBLE);
-        } else {
         }
 
         if (studentsAttendedHeader != null) {
@@ -583,6 +589,7 @@ public class SessionDetailsActivity extends AppCompatActivity {
         }
 
         View searchBarContainer = findViewById(R.id.searchBarContainer);
+
         if (searchBarContainer != null) {
             searchBarContainer.setVisibility(View.VISIBLE);
         }
