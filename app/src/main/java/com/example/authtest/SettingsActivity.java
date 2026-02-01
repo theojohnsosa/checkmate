@@ -50,7 +50,7 @@ public class SettingsActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
 
-        findViewById(R.id.hamburger_icon).setOnClickListener(v -> {
+        findViewById(R.id.hamburger_icon).setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
 
@@ -91,15 +91,9 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Toggles the Do Not Disturb mode on the device
-     * @param enable true to enable DND, false to disable
-     */
     private void toggleDoNotDisturb(boolean enable) {
-        // Check if app has permission to access DND settings (API 31+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!notificationManager.isNotificationPolicyAccessGranted()) {
-                // Permission not granted, open settings
                 showDNDPermissionDialog(enable);
                 return;
             }
@@ -108,46 +102,35 @@ public class SettingsActivity extends AppCompatActivity {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (enable) {
-                    // Enable Do Not Disturb
                     notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
                     Toast.makeText(this, "Do Not Disturb enabled", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Disable Do Not Disturb
                     notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL);
                     Toast.makeText(this, "Do Not Disturb disabled", Toast.LENGTH_SHORT).show();
                 }
             }
         } catch (Exception e) {
             Toast.makeText(this, "Error changing Do Not Disturb: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            // Revert the toggle
             doNotDisturbToggle.setOnCheckedChangeListener(null);
             doNotDisturbToggle.setChecked(!enable);
-            doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> toggleDoNotDisturb(isChecked));
+            doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                toggleDoNotDisturb(isChecked);
+            });
         }
     }
 
-    /**
-     * Shows a dialog to guide user to grant DND permission
-     */
     private void showDNDPermissionDialog(boolean shouldEnable) {
-        // Revert toggle
         doNotDisturbToggle.setOnCheckedChangeListener(null);
         doNotDisturbToggle.setChecked(!shouldEnable);
         doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> toggleDoNotDisturb(isChecked));
-
         Toast.makeText(this, "Please grant Do Not Disturb permission in Settings", Toast.LENGTH_LONG).show();
-
-        // Open notification settings
         Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
         startActivity(intent);
     }
 
-    /**
-     * Loads the current DND state from the device and updates the toggle
-     */
     private void loadDNDState() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            doNotDisturbToggle.setOnCheckedChangeListener(null); // Disable listener to prevent triggering event
+            doNotDisturbToggle.setOnCheckedChangeListener(null);
 
             int interruptionFilter = notificationManager.getCurrentInterruptionFilter();
             boolean isDNDEnabled = interruptionFilter == NotificationManager.INTERRUPTION_FILTER_NONE ||
@@ -155,7 +138,9 @@ public class SettingsActivity extends AppCompatActivity {
                     interruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALARMS;
 
             doNotDisturbToggle.setChecked(isDNDEnabled);
-            doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> toggleDoNotDisturb(isChecked));
+            doNotDisturbToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                toggleDoNotDisturb(isChecked);
+            });
         }
     }
 
@@ -299,11 +284,12 @@ public class SettingsActivity extends AppCompatActivity {
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
                             String lastName = documentSnapshot.getString("lastName");
-
                             String fullName = "";
+
                             if (firstName != null && !firstName.isEmpty()) {
                                 fullName = firstName;
                             }
+
                             if (lastName != null && !lastName.isEmpty()) {
                                 fullName += (fullName.isEmpty() ? "" : " ") + lastName;
                             }
@@ -324,10 +310,8 @@ public class SettingsActivity extends AppCompatActivity {
     private void openAppIcon() {
         AppIconSelectionDialog iconDialog = new AppIconSelectionDialog(
                 this,
-                () -> {
-                },
-                () -> {
-                }
+                () -> {},
+                () -> {}
         );
         iconDialog.show();
     }
@@ -360,8 +344,7 @@ public class SettingsActivity extends AppCompatActivity {
         LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(
                 this,
                 this::logout,
-                () -> {
-                }
+                () -> {}
         );
         confirmDialog.show();
     }
