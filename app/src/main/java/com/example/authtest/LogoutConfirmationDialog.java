@@ -44,14 +44,14 @@ public class LogoutConfirmationDialog extends Dialog {
 
         messageText.setText("Are you sure you want to logout of your account?");
 
-        cancelButton.setOnClickListener(v -> {
+        cancelButton.setOnClickListener(view -> {
             dismiss();
             if (onCancel != null) {
                 onCancel.run();
             }
         });
 
-        logoutButton.setOnClickListener(v -> {
+        logoutButton.setOnClickListener(view -> {
             dismiss();
             if (onConfirm != null) {
                 onConfirm.run();
