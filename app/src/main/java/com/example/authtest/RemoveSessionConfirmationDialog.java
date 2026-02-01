@@ -44,14 +44,14 @@ public class RemoveSessionConfirmationDialog extends Dialog {
 
         messageText.setText("Are you sure you want to delete this session on " + sessionDate + "? This action cannot be undone.");
 
-        cancelButton.setOnClickListener(v -> {
+        cancelButton.setOnClickListener(view -> {
             dismiss();
             if (onCancel != null) {
                 onCancel.run();
             }
         });
 
-        removeButton.setOnClickListener(v -> {
+        removeButton.setOnClickListener(view -> {
             dismiss();
             if (onConfirm != null) {
                 onConfirm.run();
