@@ -78,6 +78,8 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         setupClassSearch();
 
         loadClasses();
+
+        navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
     }
 
     private void setupBackPressHandler() {
