@@ -28,8 +28,7 @@
 
     <include
         android:id="@+id/studentAttendance"
-        layout="@layout/student_attendance_item"
-        />
+        layout="@layout/student_attendance_item" />
 
     <LinearLayout
         android:gravity="end"
