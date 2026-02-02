@@ -39,6 +39,7 @@
                 android:layout_marginEnd="16dp"
                 android:src="@drawable/hamburger_icon"
                 android:contentDescription="hamburger_icon" />
+
         </RelativeLayout>
 
         <LinearLayout
@@ -58,6 +59,7 @@
                 android:text="Back"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF" />
+
         </LinearLayout>
 
         <ScrollView
