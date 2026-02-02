@@ -135,6 +135,9 @@
         <activity
             android:name=".Faqs"
             android:exported="false" />
+        <activity
+            android:name=".ShareFeedbackActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

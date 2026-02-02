@@ -343,7 +343,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void shareFeeback() {
-        Toast.makeText(this, "Share Feedback feature coming soon", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(SettingsActivity.this, ShareFeedbackActivity.class));
     }
 
     private void openTermsOfServices() {
