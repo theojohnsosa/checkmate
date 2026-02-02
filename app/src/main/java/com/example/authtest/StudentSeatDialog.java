@@ -8,8 +8,6 @@ import android.os.Bundle;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
 
@@ -17,10 +15,10 @@ public class StudentSeatDialog extends Dialog {
 
     private final StudentAttendanceModel student;
 
-    public StudentSeatDialog(
+    public StudentSeatDialog (
             Context context,
-
-            StudentAttendanceModel student) {
+            StudentAttendanceModel student
+    ) {
         super(context);
         this.student = student;
 
@@ -47,11 +45,9 @@ public class StudentSeatDialog extends Dialog {
         CardView statusBadge = findViewById(R.id.statusBadge);
         AppCompatButton closeButton = findViewById(R.id.closeButton1);
 
-        // --- BASIC DATA ---
         studentNameText.setText(student.getFullName());
         studentEmailText.setText(student.getEmail());
 
-        // status
         String status = student.getAttendanceStatus();
 
         if (status == null || status.trim().isEmpty()) {
@@ -60,11 +56,9 @@ public class StudentSeatDialog extends Dialog {
 
         attendanceStatusText.setText(status);
 
-        //reset the color
         statusBadge.setCardBackgroundColor(0xFF2C2C2C);
         attendanceStatusText.setTextColor(0xFF828282);
 
-        // update status
         switch (status) {
             case "Present":
                 statusBadge.setCardBackgroundColor(0xFF51CF66);
@@ -82,12 +76,13 @@ public class StudentSeatDialog extends Dialog {
                 break;
 
             default:
-                // "Not Marked" → keep default styling
                 break;
         }
 
         if (closeButton != null) {
-            closeButton.setOnClickListener(v -> closeDialog());
+            closeButton.setOnClickListener(view -> {
+                closeDialog();
+            });
         }
         setCanceledOnTouchOutside(true);
 
