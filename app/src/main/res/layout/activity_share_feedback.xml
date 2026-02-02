@@ -98,7 +98,6 @@
 
                 </LinearLayout>
 
-                <!-- How did Checkmate feel? -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -108,7 +107,6 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="15dp" />
 
-                <!-- Chips layout using FlexboxLayout (like a grid that wraps) -->
                 <com.google.android.flexbox.FlexboxLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -265,7 +263,6 @@
 
                 </com.google.android.flexbox.FlexboxLayout>
 
-                <!-- Rate our service -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -338,7 +335,6 @@
 
                 </LinearLayout>
 
-                <!-- Would you recommend Checkmate? -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -416,7 +412,6 @@
 
                 </LinearLayout>
 
-                <!-- Can you share more? -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

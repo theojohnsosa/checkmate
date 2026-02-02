@@ -27,25 +27,15 @@ public class ShareFeedbackActivity extends AppCompatActivity {
     private AppCompatButton backButton;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
-    // Feeling buttons
     private AppCompatButton buttonSlow, buttonConfusing, buttonFast, buttonFrustrating;
     private AppCompatButton buttonConvenient, buttonEasyToUse, buttonReliable, buttonTimeSaving;
     private AppCompatButton buttonNeedsImprovement, buttonGreatDesign, buttonIntuitive, buttonHelpful;
-
-    // Star rating
     private ImageView star1, star2, star3, star4, star5;
     private int selectedStarRating = 0;
-
-    // Recommendation
     private LinearLayout recommendationNo, recommendationYes;
-    private int selectedRecommendation = 0; // 0 = none, 1 = No, 2 = Yes
-
-    // Text feedback
+    private int selectedRecommendation = 0;
     private EditText feedbackTextInput;
     private AppCompatButton submitFeedbackButton;
-
-    // Track selected buttons
     private Set<AppCompatButton> selectedFeelingButtons = new HashSet<>();
 
     @Override
@@ -81,7 +71,6 @@ public class ShareFeedbackActivity extends AppCompatActivity {
     private void initializeViews() {
         backButton = findViewById(R.id.backButton);
 
-        // Feeling buttons
         buttonSlow = findViewById(R.id.buttonSlow);
         buttonConfusing = findViewById(R.id.buttonConfusing);
         buttonFast = findViewById(R.id.buttonFast);
@@ -95,46 +84,52 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         buttonIntuitive = findViewById(R.id.buttonIntuitive);
         buttonHelpful = findViewById(R.id.buttonHelpful);
 
-        // Star rating
         star1 = findViewById(R.id.star1);
         star2 = findViewById(R.id.star2);
         star3 = findViewById(R.id.star3);
         star4 = findViewById(R.id.star4);
         star5 = findViewById(R.id.star5);
 
-        // Recommendation
         recommendationNo = findViewById(R.id.recommendationNo);
         recommendationYes = findViewById(R.id.recommendationYes);
 
-        // Text feedback
         feedbackTextInput = findViewById(R.id.feedbackTextInput);
         submitFeedbackButton = findViewById(R.id.submitFeedbackButton);
     }
 
     private void setupFeelingButtonListeners() {
         AppCompatButton[] buttons = {
-                buttonSlow, buttonConfusing, buttonFast, buttonFrustrating,
-                buttonConvenient, buttonEasyToUse, buttonReliable, buttonTimeSaving,
-                buttonNeedsImprovement, buttonGreatDesign, buttonIntuitive, buttonHelpful
+                buttonSlow,
+                buttonConfusing,
+                buttonFast,
+                buttonFrustrating,
+                buttonConvenient,
+                buttonEasyToUse,
+                buttonReliable,
+                buttonTimeSaving,
+                buttonNeedsImprovement,
+                buttonGreatDesign,
+                buttonIntuitive,
+                buttonHelpful
         };
 
         for (AppCompatButton button : buttons) {
             if (button != null) {
-                button.setOnClickListener(v -> toggleFeelingButton(button));
+                button.setOnClickListener(view -> {
+                    toggleFeelingButton(button);
+                });
             }
         }
     }
 
     private void toggleFeelingButton(AppCompatButton button) {
         if (selectedFeelingButtons.contains(button)) {
-            // Deselect button
             selectedFeelingButtons.remove(button);
-            button.setTextColor(0xFFFFFFFF); // White text
+            button.setTextColor(0xFFFFFFFF);
             button.setBackgroundResource(R.drawable.feedback_button_unselected);
         } else {
-            // Select button
             selectedFeelingButtons.add(button);
-            button.setTextColor(0xFF000000); // Black text
+            button.setTextColor(0xFF000000);
             button.setBackgroundResource(R.drawable.feedback_button_selected);
         }
     }
@@ -145,7 +140,9 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         for (int i = 0; i < stars.length; i++) {
             if (stars[i] != null) {
                 final int rating = i + 1;
-                stars[i].setOnClickListener(v -> selectStarRating(rating));
+                stars[i].setOnClickListener(view -> {
+                    selectStarRating(rating);
+                });
             }
         }
     }
@@ -167,21 +164,23 @@ public class ShareFeedbackActivity extends AppCompatActivity {
 
     private void setupRecommendationListeners() {
         if (recommendationNo != null) {
-            recommendationNo.setOnClickListener(v -> selectRecommendation(1));
+            recommendationNo.setOnClickListener(view -> {
+                selectRecommendation(1);
+            });
         }
         if (recommendationYes != null) {
-            recommendationYes.setOnClickListener(v -> selectRecommendation(2));
+            recommendationYes.setOnClickListener(view -> {
+                selectRecommendation(2);
+            });
         }
     }
 
     private void selectRecommendation(int recommendation) {
         selectedRecommendation = recommendation;
 
-        // Reset both buttons
         recommendationNo.setBackgroundResource(R.drawable.feedback_button_unselected);
         recommendationYes.setBackgroundResource(R.drawable.feedback_button_unselected);
 
-        // Update thumbs icons color
         ImageView thumbsDownNo = (ImageView) recommendationNo.getChildAt(0);
         ImageView thumbsUpYes = (ImageView) recommendationYes.getChildAt(0);
 
@@ -202,7 +201,6 @@ public class ShareFeedbackActivity extends AppCompatActivity {
             textYes.setTextColor(0xFFFFFFFF);
         }
 
-        // Select the chosen one
         if (recommendation == 1) {
             recommendationNo.setBackgroundResource(R.drawable.feedback_button_selected);
             if (thumbsDownNo != null) {
@@ -224,7 +222,7 @@ public class ShareFeedbackActivity extends AppCompatActivity {
 
     private void setupSubmitButton() {
         if (submitFeedbackButton != null) {
-            submitFeedbackButton.setOnClickListener(v -> {
+            submitFeedbackButton.setOnClickListener(view -> {
                 if (validateForm()) {
                     submitFeedback();
                 }
@@ -233,25 +231,21 @@ public class ShareFeedbackActivity extends AppCompatActivity {
     }
 
     private boolean validateForm() {
-        // Check if at least one feeling button is selected
         if (selectedFeelingButtons.isEmpty()) {
             Toast.makeText(this, "Please select at least one feeling", Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        // Check if star rating is selected
         if (selectedStarRating == 0) {
             Toast.makeText(this, "Please rate our service", Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        // Check if recommendation is selected
         if (selectedRecommendation == 0) {
             Toast.makeText(this, "Please select whether you would recommend Checkmate", Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        // Check if feedback text is not empty
         String feedbackText = feedbackTextInput.getText().toString().trim();
         if (feedbackText.isEmpty()) {
             Toast.makeText(this, "Please provide feedback text", Toast.LENGTH_SHORT).show();
@@ -268,7 +262,9 @@ public class ShareFeedbackActivity extends AppCompatActivity {
 
     private void setupBackButton() {
         if (backButton != null) {
-            backButton.setOnClickListener(view -> finish());
+            backButton.setOnClickListener(view -> {
+                finish();
+            });
         }
     }
 
@@ -311,8 +307,8 @@ public class ShareFeedbackActivity extends AppCompatActivity {
                 startActivity(new Intent(ShareFeedbackActivity.this, ArchiveActivity.class));
                 return true;
             } else if (itemId == R.id.menu_settings) {
-                // Don't launch SettingsActivity, just close drawer
                 drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(ShareFeedbackActivity.this, SettingsActivity.class));
                 return true;
             } else if (itemId == R.id.menu_logout) {
                 LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(ShareFeedbackActivity.this, this::logout,
@@ -420,7 +416,6 @@ public class ShareFeedbackActivity extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
 
-                        // Hide streak menu item if user is not a student
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                         }
