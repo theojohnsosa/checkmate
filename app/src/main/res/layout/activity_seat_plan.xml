@@ -40,6 +40,7 @@
                 android:layout_marginEnd="16dp"
                 android:src="@drawable/hamburger_icon"
                 android:contentDescription="hamburger_icon" />
+
         </RelativeLayout>
 
         <LinearLayout
@@ -59,6 +60,7 @@
                 android:text="Back"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -321,13 +323,9 @@
                     android:textColor="#828282"
                     android:textSize="15sp" />
 
-
             </LinearLayout>
 
-
         </LinearLayout>
-
-
 
     </LinearLayout>
 
@@ -342,6 +340,5 @@
         app:headerLayout="@layout/drawer_header"
         app:itemTextColor="@color/menu_item_color"
         app:itemIconTint="@color/menu_item_color" />
-
 
 </androidx.drawerlayout.widget.DrawerLayout>
