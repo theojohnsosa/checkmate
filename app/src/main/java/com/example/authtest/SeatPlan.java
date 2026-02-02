@@ -61,12 +61,12 @@ public class SeatPlan extends AppCompatActivity {
         checkUserTypeAndConfigureMenu();
 
         backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(view -> finish());
+        backButton.setOnClickListener(view -> {
+            finish();
+        });
 
-        // Initialization of seat buttons
         initializeSeatCards();
 
-        // Fetch the class id from class info
         currentClassId = getIntent().getStringExtra("CLASS_ID");
 
         if (currentClassId == null || currentClassId.isEmpty()) {
@@ -81,7 +81,6 @@ public class SeatPlan extends AppCompatActivity {
         vacantText = findViewById(R.id.vacantText);
     }
 
-    // Iteration of seat plan card button
     private void initializeSeatCards() {
         for (int i = 0; i < 40; i++) {
             int resId = getResources().getIdentifier("seatPlanCard" + (i + 1), "id", getPackageName());
@@ -89,8 +88,6 @@ public class SeatPlan extends AppCompatActivity {
             TextView occupied = findViewById(R.id.occupiedText);
             TextView vacant = findViewById(R.id.vacantText);
 
-
-            // Add click listener to each seat card
             final int seatNumber = i + 1;
             seatCards[i].setOnClickListener(view -> {
                 onSeatClicked(seatNumber);
@@ -99,13 +96,11 @@ public class SeatPlan extends AppCompatActivity {
     }
 
     private void onSeatClicked(int seatNumber) {
-        // Check if there's a student assigned to this seat
         if (seatNumber <= sortedStudentList.size()) {
             StudentAttendanceModel student = sortedStudentList.get(seatNumber - 1);
             TextView occupied = findViewById(R.id.occupiedText);
             TextView vacant = findViewById(R.id.vacantText);
 
-            // Show dialog with student info
             StudentSeatDialog dialog = new StudentSeatDialog(this, student);
             dialog.show();
         } else {
@@ -113,7 +108,6 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
-    // Called when a class is selected
     private void loadSeatPlanForClass(String classId) {
         clearSeatColors();
         String teacherId = mAuth.getCurrentUser().getUid();
@@ -178,7 +172,6 @@ public class SeatPlan extends AppCompatActivity {
                             studentList.add(student);
                             checkStudentAttendance(student);
                         } else {
-                            // Try alternative email field
                             db.collection("users")
                                     .whereEqualTo("email", cleanEmail)
                                     .limit(1)
@@ -235,14 +228,12 @@ public class SeatPlan extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
 
-                        // Hide streak menu item if user is not a student
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // In case of error, hide streak menu item for safety
                     navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                 });
     }
@@ -281,13 +272,10 @@ public class SeatPlan extends AppCompatActivity {
     }
 
     private String getAttendanceStatus(long markedTimestamp) {
-        // You can implement this similar to ClassInformation
-        // For now, return a simple status
         return "Present";
     }
 
     private void sortAndUpdateSeats(List<StudentAttendanceModel> studentList) {
-        // Sort by lastName, then firstName
         Collections.sort(studentList, (student1, student2) -> {
             String lastName1 = student1.getLastName() != null ? student1.getLastName().toLowerCase() : "";
             String lastName2 = student2.getLastName() != null ? student2.getLastName().toLowerCase() : "";
@@ -303,13 +291,11 @@ public class SeatPlan extends AppCompatActivity {
             return lastNameComparison;
         });
 
-        // Save sorted list for seat clicks
         sortedStudentList = new ArrayList<>(studentList);
 
         updateSeatColors(studentList.size());
     }
 
-    // Removing seat colors
     private void clearSeatColors() {
         int emptyColor = ContextCompat.getColor(this, R.color.empty_seat);
         for (CardView seat : seatCards) {
@@ -317,7 +303,6 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
-    // Updation of seat colors
     private void updateSeatColors(int studentCount) {
         int emptyColor = ContextCompat.getColor(this, R.color.empty_seat);
         int occupiedColor = ContextCompat.getColor(this, R.color.occupied_seat);
