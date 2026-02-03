@@ -32,11 +32,15 @@ public class TermsOfServices extends AppCompatActivity {
         drawerLayout = findViewById(R.id.main);
         navigationView = findViewById(R.id.navigation_view);
 
-        findViewById(R.id.hamburger_icon).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
-        findViewById(R.id.backButton).setOnClickListener(v -> finish());
+        findViewById(R.id.hamburger_icon).setOnClickListener(view -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
 
-        // Setup for the agree button
-        findViewById(R.id.agreeButton).setOnClickListener(v -> {
+        findViewById(R.id.backButton).setOnClickListener(view -> {
+            finish();
+        });
+        
+        findViewById(R.id.agreeButton).setOnClickListener(view -> {
             Toast.makeText(this, "You have agreed to the Terms of Service", Toast.LENGTH_SHORT).show();
         });
 
@@ -86,7 +90,10 @@ public class TermsOfServices extends AppCompatActivity {
     }
 
     private void showLogoutConfirmation() {
-        LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout, () -> {});
+        LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,
+                () -> {
+
+                });
         confirmDialog.show();
     }
 
