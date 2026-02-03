@@ -41,834 +41,866 @@
 
         </RelativeLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="15dp">
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/agreeButton"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginBottom="30dp"
-                android:background="@drawable/settings_button_bg"
-                android:text="I agree to the terms of services"
-                android:textColor="#000000"
-                android:textSize="16sp"
-                android:textAllCaps="false" />
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:drawableStart="@drawable/left_arrow"
+                android:drawablePadding="10dp"
+                android:text="Back"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF" />
 
-            <ScrollView
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="vertical">
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@id/agreeButton"
-                android:scrollbars="vertical">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/backButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
-                        android:drawableStart="@drawable/left_arrow"
-                        android:drawablePadding="10dp"
-                        android:text="Back"
-                        android:textAllCaps="false"
-                        android:textColor="#FFFFFF" />
+                    android:layout_marginBottom="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Terms of Services"
                         android:textColor="#FFFFFF"
-                        android:textSize="29sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="16dp"/>
+                        android:textSize="40sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginBottom="35dp"
-                        android:text="Rules and conditons for using the app"
-                        android:textColor="#AAAAAA" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1. Welcome to Checkmate"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="By using this app, you agree to follow these Terms of Service. This app is designed to help teachers track student attendance and motivate students to maintain good attendance through the streak tracking feature."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="6dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Important: "
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="This app is only for National University MOA (NU MOA) students and faculty. If you don't have a valid NU MOA account, you cannot use this app."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2. What This App Does"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Checkmate helps make attendance tracking easier for everyone:"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• For Teachers: "
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Create classes, generate class codes, and track student attendance in one place"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• For Students: "
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Join your classes, see your attendance records, and track your attendance streak to stay motivated"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="The app only tracks attendance—nothing more, nothing less."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="3. Who Can Use This App"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• You must be a current student or faculty member at NU MOA (senior high school to college level)\n• You must be at least 13 years old\n• If you're under 18, your parent or guardian should be aware that you're using this app\n• You must use a valid NU MOA school email and student/faculty number to create your account\n• You're responsible for keeping your login information private and secure"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="4. How to Use This App"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Teachers:"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Create classes and manage them\n• Generate class codes for students to join\n• Add or remove students from your classes\n• View and manage attendance records for your students\n• Only you can see your students' attendance data"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Students:"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Join classes using the class code (your teacher must add you first)\n• Mark yourself present during class\n• View only your own attendance records and streak\n• See your monthly attendance streak tracker (like GitHub contributions)"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="5. Your Account &amp; Information"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="When you sign up, we collect:"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Your first name and last name\n• Your NU MOA school email\n• Your student/faculty school number\n• Your department/course"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Keep your password safe. You're responsible for everything that happens in your account. If something looks wrong or if someone else is using your account, tell us immediately."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="6. Your Data &amp; Privacy"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Your attendance data is stored securely and only used for tracking purposes"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Students: "
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="You can only see your own attendance and streak. Teachers can see their students' attendance."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Teachers: "
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="You can only see the attendance of students in your classes"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• We won't share your data with anyone outside of NU MOA\n• If your account is deleted or the school year ends, we'll delete your data according to the NU MOA data retention policies"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="7. Rules for Using This App"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Don't do these things:"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Try to hack or break into the app\n• Use someone else's account\n• Try to see other students' private attendance or streak data\n• Pretend to be a teacher or student you're not\n• Use the app for anything other than attendance tracking\n• Send spam or inappropriate messages through the app\n• Spread false information\n• Try to download or steal the app's code"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="If you're a teacher:"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Make sure the attendance records you enter are accurate\n• Only add students to your classes if they're actually in your class\n• Keep attendance data confidential"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="If you're a student:"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Only mark yourself present if you're actually in class\n• Don't share your login info with other students\n• Don't try to access classes you're not added to"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="8. The Streak Tracker Feature"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="The streak tracker is designed to motivate you to maintain good attendance. Here's how it works:"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Every time you're marked present, your streak counter goes up\n• Your streak resets if you're absent or don't attend class\n• You can see your monthly attendance history in a visual box (similar to GitHub's contribution tracker)\n• Only you can see your own streak—your classmates can't see it"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="This is just for motivation. Your actual grade and academic standing depend on your institution's attendance policy."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="9. What We're NOT Responsible For"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• If the app goes down or has bugs (we'll try our best to fix it quickly)\n• If you lose your password or account access\n• If you enter wrong attendance information by accident\n• If you share your login info and someone else uses your account\n• Problems with your phone or internet connection"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10. What Happens If You Break the Rules"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="If you violate these terms:"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• We can suspend or delete your account\n• You might lose access to the app\n• Your school might take additional action"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="If we think you're being dishonest about attendance, we'll tell your teacher or school administrator."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="11. We Can Change These Terms"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="We might update these Terms of Service sometimes. If we make big changes, we'll let you know. If you keep using the app after the change, it means you accept the new terms."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="12. Technical Stuff You Should Know"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• This app works on Android devices\n• You need an internet connection to use it\n• Make sure your phone meets the minimum requirements (check the app store listing)\n• You're responsible for keeping your device working"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="13. This is a School Project"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="This app was built as a school project. It's not a professional product from a big company. While we take your data seriously, understand that this is a learning experience and the app might have limitations."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="14. Settling Disagreements"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="If you have a problem or complaint:"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1. Try talking to us about it first\n2. Contact your school's IT department or administration.\n3. If needed, disputes will be handled according to NU MOA's policies"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="15. If Something is Invalid"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="If any part of these terms is found to be invalid or unenforceable, the rest of the terms still apply."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="16. The Whole Agreement"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="These Terms of Service, along with NU MOA's privacy policies, make up the entire agreement between you and us about using this app."
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="17. Questions?"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="If you have questions about this app or these terms, contact:"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Your Teacher (for class-related issues)\n• Your School's IT Department (for technical or account issues)\n• Checkmate Team – checkmate.team@gmail.com (for app-related questions)"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="18. You Agree to These Terms"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="12dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="By using this app, you confirm that:"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• You've read and understood these Terms of Service\n• You're authorized to use an NU MOA account\n• You agree to follow all these rules\n• If you don't agree, please don't use the app"
-                            android:textColor="#CCCCCC"
-                            android:textSize="15sp"
-                            android:lineSpacingExtra="4dp"
-                            android:paddingStart="16dp"
-                            android:layout_marginBottom="35dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="End of Terms of Service"
-                            android:textColor="#FFFFFF"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Last Updated: February 2, 2026"
-                            android:textColor="#888888"
-                            android:textSize="13sp"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Thank you for using Checkmate!"
-                            android:textColor="#888888"
-                            android:textSize="13sp" />
-                    </LinearLayout>
+                        android:text="Rules and conditions for using the app"
+                        android:textColor="#828282"
+                        android:textSize="12sp" />
 
                 </LinearLayout>
 
-            </ScrollView>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
 
-        </RelativeLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1. Welcome to Checkmate"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="By using this app, you agree to follow these Terms of Service. This app is designed to help teachers track student attendance and motivate students to maintain good attendance through the streak tracking feature."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Important:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="This app is only for National University MOA (NU MOA) students and faculty. If you don't have a valid NU MOA account, you cannot use this app."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2. What This App Does"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Checkmate helps make attendance tracking easier for everyone:"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• For Teachers:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Create classes, generate class codes, and track student attendance in one place"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• For Students:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Join your classes, see your attendance records, and track your attendance streak to stay motivated"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="The app only tracks attendance—nothing more, nothing less."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="3. Who Can Use This App"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• You must be a current student or faculty member at NU MOA (senior high school to college level)\n• You must be at least 13 years old\n• If you're under 18, your parent or guardian should be aware that you're using this app\n• You must use a valid NU MOA school email and student/faculty number to create your account\n• You're responsible for keeping your login information private and secure"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="4. How to Use This App"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Teachers:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Create classes and manage them\n• Generate class codes for students to join\n• Add or remove students from your classes\n• View and manage attendance records for your students\n• Only you can see your students' attendance data"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Students:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Join classes using the class code (your teacher must add you first)\n• Mark yourself present during class\n• View only your own attendance records and streak\n• See your monthly attendance streak tracker (like GitHub contributions)"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5. Your Account &amp; Information"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="When you sign up, we collect:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Your first name and last name\n• Your NU MOA school email\n• Your student/faculty school number\n• Your department/course"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Keep your password safe. You're responsible for everything that happens in your account. If something looks wrong or if someone else is using your account, tell us immediately."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="6. Your Data &amp; Privacy"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Your attendance data is stored securely and only used for tracking purposes"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Students:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="You can only see your own attendance and streak. Teachers can see their students' attendance."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Teachers:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="You can only see the attendance of students in your classes"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• We won't share your data with anyone outside of NU MOA\n• If your account is deleted or the school year ends, we'll delete your data according to the NU MOA data retention policies"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="7. Rules for Using This App"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Don't do these things:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Try to hack or break into the app\n• Use someone else's account\n• Try to see other students' private attendance or streak data\n• Pretend to be a teacher or student you're not\n• Use the app for anything other than attendance tracking\n• Send spam or inappropriate messages through the app\n• Spread false information\n• Try to download or steal the app's code"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="If you're a teacher:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Make sure the attendance records you enter are accurate\n• Only add students to your classes if they're actually in your class\n• Keep attendance data confidential"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="If you're a student:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Only mark yourself present if you're actually in class\n• Don't share your login info with other students\n• Don't try to access classes you're not added to"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="8. The Streak Tracker Feature"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="The streak tracker is designed to motivate you to maintain good attendance. Here's how it works:"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Every time you're marked present, your streak counter goes up\n• Your streak resets if you're absent or don't attend class\n• You can see your monthly attendance history in a visual box (similar to GitHub's contribution tracker)\n• Only you can see your own streak—your classmates can't see it"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="This is just for motivation. Your actual grade and academic standing depend on your institution's attendance policy."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="9. What We're NOT Responsible For"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• If the app goes down or has bugs (we'll try our best to fix it quickly)\n• If you lose your password or account access\n• If you enter wrong attendance information by accident\n• If you share your login info and someone else uses your account\n• Problems with your phone or internet connection"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10. What Happens If You Break the Rules"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="If you violate these terms:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• We can suspend or delete your account\n• You might lose access to the app\n• Your school might take additional action"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="If we think you're being dishonest about attendance, we'll tell your teacher or school administrator."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="11. We Can Change These Terms"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="We might update these Terms of Service sometimes. If we make big changes, we'll let you know. If you keep using the app after the change, it means you accept the new terms."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="12. Technical Stuff You Should Know"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• This app works on Android devices\n• You need an internet connection to use it\n• Make sure your phone meets the minimum requirements (check the app store listing)\n• You're responsible for keeping your device working"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="13. This is a School Project"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="This app was built as a school project. It's not a professional product from a big company. While we take your data seriously, understand that this is a learning experience and the app might have limitations."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="14. Settling Disagreements"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="If you have a problem or complaint:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1. Try talking to us about it first\n2. Contact your school's IT department or administration.\n3. If needed, disputes will be handled according to NU MOA's policies"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="15. If Something is Invalid"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="If any part of these terms is found to be invalid or unenforceable, the rest of the terms still apply."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="16. The Whole Agreement"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="These Terms of Service, along with NU MOA's privacy policies, make up the entire agreement between you and us about using this app."
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="17. Questions?"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="If you have questions about this app or these terms, contact:"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• Your Teacher (for class-related issues)\n• Your School's IT Department (for technical or account issues)\n• Checkmate Team – checkmate.team@gmail.com (for app-related questions)"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="18. You Agree to These Terms"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="By using this app, you confirm that:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• You've read and understood these Terms of Service\n• You're authorized to use an NU MOA account\n• You agree to follow all these rules\n• If you don't agree, please don't use the app"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="End of Terms of Service"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Last Updated: February 2, 2026"
+                        android:textColor="#828282"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thank you for using Checkmate!"
+                        android:textColor="#828282"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/agreeButton"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/settings_button_bg"
+            android:text="I agree to the terms of services"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textAllCaps="false" />
 
     </LinearLayout>
 
