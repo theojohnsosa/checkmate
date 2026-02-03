@@ -138,6 +138,9 @@
         <activity
             android:name=".ShareFeedbackActivity"
             android:exported="false" />
+        <activity
+            android:name=".TermsOfServices"
+            android:exported="false" />
     </application>
 
 </manifest>

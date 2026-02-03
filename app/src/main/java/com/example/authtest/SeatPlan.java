@@ -331,6 +331,7 @@ public class SeatPlan extends AppCompatActivity {
     }
 
     private void setupNavigationDrawer() {
+        navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
@@ -442,6 +443,11 @@ public class SeatPlan extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
+                            String userType = documentSnapshot.getString("userType");
+                            if ("Student".equalsIgnoreCase(userType)) {
+                                navigationView.getMenu().findItem(R.id.menu_streak).setVisible(true);
+                            }
+
                             String firstName = documentSnapshot.getString("firstName");
                             String lastName = documentSnapshot.getString("lastName");
                             String fullName = "";

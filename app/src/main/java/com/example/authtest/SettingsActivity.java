@@ -347,7 +347,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void openTermsOfServices() {
-        Toast.makeText(this, "Terms of Services feature coming soon", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(SettingsActivity.this, TermsOfServices.class));
     }
 
     private void openPrivacyPolicy() {
