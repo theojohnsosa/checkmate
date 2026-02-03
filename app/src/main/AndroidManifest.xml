@@ -14,18 +14,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AuthTest">
-        <activity
-            android:name=".TermsOfServices"
-            android:exported="false" />
-        <activity
-            android:name=".SplashScreen"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
 
         <activity-alias
             android:name=".IconGreenAlias"
@@ -94,6 +82,15 @@
         </activity-alias>
 
         <activity
+            android:name=".SplashScreen"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".SignIn"
             android:exported="false" />
         <activity
@@ -140,6 +137,9 @@
             android:exported="false" />
         <activity
             android:name=".ShareFeedbackActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TermsOfServices"
             android:exported="false" />
     </application>
 
