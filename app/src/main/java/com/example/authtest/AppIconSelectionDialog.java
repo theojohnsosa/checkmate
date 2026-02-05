@@ -38,13 +38,19 @@ public class AppIconSelectionDialog extends Dialog {
     };
 
     private static final int[] IconButtonIds = {
-            R.id.iconButton1, R.id.iconButton2, R.id.iconButton3,
-            R.id.iconButton4, R.id.iconButton5
+            R.id.iconButton1,
+            R.id.iconButton2,
+            R.id.iconButton3,
+            R.id.iconButton4,
+            R.id.iconButton5
     };
 
     private static final int[] CheckmarkIds = {
-            R.id.checkmark1, R.id.checkmark2, R.id.checkmark3,
-            R.id.checkmark4, R.id.checkmark5
+            R.id.checkmark1,
+            R.id.checkmark2,
+            R.id.checkmark3,
+            R.id.checkmark4,
+            R.id.checkmark5
     };
 
     private int selectedIconIndex = -1;

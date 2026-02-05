@@ -321,14 +321,12 @@ public class SettingsActivity extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
 
-                        // Hide streak menu item if user is not a student
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // In case of error, hide streak menu item for safety
                     navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                 });
     }
@@ -336,8 +334,12 @@ public class SettingsActivity extends AppCompatActivity {
     private void openAppIcon() {
         AppIconSelectionDialog iconDialog = new AppIconSelectionDialog(
                 this,
-                () -> {},
-                () -> {}
+                () -> {
+
+                },
+                () -> {
+
+                }
         );
         iconDialog.show();
     }
