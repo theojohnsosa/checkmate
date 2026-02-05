@@ -148,6 +148,8 @@ public class ClassInformation extends AppCompatActivity {
                     loadStudentList();
                 } else {
                     setupStudentView(classModel);
+                    setupStudentListRecyclerView();
+                    loadStudentList();
                 }
 
                 loadRecentSessions();
@@ -1866,15 +1868,7 @@ public class ClassInformation extends AppCompatActivity {
                 if (addStudentsButton != null) {
                     addStudentsButton.setVisibility(View.GONE);
                 }
-                if (viewSeatPlanButton != null) {
-                    viewSeatPlanButton.setVisibility(View.GONE);
-                }
-                if (studentsAttendedHeader != null) {
-                    studentsAttendedHeader.setVisibility(View.GONE);
-                }
-                if (studentsRecyclerView != null) {
-                    studentsRecyclerView.setVisibility(View.GONE);
-                }
+
 
             } else {
                 isStudent = false;
