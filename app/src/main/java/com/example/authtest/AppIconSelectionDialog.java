@@ -64,7 +64,7 @@ public class AppIconSelectionDialog extends Dialog {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_app_icon_selection);
-        setCancelable(true);
+        setCancelable(false);
 
         Window window = getWindow();
         if (window != null) {
