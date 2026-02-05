@@ -49,6 +49,7 @@ public class AttendanceHistoryAdapter extends RecyclerView.Adapter<AttendanceHis
     }
 
     static class HistoryViewHolder extends RecyclerView.ViewHolder {
+
         private TextView classNameText;
         private TextView classCodeText;
         private TextView subjectCodeText;

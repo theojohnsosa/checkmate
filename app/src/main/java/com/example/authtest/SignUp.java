@@ -61,9 +61,11 @@ public class SignUp extends AppCompatActivity {
         userTypeInput.setOnClickListener(view -> {
             userTypeInput.showDropDown();
         });
+
         userTypeInput.setOnFocusChangeListener((view, hasFocus) -> {
             if (hasFocus) userTypeInput.showDropDown();
         });
+
         userTypeInput.setKeyListener(null);
 
         userTypeInput.setOnItemClickListener((parent, view, position, id) -> {
@@ -87,14 +89,17 @@ public class SignUp extends AppCompatActivity {
         );
 
         departmentInput.setAdapter(departmentAdapter);
+
         departmentInput.setOnClickListener(view -> {
             departmentInput.showDropDown();
         });
+
         departmentInput.setOnFocusChangeListener((view, hasFocus) -> {
             if (hasFocus) {
                 departmentInput.showDropDown();
             }
         });
+
         departmentInput.setKeyListener(null);
 
         String[] yearLevels = {"1st Year", "2nd Year", "3rd Year", "4th Year"};
@@ -103,16 +108,19 @@ public class SignUp extends AppCompatActivity {
                 android.R.layout.simple_dropdown_item_1line,
                 yearLevels
         );
+
         yearLevelInput.setAdapter(yearLevelAdapter);
 
         yearLevelInput.setOnClickListener(view -> {
             yearLevelInput.showDropDown();
         });
+
         yearLevelInput.setOnFocusChangeListener((view, hasFocus) -> {
             if (hasFocus) {
                 yearLevelInput.showDropDown();
             }
         });
+
         yearLevelInput.setKeyListener(null);
 
         signUpButton.setOnClickListener(view -> {

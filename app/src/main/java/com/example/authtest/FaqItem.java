@@ -1,6 +1,7 @@
 package com.example.authtest;
 
 public class FaqItem {
+
     private String question;
     private String answer;
     private String category;

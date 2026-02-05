@@ -1,6 +1,7 @@
 package com.example.authtest;
 
 public class StudentAttendanceModel {
+
     private String studentId;
     private String email;
     private String firstName;

@@ -63,11 +63,8 @@ public class StudentHome extends AppCompatActivity {
         });
 
         setupNavigationDrawer();
-
         loadUserInfoInDrawer();
-
         setupBackPressHandler();
-
         setupRecyclerView();
         setupClassSearch();
         loadClasses();

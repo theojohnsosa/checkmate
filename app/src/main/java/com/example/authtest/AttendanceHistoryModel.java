@@ -1,6 +1,7 @@
 package com.example.authtest;
 
 public class AttendanceHistoryModel {
+
     private String classId;
     private String className;
     private String classCode;

@@ -372,7 +372,9 @@ public class SettingsActivity extends AppCompatActivity {
         LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(
                 this,
                 this::logout,
-                () -> {}
+                () -> {
+
+                }
         );
         confirmDialog.show();
     }

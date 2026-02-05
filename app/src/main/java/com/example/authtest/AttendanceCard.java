@@ -13,7 +13,6 @@ public class AttendanceCard {
     private CardView classCodeCard;
     private AppCompatButton attendanceButton;
     private TextView classCodeText;
-
     private boolean isSessionActive = false;
     private OnAttendanceSessionListener listener;
 
@@ -29,7 +28,7 @@ public class AttendanceCard {
         classCodeText = rootView.findViewById(R.id.classCodeText);
 
         if (attendanceButton != null) {
-            attendanceButton.setOnClickListener(v -> {
+            attendanceButton.setOnClickListener(view -> {
                 isSessionActive = !isSessionActive;
                 updateState();
 

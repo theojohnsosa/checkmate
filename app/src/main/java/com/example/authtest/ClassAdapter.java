@@ -54,6 +54,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     }
 
     static class ClassViewHolder extends RecyclerView.ViewHolder {
+
         private CardView cardView;
         private TextView classNameText;
         private TextView subjectCodeText;

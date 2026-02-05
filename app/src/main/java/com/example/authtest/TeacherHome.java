@@ -82,7 +82,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         setupBackPressHandler();
         setupClassSearch();
         checkUserTypeAndConfigureMenu();
-
         loadClasses();
 
         navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
@@ -115,9 +114,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Log.d("Navigation", "Streak item clicked, itemId: " + itemId);
-                Log.d("Navigation", "R.id.menu_streak value: " + R.id.menu_streak);
-                Log.d("Navigation", "Starting AttendanceStreak activity");
                 Intent streakIntent = new Intent(TeacherHome.this, AttendanceStreak.class);
                 startActivity(streakIntent);
                 Toast.makeText(TeacherHome.this, "Opening Attendance Streak", Toast.LENGTH_SHORT).show();
@@ -235,14 +231,12 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
 
-                        // Hide streak menu item if user is not a student
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // In case of error, hide streak menu item for safety
                     navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                 });
     }

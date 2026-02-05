@@ -85,6 +85,7 @@ public class ProfilePage extends AppCompatActivity {
         };
         getOnBackPressedDispatcher().addCallback(this, callback);
     }
+
     private void setupListeners() {
         hamburgerIcon.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
@@ -101,6 +102,7 @@ public class ProfilePage extends AppCompatActivity {
             confirmDialog.show();
         });
     }
+
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -236,14 +238,12 @@ public class ProfilePage extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
 
-                        // Hide streak menu item if user is not a student
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // In case of error, hide streak menu item for safety
                     navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                 });
     }

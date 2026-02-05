@@ -45,6 +45,7 @@ public class CreateClass extends AppCompatActivity {
         navigationView = findViewById(R.id.navigation_view);
 
         ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
+
         hamburgerIcon.setOnClickListener(view ->
                 drawerLayout.openDrawer(GravityCompat.START)
         );
@@ -179,14 +180,12 @@ public class CreateClass extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
 
-                        // Hide streak menu item if user is not a student
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // In case of error, hide streak menu item for safety
                     navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                 });
     }
@@ -327,6 +326,7 @@ public class CreateClass extends AppCompatActivity {
         startTimeInput.setOnClickListener(view -> {
             startTimeInput.showDropDown();
         });
+
         endTimeInput.setOnClickListener(view -> {
             endTimeInput.showDropDown();
         });
@@ -357,26 +357,32 @@ public class CreateClass extends AppCompatActivity {
             classNameInput.setError("Required");
             return false;
         }
+
         if (subjectCodeInput.getText().toString().trim().isEmpty()) {
             subjectCodeInput.setError("Required");
             return false;
         }
+
         if (getSelectedDays().isEmpty()) {
             Toast.makeText(this, "Select at least one day", Toast.LENGTH_SHORT).show();
             return false;
         }
+
         if (startTimeInput.getText().toString().trim().isEmpty()) {
             startTimeInput.setError("Required");
             return false;
         }
+
         if (endTimeInput.getText().toString().trim().isEmpty()) {
             endTimeInput.setError("Required");
             return false;
         }
+
         if (roomInput.getText().toString().trim().isEmpty()) {
             roomInput.setError("Required");
             return false;
         }
+
         return true;
     }
 }

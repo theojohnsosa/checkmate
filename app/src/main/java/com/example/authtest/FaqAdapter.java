@@ -13,7 +13,6 @@ public class FaqAdapter extends RecyclerView.Adapter<FaqAdapter.FAQViewHolder> {
 
     private List<FaqItem> faqList;
     private int expandedPosition = -1;
-
     public FaqAdapter(List<FaqItem> faqList) {
         this.faqList = faqList;
     }

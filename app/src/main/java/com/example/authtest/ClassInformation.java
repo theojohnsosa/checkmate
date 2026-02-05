@@ -215,14 +215,12 @@ public class ClassInformation extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
 
-                        // Hide streak menu item if user is not a student
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // In case of error, hide streak menu item for safety
                     navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                 });
     }
@@ -1143,6 +1141,7 @@ public class ClassInformation extends AppCompatActivity {
         }
 
         View searchBarContainer = findViewById(R.id.searchBarContainer);
+
         if (searchBarContainer != null) {
             searchBarContainer.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
         }
@@ -1429,7 +1428,6 @@ public class ClassInformation extends AppCompatActivity {
         String studentId = mAuth.getCurrentUser().getUid();
         long timestamp = System.currentTimeMillis();
 
-        // Original session-based attendance record
         Map<String, Object> attendanceRecord = new HashMap<>();
         attendanceRecord.put("studentId", studentId);
         attendanceRecord.put("classId", classId);
@@ -1445,8 +1443,6 @@ public class ClassInformation extends AppCompatActivity {
                     hasMarkedAttendance = true;
                     attendanceTimestamp = formatTimestamp(timestamp);
                     showAttendanceMarkedState();
-
-                    // ALSO save to attendance collection for streak tracking
                     saveAttendanceForStreak(studentId, timestamp);
                 })
                 .addOnFailureListener(e -> {
@@ -1458,7 +1454,6 @@ public class ClassInformation extends AppCompatActivity {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String today = dateFormat.format(new Date(timestamp));
 
-        // Check if already saved today (prevent duplicates if student marks in multiple classes)
         db.collection("attendance")
                 .whereEqualTo("userId", studentId)
                 .whereEqualTo("date", today)
@@ -1466,7 +1461,6 @@ public class ClassInformation extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     if (querySnapshot.isEmpty()) {
-                        // Not saved yet for this class today, create new record
                         Map<String, Object> streakAttendance = new HashMap<>();
                         streakAttendance.put("userId", studentId);
                         streakAttendance.put("date", today);
@@ -1475,19 +1469,8 @@ public class ClassInformation extends AppCompatActivity {
                         streakAttendance.put("classId", classId);
 
                         db.collection("attendance")
-                                .add(streakAttendance)
-                                .addOnSuccessListener(doc -> {
-                                    android.util.Log.d(TAG, "✅ Attendance saved for streak: " + today);
-                                })
-                                .addOnFailureListener(e -> {
-                                    android.util.Log.e(TAG, "❌ Failed to save streak attendance", e);
-                                });
-                    } else {
-                        android.util.Log.d(TAG, "ℹ️ Attendance already recorded for this class today");
+                                .add(streakAttendance);
                     }
-                })
-                .addOnFailureListener(e -> {
-                    android.util.Log.e(TAG, "Error checking existing attendance", e);
                 });
     }
 
@@ -1935,20 +1918,26 @@ public class ClassInformation extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        
         if (attendanceListener != null) {
             attendanceListener.remove();
         }
+
         if (statsListener != null) {
             statsListener.remove();
         }
+
         if (classInfoListener != null) {
             classInfoListener.remove();
         }
+
         if (studentsListener != null) {
             studentsListener.remove();
         }
+
         if (recentSessionsListener != null) {
             recentSessionsListener.remove();
         }
+
     }
 }

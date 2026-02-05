@@ -190,6 +190,7 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         if (thumbsDownNo != null) {
             thumbsDownNo.setImageResource(R.drawable.ic_thumbs_down_white);
         }
+
         if (thumbsUpYes != null) {
             thumbsUpYes.setImageResource(R.drawable.ic_thumbs_up_white);
         }
@@ -197,6 +198,7 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         if (textNo != null) {
             textNo.setTextColor(0xFFFFFFFF);
         }
+
         if (textYes != null) {
             textYes.setTextColor(0xFFFFFFFF);
         }
@@ -247,6 +249,7 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         }
 
         String feedbackText = feedbackTextInput.getText().toString().trim();
+
         if (feedbackText.isEmpty()) {
             Toast.makeText(this, "Please provide feedback text", Toast.LENGTH_SHORT).show();
             return false;
@@ -312,7 +315,9 @@ public class ShareFeedbackActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_logout) {
                 LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(ShareFeedbackActivity.this, this::logout,
-                        () -> drawerLayout.closeDrawer(GravityCompat.START)
+                        () -> {
+                            drawerLayout.closeDrawer(GravityCompat.START);
+                        }
                 );
                 confirmDialog.show();
                 return true;
