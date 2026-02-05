@@ -148,6 +148,7 @@
                         android:padding="20dp"
                         android:text="sosatp@students.nu-moa.edu.ph"
                         android:textSize="16sp"
+                        android:textColor="#000000"
                         android:textStyle="bold" />
 
                 </LinearLayout>
@@ -175,6 +176,7 @@
                         android:padding="20dp"
                         android:text="2024-1059396"
                         android:textSize="16sp"
+                        android:textColor="#000000"
                         android:textStyle="bold" />
 
                 </LinearLayout>
@@ -202,6 +204,7 @@
                         android:padding="20dp"
                         android:text="Bachelor of Science in Information Technology"
                         android:textSize="16sp"
+                        android:textColor="#000000"
                         android:textStyle="bold" />
 
                 </LinearLayout>
@@ -229,6 +232,7 @@
                         android:padding="20dp"
                         android:text="Student"
                         android:textSize="16sp"
+                        android:textColor="#000000"
                         android:textStyle="bold" />
 
                 </LinearLayout>
@@ -256,6 +260,7 @@
                         android:padding="20dp"
                         android:text="2nd Year"
                         android:textSize="16sp"
+                        android:textColor="#000000"
                         android:textStyle="bold" />
 
                 </LinearLayout>
