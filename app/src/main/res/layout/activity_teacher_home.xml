@@ -79,6 +79,7 @@
                 android:textAllCaps="false"
                 android:background="@drawable/buttons_corner_radius"
                 android:textStyle="bold"
+                android:textColor="#000000"
                 android:textSize="15sp"
                 android:layout_width="match_parent"
                 android:layout_height="60dp" />
@@ -188,6 +189,7 @@
                     android:drawablePadding="10dp"
                     android:paddingStart="40dp"
                     android:paddingTop="10dp"
+                    android:textColor="#000000"
                     android:paddingEnd="40dp"
                     android:paddingBottom="10dp"
                     android:text="Create Class"

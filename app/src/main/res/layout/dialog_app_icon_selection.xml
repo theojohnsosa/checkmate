@@ -181,6 +181,7 @@
             android:id="@+id/selectButton"
             android:text="Select"
             android:textAllCaps="false"
+            android:textColor="#000000"
             android:textStyle="bold"
             android:background="@drawable/create_account_button"
             android:layout_width="115dp"
