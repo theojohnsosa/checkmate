@@ -141,6 +141,9 @@
         <activity
             android:name=".TermsOfServices"
             android:exported="false" />
+        <activity
+            android:name=".Leaderboards"
+            android:exported="false" />
     </application>
 
 </manifest>
