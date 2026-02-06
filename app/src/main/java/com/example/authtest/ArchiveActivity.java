@@ -111,6 +111,10 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(ArchiveActivity.this, AttendanceStreak.class));
                 return true;
+            } else if (itemId == R.id.menu_leaderboards) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(ArchiveActivity.this, Leaderboards.class));
+                return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(ArchiveActivity.this, AttendanceHistoryActivity.class));

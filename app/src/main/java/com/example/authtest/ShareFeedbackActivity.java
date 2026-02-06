@@ -342,6 +342,10 @@ public class ShareFeedbackActivity extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(ShareFeedbackActivity.this, AttendanceStreak.class));
                 return true;
+            } else if (itemId == R.id.menu_leaderboards) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(ShareFeedbackActivity.this, Leaderboards.class));
+                return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(ShareFeedbackActivity.this, AttendanceHistoryActivity.class));

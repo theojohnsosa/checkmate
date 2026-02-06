@@ -118,7 +118,11 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                 startActivity(streakIntent);
                 Toast.makeText(TeacherHome.this, "Opening Attendance Streak", Toast.LENGTH_SHORT).show();
                 return true;
-            } else if (itemId == R.id.menu_attendance_history) {
+            }  else if (itemId == R.id.menu_leaderboards) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(TeacherHome.this, Leaderboards.class));
+                return true;
+            }else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(TeacherHome.this, AttendanceHistoryActivity.class));
                 return true;

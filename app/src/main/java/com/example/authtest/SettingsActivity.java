@@ -208,6 +208,10 @@ public class SettingsActivity extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(SettingsActivity.this, AttendanceStreak.class));
                 return true;
+            } else if (itemId == R.id.menu_leaderboards) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(SettingsActivity.this, Leaderboards.class));
+                return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(SettingsActivity.this, AttendanceHistoryActivity.class));
