@@ -144,6 +144,9 @@
         <activity
             android:name=".Leaderboards"
             android:exported="false" />
+        <activity
+            android:name=".PrivacyPolicy"
+            android:exported="false" />
     </application>
 
 </manifest>

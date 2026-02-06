@@ -357,7 +357,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void openPrivacyPolicy() {
-        Toast.makeText(this, "Privacy Policy feature coming soon", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(SettingsActivity.this, PrivacyPolicy.class));
     }
 
     private void openFAQs() {
