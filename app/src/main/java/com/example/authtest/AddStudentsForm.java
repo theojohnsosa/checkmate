@@ -256,6 +256,25 @@ public class AddStudentsForm extends AppCompatActivity {
     }
 
     private void checkIfStudentExists(String studentEmail, String teacherId) {
+        db.collection("users")
+                .whereEqualTo("email", studentEmail)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        resetButton();
+                        Toast.makeText(this, "Student account not found", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    checkIfAlreadyAddedToClass(studentEmail, teacherId);
+                })
+                .addOnFailureListener(e -> {
+                    resetButton();
+                    Toast.makeText(this, "Error verifying student: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void checkIfAlreadyAddedToClass(String studentEmail, String teacherId) {
         db.collection("allClasses")
                 .document(classId)
                 .get()
