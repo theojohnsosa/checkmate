@@ -43,7 +43,6 @@ public class SeatPlan extends AppCompatActivity {
     private TextView vacantText;
     private String classStartTime;
     private static final int totalSeats = 40;
-    private boolean isStudent = false; // NEW: Track user type
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,45 +80,10 @@ public class SeatPlan extends AppCompatActivity {
             return;
         }
 
+        loadSeatPlanForClass(currentClassId);
+
         occupiedText = findViewById(R.id.occupiedText);
         vacantText = findViewById(R.id.vacantText);
-
-        // NEW: Check user type before loading seat plan
-        checkUserTypeAndLoadSeatPlan();
-    }
-
-    // NEW: Check if user is student or teacher, then load accordingly
-    private void checkUserTypeAndLoadSeatPlan() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        String email = currentUser.getEmail();
-
-        // Quick check via email
-        if (email != null && email.contains("@students.")) {
-            isStudent = true;
-            loadSeatPlanForClass(currentClassId);
-        } else {
-            // Double-check via Firestore for non-student emails
-            db.collection("users")
-                    .document(currentUser.getUid())
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String userType = documentSnapshot.getString("userType");
-                            isStudent = "Student".equalsIgnoreCase(userType);
-                        }
-                        loadSeatPlanForClass(currentClassId);
-                    })
-                    .addOnFailureListener(e -> {
-                        isStudent = false;
-                        loadSeatPlanForClass(currentClassId);
-                    });
-        }
     }
 
     private void initializeSeatCards() {
@@ -145,7 +109,6 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
-    // FIXED: Now works for both teachers and students
     private void loadSeatPlanForClass(String classId) {
         clearSeatColors();
 
@@ -153,7 +116,7 @@ public class SeatPlan extends AppCompatActivity {
             classListener.remove();
         }
 
-        // Use allClasses for both teachers and students
+        // Changed from users/{teacherId}/classes to allClasses - works for both teachers and students
         classListener = db.collection("allClasses")
                 .document(classId)
                 .addSnapshotListener((documentSnapshot, error) -> {
