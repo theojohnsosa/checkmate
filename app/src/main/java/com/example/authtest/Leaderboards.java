@@ -55,6 +55,7 @@ public class Leaderboards extends AppCompatActivity {
         initializeViews();
         setupBackButton();
         loadLeaderboardData();
+        checkUserTypeAndConfigureMenu();
     }
 
     private void initializeViews() {
@@ -383,6 +384,29 @@ public class Leaderboards extends AppCompatActivity {
                 .addCallback(this, callback);
     }
 
+    private void checkUserTypeAndConfigureMenu() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+
+                        if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
+                            navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                });
+    }
+
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -391,17 +415,18 @@ public class Leaderboards extends AppCompatActivity {
                 navigateToUserHome();
                 return true;
             } else if (itemId == R.id.menu_profile) {
-                drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(Leaderboards.this, ProfilePage.class));
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                startActivity(new Intent(Leaderboards.this, AttendanceStreak.class));
+                Intent streakIntent = new Intent(Leaderboards.this, AttendanceStreak.class);
+                startActivity(streakIntent);
                 return true;
-            } else if (itemId == R.id.menu_leaderboards) {
+            }  else if (itemId == R.id.menu_leaderboards) {
                 drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(Leaderboards.this, Leaderboards.class));
                 return true;
-            } else if (itemId == R.id.menu_attendance_history) {
+            }else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(Leaderboards.this, AttendanceHistoryActivity.class));
                 return true;
@@ -411,7 +436,7 @@ public class Leaderboards extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_settings) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                startActivity(new Intent(Leaderboards.this, SettingsActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             } else if (itemId == R.id.menu_logout) {
                 LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,

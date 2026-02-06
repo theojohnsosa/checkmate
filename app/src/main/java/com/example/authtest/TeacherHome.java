@@ -116,7 +116,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                 drawerLayout.closeDrawer(GravityCompat.START);
                 Intent streakIntent = new Intent(TeacherHome.this, AttendanceStreak.class);
                 startActivity(streakIntent);
-                Toast.makeText(TeacherHome.this, "Opening Attendance Streak", Toast.LENGTH_SHORT).show();
                 return true;
             }  else if (itemId == R.id.menu_leaderboards) {
                 drawerLayout.closeDrawer(GravityCompat.START);
@@ -244,7 +243,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                     navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                 });
     }
-
 
     private void logout() {
         mAuth.signOut();
