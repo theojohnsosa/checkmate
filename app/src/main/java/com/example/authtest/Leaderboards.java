@@ -144,8 +144,9 @@ public class Leaderboards extends AppCompatActivity {
                     fetchUserNamesAndDisplay(new ArrayList<>(userPointsMap.values()));
                 })
                 .addOnFailureListener(e -> {
+                    android.util.Log.e("Leaderboards", "Error loading leaderboard", e);
                     Toast.makeText(this, "Error loading leaderboard: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_LONG).show();
                 });
     }
 
@@ -291,7 +292,7 @@ public class Leaderboards extends AppCompatActivity {
         LinearLayout itemLayout = new LinearLayout(this);
         itemLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                (int) (50 * getResources().getDisplayMetrics().density)
+                (int) (60 * getResources().getDisplayMetrics().density)  // Changed to 60dp
         ));
         itemLayout.setOrientation(LinearLayout.HORIZONTAL);
         itemLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
@@ -310,7 +311,7 @@ public class Leaderboards extends AppCompatActivity {
         // Position TextView
         TextView positionText = new TextView(this);
         positionText.setText(String.valueOf(position));
-        positionText.setTextColor(0xFFFFFFFF);
+        positionText.setTextColor(0xFF000000);  // Black text
         positionText.setTextSize(14);
         positionText.setTypeface(null, android.graphics.Typeface.BOLD);
         LinearLayout.LayoutParams posParams = new LinearLayout.LayoutParams(
@@ -324,8 +325,9 @@ public class Leaderboards extends AppCompatActivity {
         // Name TextView
         TextView nameText = new TextView(this);
         nameText.setText(entry.fullName);
-        nameText.setTextColor(0xFFFFFFFF);
+        nameText.setTextColor(0xFF000000);  // Black text
         nameText.setTextSize(14);
+        nameText.setTypeface(null, android.graphics.Typeface.BOLD);
         LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -337,8 +339,9 @@ public class Leaderboards extends AppCompatActivity {
         // Points TextView
         TextView pointsText = new TextView(this);
         pointsText.setText(entry.points + " pts");
-        pointsText.setTextColor(0xFFFFFFFF);
+        pointsText.setTextColor(0xFF000000);  // Black text
         pointsText.setTextSize(14);
+        pointsText.setTypeface(null, android.graphics.Typeface.BOLD);
         pointsText.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
