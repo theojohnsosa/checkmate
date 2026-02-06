@@ -46,8 +46,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="20dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
+            android:paddingTop="24dp"
+            android:paddingBottom="15dp">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/backButton"
@@ -59,12 +59,12 @@
                 android:text="Back"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF" />
-            
+
         </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
@@ -74,8 +74,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginBottom="15dp"
-                    android:paddingTop="0dp" >
+                    android:layout_marginBottom="20dp" >
 
                     <TextView
                         android:text="Attendance Streak"
@@ -164,7 +163,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
-                    android:layout_marginBottom="10dp" >
+                    android:layout_marginBottom="20dp" >
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -325,7 +324,7 @@
                     android:textColor="#888888"
                     android:textSize="14sp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginBottom="20dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
