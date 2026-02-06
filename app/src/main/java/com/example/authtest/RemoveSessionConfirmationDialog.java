@@ -27,7 +27,7 @@ public class RemoveSessionConfirmationDialog extends Dialog {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_remove_session);
-        setCancelable(true);
+        setCancelable(false);
 
         Window window = getWindow();
         if (window != null) {

@@ -21,7 +21,6 @@ public class StudentSeatDialog extends Dialog {
     ) {
         super(context);
         this.student = student;
-
     }
 
     @Override
@@ -29,6 +28,7 @@ public class StudentSeatDialog extends Dialog {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.seatplan_dialog);
+        setCancelable(false);
 
         Window window = getWindow();
         if (window != null) {
@@ -84,7 +84,6 @@ public class StudentSeatDialog extends Dialog {
                 closeDialog();
             });
         }
-        setCanceledOnTouchOutside(true);
 
     }
     public void closeDialog() {
@@ -93,4 +92,3 @@ public class StudentSeatDialog extends Dialog {
         }
     }
 }
-

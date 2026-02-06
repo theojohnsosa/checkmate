@@ -26,7 +26,6 @@ public class LogoutConfirmationDialog extends Dialog {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_logout);
-
         setCancelable(false);
 
         Window window = getWindow();

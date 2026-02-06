@@ -27,7 +27,7 @@ public class ArchiveClassConfirmationDialog extends Dialog {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_archive_class);
-        setCancelable(true);
+        setCancelable(false);
 
         Window window = getWindow();
         if (window != null) {
