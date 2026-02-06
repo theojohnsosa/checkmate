@@ -117,6 +117,10 @@ public class ProfilePage extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(ProfilePage.this, AttendanceStreak.class));
                 return true;
+            } else if (itemId == R.id.menu_leaderboards) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(ProfilePage.this, Leaderboards.class));
+                return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(ProfilePage.this, AttendanceHistoryActivity.class));

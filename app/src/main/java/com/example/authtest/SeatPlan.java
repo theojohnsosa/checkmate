@@ -345,6 +345,10 @@ public class SeatPlan extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(SeatPlan.this, AttendanceStreak.class));
                 return true;
+            } else if (itemId == R.id.menu_leaderboards) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(SeatPlan.this, Leaderboards.class));
+                return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(SeatPlan.this, AttendanceHistoryActivity.class));

@@ -111,6 +111,10 @@ public class AddStudentsForm extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(AddStudentsForm.this, AttendanceStreak.class));
                 return true;
+            }else if (itemId == R.id.menu_leaderboards) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(AddStudentsForm.this, Leaderboards.class));
+                return true;
             } else if (itemId == R.id.menu_archive) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(AddStudentsForm.this, ArchiveActivity.class));
