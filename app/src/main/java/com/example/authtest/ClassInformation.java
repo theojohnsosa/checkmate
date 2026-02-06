@@ -136,7 +136,17 @@ public class ClassInformation extends AppCompatActivity {
             ClassModel classModel = (ClassModel) intent.getSerializableExtra("CLASS_MODEL");
 
             if (classModel != null) {
-                classId = classModel.getId();
+                if (intent.hasExtra("CLASS_ID")) {
+                    classId = intent.getStringExtra("CLASS_ID");
+                } else {
+                    classId = intent.getStringExtra("CLASS_CODE");
+                }
+
+                if (classId == null || classId.isEmpty()) {
+                    queryClassIdByCode(classModel.getClassCode(), classModel);
+                    return;
+                }
+
                 classStartTime = classModel.getStartTime();
 
                 if (!isStudent) {
@@ -175,6 +185,51 @@ public class ClassInformation extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    /**
+     * Query Firestore to find the document ID by classCode
+     */
+    private void queryClassIdByCode(String classCode, ClassModel classModel) {
+        if (classCode == null || classCode.isEmpty()) {
+            Toast.makeText(this, "Invalid class code", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        db.collection("allClasses")
+                .whereEqualTo("classCode", classCode)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (!snapshot.isEmpty()) {
+                        classId = snapshot.getDocuments().get(0).getId();
+                        classStartTime = classModel.getStartTime();
+
+                        if (!isStudent) {
+                            setupTeacherView(classModel);
+                            setupAttendanceStatsListener();
+                            setupClassInfoListener();
+                            setupStudentListRecyclerView();
+                            diagnoseFirestoreStructure();
+                            loadStudentList();
+                        } else {
+                            setupStudentView(classModel);
+                            setupStudentListRecyclerView();
+                            loadStudentList();
+                        }
+
+                        loadRecentSessions();
+                        setupClassInfo(classModel);
+                    } else {
+                        Toast.makeText(ClassInformation.this, "Class not found", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ClassInformation.this, "Error loading class: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    finish();
+                });
     }
 
     private void setupRecentSessionsRecyclerView() {

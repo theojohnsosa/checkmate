@@ -302,7 +302,6 @@ public class CreateClass extends AppCompatActivity {
                 .add(model)
                 .addOnSuccessListener(ref -> {
                     String classId = ref.getId();
-                    model.setId(classId);
                     db.collection("allClasses").document(classId).set(model);
                     Toast.makeText(this, "Class created successfully!", Toast.LENGTH_SHORT).show();
                     finish();

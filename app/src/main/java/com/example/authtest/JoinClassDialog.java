@@ -95,7 +95,6 @@ public class JoinClassDialog extends Dialog {
                         }
 
                         String classId = doc.getId();
-                        classModel.setId(classId);
 
                         List<String> allowedEmails = classModel.getAllowedStudentEmails();
 

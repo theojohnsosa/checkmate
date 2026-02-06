@@ -26,7 +26,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.OnClassClickListener {
 
@@ -40,6 +42,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
     private List<ClassModel> filteredClasses = new ArrayList<>();
     private EditText classSearchBar;
     private ImageView clearSearchButton;
+    private Map<ClassModel, String> classIdMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -404,7 +407,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
     }
 
     private void deleteClassFromArchive(ClassModel classItem, int position) {
-        if (classItem == null || classItem.getId() == null) {
+        if (classItem == null) {
             Toast.makeText(ArchiveActivity.this, "Error: Invalid class data", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -414,8 +417,13 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
             return;
         }
 
+        String classId = classIdMap.get(classItem);
+        if (classId == null) {
+            Toast.makeText(ArchiveActivity.this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String userId = mAuth.getCurrentUser().getUid();
-        String classId = classItem.getId();
 
         db.collection("users")
                 .document(userId)
@@ -431,6 +439,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                                     try {
                                         if (position >= 0 && position < archivedClasses.size()) {
                                             archivedClasses.remove(position);
+                                            classIdMap.remove(classItem);
                                             classAdapter.notifyItemRemoved(position);
                                             classAdapter.notifyItemRangeChanged(position, archivedClasses.size());
                                         } else {
@@ -523,6 +532,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     archivedClasses.clear();
+                    classIdMap.clear();
 
                     final int totalClasses = queryDocumentSnapshots.size();
                     final int[] loadedClasses = {0};
@@ -547,7 +557,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                                         if (classDoc.exists()) {
                                             ClassModel classModel = classDoc.toObject(ClassModel.class);
                                             if (classModel != null) {
-                                                classModel.setId(classDoc.getId());
+                                                classIdMap.put(classModel, classDoc.getId());
                                                 tempClasses.add(classModel);
                                             }
                                         }
@@ -594,7 +604,12 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
 
     private void unarchiveClass(ClassModel classItem, int position) {
         String userId = mAuth.getCurrentUser().getUid();
-        String classId = classItem.getId();
+        String classId = classIdMap.get(classItem);
+
+        if (classId == null) {
+            Toast.makeText(ArchiveActivity.this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         db.collection("users")
                 .document(userId)
@@ -627,7 +642,10 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                             .document(classId)
                             .update("isArchived", false)
                             .addOnSuccessListener(unused2 -> {
-                                archivedClasses.remove(position);
+                                ClassModel removed = archivedClasses.remove(position);
+                                if (removed != null) {
+                                    classIdMap.remove(removed);
+                                }
                                 classAdapter.notifyItemRemoved(position);
                                 classAdapter.notifyItemRangeChanged(position, archivedClasses.size());
 
@@ -652,7 +670,10 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 .document(classId)
                 .update("isArchived", false)
                 .addOnSuccessListener(unused -> {
-                    archivedClasses.remove(position);
+                    ClassModel removed = archivedClasses.remove(position);
+                    if (removed != null) {
+                        classIdMap.remove(removed);
+                    }
                     classAdapter.notifyItemRemoved(position);
                     classAdapter.notifyItemRangeChanged(position, archivedClasses.size());
 
@@ -706,11 +727,15 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     archivedClasses.clear();
+                    classIdMap.clear();
 
                     for (var document : queryDocumentSnapshots) {
                         ClassModel classModel = document.toObject(ClassModel.class);
-                        classModel.setId(document.getId());
-                        archivedClasses.add(classModel);
+                        if (classModel != null) {
+                            // Don't call setId() - store the ID in a map instead
+                            classIdMap.put(classModel, document.getId());
+                            archivedClasses.add(classModel);
+                        }
                     }
 
                     classAdapter.setClasses(archivedClasses);
@@ -742,6 +767,7 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
     public void onClassClick(ClassModel classModel) {
         Intent intent = new Intent(ArchiveActivity.this, ClassInformation.class);
         intent.putExtra("CLASS_MODEL", classModel);
+        intent.putExtra("CLASS_CODE", classModel.getClassCode());
         startActivity(intent);
     }
 }

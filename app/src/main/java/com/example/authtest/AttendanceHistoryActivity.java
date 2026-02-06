@@ -140,7 +140,6 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         }
 
         String email = currentUser.getEmail();
-
         if (email != null && email.contains("@students.")) {
             isStudent = true;
             loadStudentHistory();
@@ -180,7 +179,6 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
                                         if (classDoc.exists()) {
                                             ClassModel classModel = classDoc.toObject(ClassModel.class);
                                             if (classModel != null) {
-                                                classModel.setId(classId);
                                                 AttendanceHistoryModel historyModel = new AttendanceHistoryModel(
                                                         classId,
                                                         classModel.getClassName(),
@@ -243,8 +241,6 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
                     for (QueryDocumentSnapshot doc : querySnapshot) {
                         ClassModel classModel = doc.toObject(ClassModel.class);
                         if (classModel != null) {
-                            classModel.setId(doc.getId());
-
                             Long createdAt = doc.getLong("createdAt");
                             if (createdAt == null) {
                                 createdAt = System.currentTimeMillis();
@@ -319,7 +315,7 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(AttendanceHistoryActivity.this, AttendanceStreak.class));
                 return true;
-            }else if (itemId == R.id.menu_leaderboards) {
+            } else if (itemId == R.id.menu_leaderboards) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(AttendanceHistoryActivity.this, Leaderboards.class));
                 return true;
@@ -405,11 +401,12 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
                             String lastName = documentSnapshot.getString("lastName");
-
                             String fullName = "";
+
                             if (firstName != null && !firstName.isEmpty()) {
                                 fullName = firstName;
                             }
+
                             if (lastName != null && !lastName.isEmpty()) {
                                 fullName += (fullName.isEmpty() ? "" : " ") + lastName;
                             }

@@ -6,7 +6,6 @@ import java.util.List;
 
 public class ClassModel implements Serializable {
 
-    private String id;
     private String className;
     private String classCode;
     private String subjectCode;
@@ -55,14 +54,6 @@ public class ClassModel implements Serializable {
         this.isAttendanceActive = false;
         this.isArchived = false;
         this.createdAt = 0;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getClassName() {

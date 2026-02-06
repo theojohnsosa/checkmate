@@ -227,7 +227,7 @@ public class StudentHome extends AppCompatActivity {
     }
 
     private void archiveClass(ClassModel classItem, int position) {
-        if (classItem == null || classItem.getId() == null) {
+        if (classItem == null) {
             Toast.makeText(StudentHome.this, "Error: Invalid class data", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -238,7 +238,7 @@ public class StudentHome extends AppCompatActivity {
         }
 
         String studentId = mAuth.getCurrentUser().getUid();
-        String classId = classItem.getId();
+        String classId = classItem.getClassCode();
 
         db.collection("users")
                 .document(studentId)
@@ -466,7 +466,8 @@ public class StudentHome extends AppCompatActivity {
                                         if (classDoc.exists()) {
                                             ClassModel model = classDoc.toObject(ClassModel.class);
                                             if (model != null) {
-                                                model.setId(classDoc.getId());
+                                                // Don't call setId() - the id field no longer exists
+                                                // Firebase document ID is accessible via classDoc.getId()
                                                 classList.add(model);
                                             }
                                         }

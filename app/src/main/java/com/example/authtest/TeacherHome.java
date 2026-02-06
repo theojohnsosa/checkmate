@@ -28,7 +28,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnClassClickListener {
 
@@ -42,6 +44,7 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     private List<ClassModel> filteredClasses = new ArrayList<>();
     private EditText classSearchBar;
     private ImageView clearSearchButton;
+    private Map<ClassModel, String> classIdMap = new HashMap<>();  // Map to store classId for each ClassModel
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -330,11 +333,13 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     classList.clear();
+                    classIdMap.clear();
                     int archivedCount = 0;
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         ClassModel classModel = document.toObject(ClassModel.class);
-                        classModel.setId(document.getId());
+                        // Don't call setId() - store the ID in a map instead
+                        classIdMap.put(classModel, document.getId());
 
                         Boolean isArchived = document.getBoolean("isArchived");
 
@@ -374,6 +379,7 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     public void onClassClick(ClassModel classModel) {
         Intent intent = new Intent(TeacherHome.this, ClassInformation.class);
         intent.putExtra("CLASS_MODEL", classModel);
+        intent.putExtra("CLASS_CODE", classModel.getClassCode());
         startActivity(intent);
     }
 
@@ -453,7 +459,7 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     }
 
     private void archiveClass(ClassModel classItem, int position) {
-        if (classItem == null || classItem.getId() == null) {
+        if (classItem == null) {
             Toast.makeText(TeacherHome.this, "Error: Invalid class data", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -463,8 +469,14 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
             return;
         }
 
+        // Get the classId from the map
+        String classId = classIdMap.get(classItem);
+        if (classId == null) {
+            Toast.makeText(TeacherHome.this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String teacherId = mAuth.getCurrentUser().getUid();
-        String classId = classItem.getId();
 
         db.collection("users")
                 .document(teacherId)
@@ -478,7 +490,8 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
                             .addOnSuccessListener(unused2 -> {
                                 try {
                                     if (position >= 0 && position < classList.size()) {
-                                        classList.remove(position);
+                                        ClassModel removed = classList.remove(position);
+                                        classIdMap.remove(removed);
                                         classAdapter.notifyItemRemoved(position);
                                         classAdapter.notifyItemRangeChanged(position, classList.size());
                                     } else {
