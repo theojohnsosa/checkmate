@@ -43,6 +43,7 @@ public class SeatPlan extends AppCompatActivity {
     private TextView vacantText;
     private String classStartTime;
     private static final int totalSeats = 40;
+    private boolean isStudent = false; // NEW: Track user type
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,18 +81,51 @@ public class SeatPlan extends AppCompatActivity {
             return;
         }
 
-        loadSeatPlanForClass(currentClassId);
-
         occupiedText = findViewById(R.id.occupiedText);
         vacantText = findViewById(R.id.vacantText);
+
+        // NEW: Check user type before loading seat plan
+        checkUserTypeAndLoadSeatPlan();
+    }
+
+    // NEW: Check if user is student or teacher, then load accordingly
+    private void checkUserTypeAndLoadSeatPlan() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        String email = currentUser.getEmail();
+
+        // Quick check via email
+        if (email != null && email.contains("@students.")) {
+            isStudent = true;
+            loadSeatPlanForClass(currentClassId);
+        } else {
+            // Double-check via Firestore for non-student emails
+            db.collection("users")
+                    .document(currentUser.getUid())
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String userType = documentSnapshot.getString("userType");
+                            isStudent = "Student".equalsIgnoreCase(userType);
+                        }
+                        loadSeatPlanForClass(currentClassId);
+                    })
+                    .addOnFailureListener(e -> {
+                        isStudent = false;
+                        loadSeatPlanForClass(currentClassId);
+                    });
+        }
     }
 
     private void initializeSeatCards() {
         for (int i = 0; i < 40; i++) {
             int resId = getResources().getIdentifier("seatPlanCard" + (i + 1), "id", getPackageName());
             seatCards[i] = findViewById(resId);
-            TextView occupied = findViewById(R.id.occupiedText);
-            TextView vacant = findViewById(R.id.vacantText);
 
             final int seatNumber = i + 1;
             seatCards[i].setOnClickListener(view -> {
@@ -103,8 +137,6 @@ public class SeatPlan extends AppCompatActivity {
     private void onSeatClicked(int seatNumber) {
         if (seatNumber <= sortedStudentList.size()) {
             StudentAttendanceModel student = sortedStudentList.get(seatNumber - 1);
-            TextView occupied = findViewById(R.id.occupiedText);
-            TextView vacant = findViewById(R.id.vacantText);
 
             StudentSeatDialog dialog = new StudentSeatDialog(this, student);
             dialog.show();
@@ -113,17 +145,16 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
+    // FIXED: Now works for both teachers and students
     private void loadSeatPlanForClass(String classId) {
         clearSeatColors();
-        String teacherId = mAuth.getCurrentUser().getUid();
 
         if (classListener != null) {
             classListener.remove();
         }
 
-        classListener = db.collection("users")
-                .document(teacherId)
-                .collection("classes")
+        // Use allClasses for both teachers and students
+        classListener = db.collection("allClasses")
                 .document(classId)
                 .addSnapshotListener((documentSnapshot, error) -> {
                     if (error != null) {
@@ -353,13 +384,14 @@ public class SeatPlan extends AppCompatActivity {
         }
         updateSeatCounters(studentCount);
     }
+
     private void updateSeatCounters(int occupiedCount) {
         int vacantCount = totalSeats - occupiedCount;
 
         String occupied = " Occupied";
         String vacant = " Vacant";
-        occupiedText.setText(occupiedCount  + occupied);
-        vacantText.setText(vacantCount +  vacant);
+        occupiedText.setText(occupiedCount + occupied);
+        vacantText.setText(vacantCount + vacant);
     }
 
     @Override
@@ -369,7 +401,6 @@ public class SeatPlan extends AppCompatActivity {
     }
 
     private void setupNavigationDrawer() {
-        navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
 

@@ -1856,6 +1856,9 @@ public class ClassInformation extends AppCompatActivity {
                     addStudentsButton.setVisibility(View.GONE);
                 }
 
+                if (viewSeatPlanButton != null) {
+                    viewSeatPlanButton.setVisibility(View.VISIBLE);
+                }
 
             } else {
                 isStudent = false;
