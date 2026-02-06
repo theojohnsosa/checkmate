@@ -87,7 +87,7 @@
                         android:text="Privacy Policy"
                         android:textColor="#FFFFFF"
                         android:textStyle="bold"
-                        android:textSize="35sp" />
+                        android:textSize="40sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -120,8 +120,7 @@
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="8dp"
-                        android:layout_marginLeft="15dp"/>
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -131,7 +130,7 @@
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:paddingStart="16dp"
-                        android:layout_marginBottom="2dp" />
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -140,7 +139,7 @@
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:paddingStart="16dp" />
+                        android:paddingStart="32dp" />
 
                 </LinearLayout>
 
@@ -157,18 +156,16 @@
                         android:textColor="#FFFFFF"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="2dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="When you create an account and use the app, we collect the following information:"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
+                        android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="15dp"/>
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -177,48 +174,19 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• Your NU MOA school email"
+                        android:text="• Your NU MOA school email\n• Your student or faculty number\n• Your full name\n• Your department or course\n• Your role (student or teacher)"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginBottom="4dp"
-                        android:paddingStart="32dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Your student or faculty number"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp"
-                        android:paddingStart="32dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Your full name"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp"
-                        android:paddingStart="32dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Your department or course"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp"
-                        android:paddingStart="32dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Your role (student or teacher)"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp"
-                        android:paddingStart="32dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -226,7 +194,8 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="10dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -235,15 +204,19 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="2dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Attendance records (present/late/absent), attendance streak data"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginBottom="2dp"
-                        android:layout_marginLeft="20dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="4dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -251,15 +224,19 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="2dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Classes you create, generated class codes, added students you input, class details"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginBottom="2dp"
-                        android:layout_marginLeft="20dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="4dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -267,15 +244,19 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="2dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Login activity and app usage patterns"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginBottom="4dp"
-                        android:layout_marginLeft="20dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -283,42 +264,17 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• Your password (it's encrypted and we can't see it)"
+                        android:text="• Your password (it's encrypted and we can't see it)\n• Location data\n• Photos or biometric data\n• Browsing history outside the app\n• Tracking cookies or analytics"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:paddingStart="32dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Location data"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:paddingStart="32dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Photos or biometric data"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:paddingStart="32dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Browsing history outside the app"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:paddingStart="32dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Tracking cookies or analytics"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:paddingStart="32dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp" />
 
                 </LinearLayout>
 
@@ -326,7 +282,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginBottom="0dp">
+                    android:layout_marginBottom="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -341,37 +297,40 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="We use the information you provide for these purposes only:"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="2dp"
-                        android:layout_marginLeft="15dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• To provide the service: "
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Creating and managing your accounttracking attendance, displaying your streak"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginLeft="20dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginBottom="8dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• For teachers: "
+                        android:text="• To provide the service:"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Creating and managing your account, tracking attendance, displaying your streak"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="• For teachers:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="2dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -379,15 +338,19 @@
                         android:text="Managing your classes and student attendance records"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginLeft="20dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="4dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• For students: "
+                        android:text="• For students:"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="2dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -395,15 +358,19 @@
                         android:text="Showing you your attendance and streak data"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginLeft="20dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="4dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• Account management: "
+                        android:text="• Account management:"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="2dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -411,15 +378,19 @@
                         android:text="Creating accounts and approving them (Super Admin)"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginLeft="20dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="4dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• To improve the app: "
+                        android:text="• To improve the app:"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="2dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -427,7 +398,8 @@
                         android:text="Understanding what features work well and fixing bugs"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginLeft="20dp"/>
+                        android:lineSpacingExtra="4dp"
+                        android:paddingStart="32dp" />
 
                 </LinearLayout>
 
@@ -459,31 +431,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• You can see your own attendance records and streak"
+                        android:text="• You can see your own attendance records and streak\n• Your teachers can see your attendance in classes they teach\n• Super Admin can see your account creation details when reviewing account approvals"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
                         android:paddingStart="32dp"
-                        android:layout_marginBottom="1dp" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Your teachers can see your attendance in classes they teach"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"
-                        android:paddingStart="32dp"
-                        android:layout_marginBottom="1dp" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Super Admin can see your account creation details when reviewing account approvals"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"
-                        android:paddingStart="32dp"
-                        android:layout_marginBottom="4dp" />
-
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -498,30 +451,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• You can see attendance records of students in your classes"
+                        android:text="• You can see attendance records of students in your classes\n• Your students cannot see your information\n• Super Admin can see your account creation details when reviewing account approvals"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
                         android:paddingStart="32dp"
-                        android:layout_marginBottom="1dp" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Your students cannot see your information"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"
-                        android:paddingStart="32dp"
-                        android:layout_marginBottom="1dp" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Super Admin can see your account creation details when reviewing account approvals"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"
-                        android:paddingStart="32dp"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -536,21 +471,11 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• Can view all account creation details for approval/rejection purposes"
+                        android:text="• Can view all account creation details for approval/rejection purposes\n• Can see account information but not necessarily all attendance records"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:paddingStart="32dp"
-                        android:layout_marginBottom="4dp" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Can see account information but not necessarily all attendance records"
-                        android:textColor="#CCCCCC"
-                        android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"
-                        android:paddingStart="32dp"
-                        android:layout_marginBottom="4dp" />
+                        android:paddingStart="32dp" />
 
                 </LinearLayout>
 
@@ -588,6 +513,7 @@
                         android:lineSpacingExtra="4dp"
                         android:paddingStart="32dp"
                         android:layout_marginBottom="8dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -597,10 +523,11 @@
                         android:textStyle="bold"
                         android:paddingStart="16dp"
                         android:layout_marginBottom="4dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• Data is encrypted during transmission and at rest\n• Access is restricted based on your role (student, teacher, or super admin) \n• Only authorized users can access the app \n• Your password is encrypted and we cannot view it"
+                        android:text="• Data is encrypted during transmission and at rest\n• Access is restricted based on your role (student, teacher, or super admin)\n• Only authorized users can access the app\n• Your password is encrypted and we cannot view it"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
@@ -620,7 +547,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• No system is 100% secure. While we do our best to protect your data, we cannot guarantee complete protection against all security threats\n• If there’s a data breach, we will work with NU MOA to address the issue and notify affected users"
+                        android:text="• No system is 100% secure. While we do our best to protect your data, we cannot guarantee complete protection against all security threats\n• If there's a data breach, we will work with NU MOA to address the issue and notify affected users"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
@@ -656,12 +583,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• Data is stored indefinitely in our database once it’s created\n• There is currently no automatic deletion"
+                        android:text="• Data is stored indefinitely in our database once it's created\n• There is currently no automatic deletion"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
                         android:paddingStart="32dp"
-                        android:layout_marginBottom="2dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -671,12 +598,12 @@
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:paddingStart="16dp"
-                        android:layout_marginBottom="2dp" />
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• Accounts will only be usable for the current school year\n• New accounts will be created by Super Admin each school year \n• Details about data deletion after a school year will be communicated in a future update"
+                        android:text="• Accounts will only be usable for the current school year\n• New accounts will be created by Super Admin each school year\n• Details about data deletion after a school year will be communicated in a future update"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
@@ -702,8 +629,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="We use Firebase Firestore to store and manage your data. Firebase is a service by Google and has its own privacy practices. By using this app, you acknowledge that your data may be processed by Firebase according to their terms.
-We do not share your data with any other third-party services or companies."
+                        android:text="We use Firebase Firestore to store and manage your data. Firebase is a service by Google and has its own privacy practices. By using this app, you acknowledge that your data may be processed by Firebase according to their terms.\nWe do not share your data with any other third-party services or companies."
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
@@ -729,14 +655,11 @@ We do not share your data with any other third-party services or companies."
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• This app is separate from NU MOA’s main systems \n• NU MOA administration does not have automatic access to app data \n• Only Super Admin, teachers, and students have access to the app \n• NU MOA handles age verification and account eligibility (out of scope for this app"
+                        android:text="• This app is separate from NU MOA's main systems\n• NU MOA administration does not have automatic access to app data\n• Only Super Admin, teachers, and students have access to the app\n• NU MOA handles age verification and account eligibility (out of scope for this app)"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="5dp"
-                        android:paddingStart="32dp"/>
-
-
+                        android:paddingStart="16dp" />
 
                 </LinearLayout>
 
@@ -788,7 +711,7 @@ We do not share your data with any other third-party services or companies."
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• Delete your account or data (this feature will be added in the future) \n• Opt-out of data collection (it’s necessary to use the app) "
+                        android:text="• Delete your account or data (this feature will be added in the future)\n• Opt-out of data collection (it's necessary to use the app)"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
@@ -816,11 +739,10 @@ We do not share your data with any other third-party services or companies."
                         android:layout_height="wrap_content"
                         android:text="If we discover that your data has been compromised or accessed without authorization:"
                         android:textColor="#FFFFFF"
-                        android:textStyle="bold"
                         android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="15dp"/>
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -853,16 +775,15 @@ We do not share your data with any other third-party services or companies."
                         android:layout_height="wrap_content"
                         android:text="When you create a new account:"
                         android:textColor="#FFFFFF"
-                        android:textStyle="bold"
                         android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="15dp"/>
+                        android:textStyle="bold"
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1. Your account creation details are submitted for Super Admin review\n2. Super Admin reviews your information (school email, student/teacher number, department, etc.)\n3. Super Admin approves or rejects your account\n4. Once approved, you can access the app’s features\n5. Your account creation details remain in our system for record-keeping"
+                        android:text="1. Your account creation details are submitted for Super Admin review\n2. Super Admin reviews your information (school email, student/teacher number, department, etc.)\n3. Super Admin approves or rejects your account\n4. Once approved, you can access the app's features\n5. Your account creation details remain in our system for record-keeping"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
@@ -888,7 +809,7 @@ We do not share your data with any other third-party services or companies."
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="We may update this Privacy Policy sometimes. If we make changes, we’ll let you know. Continued use of the app means you accept the updated policy."
+                        android:text="We may update this Privacy Policy sometimes. If we make changes, we'll let you know. Continued use of the app means you accept the updated policy."
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
@@ -944,27 +865,27 @@ We do not share your data with any other third-party services or companies."
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp"
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• Contact your teacher or school’s IT department\n• Contact NU MOA’s administration\n• Contact the Checkmate Team"
+                        android:text="• Contact your teacher or school's IT department\n• Contact NU MOA's administration\n• Contact the Checkmate Team"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:paddingStart="32dp" />
+                        android:paddingStart="32dp"
+                        android:layout_marginBottom="8dp" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="If you believe your data has been misused or your privacy has been violated, please report it immediately to your teacher or NU MOA’s administration"
+                        android:text="If you believe your data has been misused or your privacy has been violated, please report it immediately to your teacher or NU MOA's administration"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="15dp"/>
+                        android:paddingStart="16dp" />
 
                 </LinearLayout>
 
@@ -996,7 +917,7 @@ We do not share your data with any other third-party services or companies."
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="• We collect only what's necessary to run the app\n• We keep your data secure\n• Teachers see their students’ attendance\n• Students see only their own information\n• Super Admin sees account details for approval\n• Your data stays with us and isn’t shared with others \n• You have rights regarding your information"
+                        android:text="• We collect only what's necessary to run the app\n• We keep your data secure\n• Teachers see their students' attendance\n• Students see only their own information\n• Super Admin sees account details for approval\n• Your data stays with us and isn't shared with others\n• You have rights regarding your information"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
@@ -1018,33 +939,20 @@ We do not share your data with any other third-party services or companies."
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="4dp" />
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Last Updated: "
-                            android:textColor="#CCCCCC"
-                            android:textStyle="italic"
-                            android:textSize="12sp"
-                            android:layout_marginBottom="4dp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="February 2, 2026: "
-                            android:textColor="#CCCCCC"
-                            android:textSize="12sp"
-                            android:layout_marginBottom="4dp" />
 
-                </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Last Updated: February 2, 2026"
+                        android:textColor="#828282"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Thank you for using Checkmate!"
-                        android:textColor="#CCCCCC"
+                        android:textColor="#828282"
                         android:textSize="12sp" />
 
                 </LinearLayout>
