@@ -90,8 +90,6 @@ public class SeatPlan extends AppCompatActivity {
         for (int i = 0; i < 40; i++) {
             int resId = getResources().getIdentifier("seatPlanCard" + (i + 1), "id", getPackageName());
             seatCards[i] = findViewById(resId);
-            TextView occupied = findViewById(R.id.occupiedText);
-            TextView vacant = findViewById(R.id.vacantText);
 
             final int seatNumber = i + 1;
             seatCards[i].setOnClickListener(view -> {
@@ -103,8 +101,6 @@ public class SeatPlan extends AppCompatActivity {
     private void onSeatClicked(int seatNumber) {
         if (seatNumber <= sortedStudentList.size()) {
             StudentAttendanceModel student = sortedStudentList.get(seatNumber - 1);
-            TextView occupied = findViewById(R.id.occupiedText);
-            TextView vacant = findViewById(R.id.vacantText);
 
             StudentSeatDialog dialog = new StudentSeatDialog(this, student);
             dialog.show();
@@ -115,15 +111,13 @@ public class SeatPlan extends AppCompatActivity {
 
     private void loadSeatPlanForClass(String classId) {
         clearSeatColors();
-        String teacherId = mAuth.getCurrentUser().getUid();
 
         if (classListener != null) {
             classListener.remove();
         }
 
-        classListener = db.collection("users")
-                .document(teacherId)
-                .collection("classes")
+        // Changed from users/{teacherId}/classes to allClasses - works for both teachers and students
+        classListener = db.collection("allClasses")
                 .document(classId)
                 .addSnapshotListener((documentSnapshot, error) -> {
                     if (error != null) {
@@ -353,13 +347,14 @@ public class SeatPlan extends AppCompatActivity {
         }
         updateSeatCounters(studentCount);
     }
+
     private void updateSeatCounters(int occupiedCount) {
         int vacantCount = totalSeats - occupiedCount;
 
         String occupied = " Occupied";
         String vacant = " Vacant";
-        occupiedText.setText(occupiedCount  + occupied);
-        vacantText.setText(vacantCount +  vacant);
+        occupiedText.setText(occupiedCount + occupied);
+        vacantText.setText(vacantCount + vacant);
     }
 
     @Override
@@ -369,7 +364,6 @@ public class SeatPlan extends AppCompatActivity {
     }
 
     private void setupNavigationDrawer() {
-        navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
