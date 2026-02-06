@@ -116,7 +116,6 @@ public class SeatPlan extends AppCompatActivity {
             classListener.remove();
         }
 
-        // Changed from users/{teacherId}/classes to allClasses - works for both teachers and students
         classListener = db.collection("allClasses")
                 .document(classId)
                 .addSnapshotListener((documentSnapshot, error) -> {

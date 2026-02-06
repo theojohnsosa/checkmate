@@ -120,6 +120,8 @@ public class ClassInformation extends AppCompatActivity {
         studentsAttendedHeader = findViewById(R.id.studentsAttendedHeader);
         recentSessionsRecyclerView = findViewById(R.id.recentSessionsRecyclerView);
 
+        checkUserTypeAndSetupUI();
+
         setupRecentSessionsRecyclerView();
 
         viewSeatPlanButton = findViewById(R.id.viewSeatPlanButton);
@@ -128,8 +130,6 @@ public class ClassInformation extends AppCompatActivity {
             intent.putExtra("CLASS_ID", classId);
             startActivity(intent);
         });
-
-        checkUserTypeAndSetupUI();
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("CLASS_MODEL")) {
@@ -195,11 +195,13 @@ public class ClassInformation extends AppCompatActivity {
         recentSessionAdapter.setClickListener(session -> {
             navigateToSessionDetails(session);
         });
-        recentSessionAdapter.setRemoveListener((session, position) -> {
-            removeSessionFromClass(session, position);
-        });
 
-        setupSwipeToDeleteSessions();
+        if (!isStudent) {
+            recentSessionAdapter.setRemoveListener((session, position) -> {
+                removeSessionFromClass(session, position);
+            });
+            setupSwipeToDeleteSessions();
+        }
     }
 
     private void checkUserTypeAndConfigureMenu() {
@@ -226,6 +228,10 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void setupSwipeToDeleteSessions() {
+        if (isStudent) {
+            return;
+        }
+
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             private final ColorDrawable background = new ColorDrawable(Color.parseColor("#C92A2A"));
             private final Drawable deleteIcon = ContextCompat.getDrawable(ClassInformation.this, android.R.drawable.ic_menu_delete);
@@ -304,6 +310,11 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void removeSessionFromClass(RecentSession session, int position) {
+        if (isStudent) {
+            Toast.makeText(this, "Only teachers can remove sessions", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (classId == null || session.getSessionId() == null) {
             return;
         }
@@ -351,7 +362,7 @@ public class ClassInformation extends AppCompatActivity {
                                         recentSessionAdapter.notifyItemChanged(position);
                                     }
                                 } catch (Exception ex) {
-                                    // Handle exception silently
+
                                 }
                             });
                 })
@@ -362,7 +373,7 @@ public class ClassInformation extends AppCompatActivity {
                             recentSessionAdapter.notifyItemChanged(position);
                         }
                     } catch (Exception ex) {
-                        // Handle exception silently
+
                     }
                 });
     }
@@ -672,7 +683,6 @@ public class ClassInformation extends AppCompatActivity {
                                                     (userEmail != null && userEmail.toLowerCase().trim().equals(cleanTarget)) ||
                                                     (studentEmail != null && studentEmail.toLowerCase().trim().equals(cleanTarget)) ||
                                                     (emailAddress != null && emailAddress.toLowerCase().trim().equals(cleanTarget))) {
-                                                // Found match - can add logging here if needed
                                             }
                                         }
                                     });
@@ -701,7 +711,9 @@ public class ClassInformation extends AppCompatActivity {
         studentsRecyclerView.setNestedScrollingEnabled(true);
         studentsRecyclerView.setHasFixedSize(false);
 
-        setupSwipeToDelete();
+        if (!isStudent) {
+            setupSwipeToDelete();
+        }
     }
 
     private void setupSwipeToDelete() {
