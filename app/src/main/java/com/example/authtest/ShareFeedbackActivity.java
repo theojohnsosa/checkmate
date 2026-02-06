@@ -148,12 +148,17 @@ public class ShareFeedbackActivity extends AppCompatActivity {
     }
 
     private void selectStarRating(int rating) {
-        selectedStarRating = rating;
+        if (selectedStarRating == rating) {
+            selectedStarRating = 0;
+        } else {
+            selectedStarRating = rating;
+        }
+
         ImageView[] stars = {star1, star2, star3, star4, star5};
 
         for (int i = 0; i < stars.length; i++) {
             if (stars[i] != null) {
-                if (i < rating) {
+                if (i < selectedStarRating) {
                     stars[i].setImageResource(R.drawable.ic_star_yellow);
                 } else {
                     stars[i].setImageResource(R.drawable.ic_star_gray);
@@ -176,6 +181,35 @@ public class ShareFeedbackActivity extends AppCompatActivity {
     }
 
     private void selectRecommendation(int recommendation) {
+        if (selectedRecommendation == recommendation) {
+            selectedRecommendation = 0;
+            recommendationNo.setBackgroundResource(R.drawable.feedback_button_unselected);
+            recommendationYes.setBackgroundResource(R.drawable.feedback_button_unselected);
+
+            ImageView thumbsDownNo = (ImageView) recommendationNo.getChildAt(0);
+            ImageView thumbsUpYes = (ImageView) recommendationYes.getChildAt(0);
+
+            TextView textNo = (TextView) recommendationNo.getChildAt(1);
+            TextView textYes = (TextView) recommendationYes.getChildAt(1);
+
+            if (thumbsDownNo != null) {
+                thumbsDownNo.setImageResource(R.drawable.ic_thumbs_down_white);
+            }
+
+            if (thumbsUpYes != null) {
+                thumbsUpYes.setImageResource(R.drawable.ic_thumbs_up_white);
+            }
+
+            if (textNo != null) {
+                textNo.setTextColor(0xFFFFFFFF);
+            }
+
+            if (textYes != null) {
+                textYes.setTextColor(0xFFFFFFFF);
+            }
+            return;
+        }
+
         selectedRecommendation = recommendation;
 
         recommendationNo.setBackgroundResource(R.drawable.feedback_button_unselected);
