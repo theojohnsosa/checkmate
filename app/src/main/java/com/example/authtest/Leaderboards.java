@@ -63,7 +63,6 @@ public class Leaderboards extends AppCompatActivity {
         userRankingPoints = findViewById(R.id.userRankingPoints);
         rankingListContainer = findViewById(R.id.rankingListContainer);
 
-        // Find the position TextView in the user ranking container
         View parent = (View) userRankingName.getParent();
         if (parent instanceof LinearLayout) {
             LinearLayout container = (LinearLayout) parent;
@@ -84,11 +83,9 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void loadLeaderboardData() {
-        // Get all attendance records
         db.collection("attendance")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    // Group attendance by date and class
                     Map<String, List<AttendanceRecord>> attendanceByClass = new HashMap<>();
 
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
@@ -100,7 +97,6 @@ public class Leaderboards extends AppCompatActivity {
 
                         if (userId == null || !"present".equals(status) || date == null) continue;
 
-                        // Create unique key for each class session (date + classId)
                         String classKey = date + "_" + (classId != null ? classId : "default");
 
                         AttendanceRecord record = new AttendanceRecord();
@@ -111,16 +107,13 @@ public class Leaderboards extends AppCompatActivity {
                         attendanceByClass.get(classKey).add(record);
                     }
 
-                    // Calculate early bird points
                     Map<String, LeaderboardEntry> userPointsMap = new HashMap<>();
 
                     for (List<AttendanceRecord> records : attendanceByClass.values()) {
                         if (records.isEmpty()) continue;
 
-                        // Sort by timestamp to find the earliest (first to mark)
                         Collections.sort(records, (a, b) -> Long.compare(a.timestamp, b.timestamp));
 
-                        // Award points only to the first person (earliest timestamp)
                         AttendanceRecord earlyBird = records.get(0);
 
                         LeaderboardEntry entry = userPointsMap.get(earlyBird.userId);
@@ -134,18 +127,12 @@ public class Leaderboards extends AppCompatActivity {
 
                         entry.points += 1;
 
-                        // Track the earliest timestamp for tie-breaking
                         if (earlyBird.timestamp < entry.earliestTimestamp) {
                             entry.earliestTimestamp = earlyBird.timestamp;
                         }
                     }
 
-                    // Fetch user names and display leaderboard
                     fetchUserNamesAndDisplay(new ArrayList<>(userPointsMap.values()));
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error loading leaderboard: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -158,7 +145,6 @@ public class Leaderboards extends AppCompatActivity {
         final int[] loadedCount = {0};
         final int totalEntries = entries.size();
 
-        // Fetch names for all users
         for (LeaderboardEntry entry : entries) {
             db.collection("users")
                     .document(entry.userId)
@@ -179,7 +165,6 @@ public class Leaderboards extends AppCompatActivity {
 
                         loadedCount[0]++;
 
-                        // Check if all names are loaded
                         if (loadedCount[0] == totalEntries) {
                             displayLeaderboard(entries);
                             loadUserRanking(entries);
@@ -198,13 +183,11 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void displayLeaderboard(List<LeaderboardEntry> entries) {
-        // Sort by points descending, then by earliest timestamp ascending (for tie-breaking)
         Collections.sort(entries, (a, b) -> {
             int pointsCompare = Integer.compare(b.points, a.points);
             if (pointsCompare != 0) {
                 return pointsCompare;
             }
-            // If points are equal, sort by earliest timestamp (lower is better)
             return Long.compare(a.earliestTimestamp, b.earliestTimestamp);
         });
 
@@ -212,14 +195,11 @@ public class Leaderboards extends AppCompatActivity {
             return;
         }
 
-        // Limit to top 10 students only
         int maxDisplay = Math.min(10, entries.size());
         List<LeaderboardEntry> top10 = entries.subList(0, maxDisplay);
 
-        // Update top 3 cards (they're already in the XML)
         updateTopThreeCards(top10);
 
-        // Clear and populate the ranking list container (positions 4-10)
         rankingListContainer.removeAllViews();
         for (int i = 3; i < top10.size(); i++) {
             addLeaderboardItem(top10.get(i), i + 1);
@@ -227,10 +207,8 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void updateTopThreeCards(List<LeaderboardEntry> top10) {
-        // Find the hardcoded cards in the layout
         LinearLayout podiumContainer = (LinearLayout) rankingListContainer.getParent();
 
-        // Get the podium container (it's the LinearLayout before rankingListContainer)
         View podiumView = null;
         for (int i = 0; i < ((LinearLayout) podiumContainer).getChildCount(); i++) {
             View child = ((LinearLayout) podiumContainer).getChildAt(i);
@@ -247,19 +225,16 @@ public class Leaderboards extends AppCompatActivity {
         if (podiumView != null && podiumView instanceof LinearLayout) {
             LinearLayout podium = (LinearLayout) podiumView;
 
-            // Update Top 2 (Left card - index 0)
             if (top10.size() >= 2 && podium.getChildCount() > 0) {
                 LinearLayout top2Card = (LinearLayout) podium.getChildAt(0);
                 updateCardData(top2Card, top10.get(1), 2);
             }
 
-            // Update Top 1 (Center card - index 1)
             if (top10.size() >= 1 && podium.getChildCount() > 1) {
                 LinearLayout top1Card = (LinearLayout) podium.getChildAt(1);
                 updateCardData(top1Card, top10.get(0), 1);
             }
 
-            // Update Top 3 (Right card - index 2)
             if (top10.size() >= 3 && podium.getChildCount() > 2) {
                 LinearLayout top3Card = (LinearLayout) podium.getChildAt(2);
                 updateCardData(top3Card, top10.get(2), 3);
@@ -268,14 +243,12 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void updateCardData(LinearLayout card, LeaderboardEntry entry, int position) {
-        // Find TextViews in the card
         for (int i = 0; i < card.getChildCount(); i++) {
             View child = card.getChildAt(i);
             if (child instanceof TextView) {
                 TextView tv = (TextView) child;
                 String hint = tv.getText().toString();
 
-                // Update based on the existing text pattern
                 if (hint.contains("Hitomo") || hint.contains("Baluyot") || hint.contains("Bloso")) {
                     tv.setText(entry.fullName);
                 } else if (hint.contains("pts")) {
@@ -291,7 +264,7 @@ public class Leaderboards extends AppCompatActivity {
         LinearLayout itemLayout = new LinearLayout(this);
         itemLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                (int) (50 * getResources().getDisplayMetrics().density)
+                (int) (60 * getResources().getDisplayMetrics().density) 
         ));
         itemLayout.setOrientation(LinearLayout.HORIZONTAL);
         itemLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
@@ -307,10 +280,9 @@ public class Leaderboards extends AppCompatActivity {
         layoutParams.setMargins(0, 0, 0, (int) (10 * getResources().getDisplayMetrics().density));
         itemLayout.setLayoutParams(layoutParams);
 
-        // Position TextView
         TextView positionText = new TextView(this);
         positionText.setText(String.valueOf(position));
-        positionText.setTextColor(0xFFFFFFFF);
+        positionText.setTextColor(0xFF000000);  
         positionText.setTextSize(14);
         positionText.setTypeface(null, android.graphics.Typeface.BOLD);
         LinearLayout.LayoutParams posParams = new LinearLayout.LayoutParams(
@@ -321,11 +293,11 @@ public class Leaderboards extends AppCompatActivity {
         positionText.setLayoutParams(posParams);
         itemLayout.addView(positionText);
 
-        // Name TextView
         TextView nameText = new TextView(this);
         nameText.setText(entry.fullName);
-        nameText.setTextColor(0xFFFFFFFF);
+        nameText.setTextColor(0xFF000000);
         nameText.setTextSize(14);
+        nameText.setTypeface(null, android.graphics.Typeface.BOLD);
         LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -334,11 +306,11 @@ public class Leaderboards extends AppCompatActivity {
         nameText.setLayoutParams(nameParams);
         itemLayout.addView(nameText);
 
-        // Points TextView
         TextView pointsText = new TextView(this);
         pointsText.setText(entry.points + " pts");
-        pointsText.setTextColor(0xFFFFFFFF);
+        pointsText.setTextColor(0xFF000000);  
         pointsText.setTextSize(14);
+        pointsText.setTypeface(null, android.graphics.Typeface.BOLD);
         pointsText.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -354,7 +326,6 @@ public class Leaderboards extends AppCompatActivity {
             return;
         }
 
-        // Find user's position in the sorted list
         int userPosition = -1;
         LeaderboardEntry userEntry = null;
 
@@ -374,7 +345,6 @@ public class Leaderboards extends AppCompatActivity {
                 userRankingPosition.setText(String.valueOf(userPosition));
             }
         } else {
-            // User not in leaderboard
             db.collection("users")
                     .document(currentUser.getUid())
                     .get()
@@ -430,7 +400,6 @@ public class Leaderboards extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_leaderboards) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                // Already on Leaderboards, just close drawer
                 return true;
             } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);

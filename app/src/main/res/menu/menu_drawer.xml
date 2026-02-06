@@ -20,7 +20,7 @@
         <item
             android:id="@+id/menu_leaderboards"
             android:title="Leaderboards"
-            android:icon="@drawable/ic_leaderboard"/>
+            android:icon="@drawable/ic_leaderboard" />
         <item
             android:id="@+id/menu_attendance_history"
             android:title="History"
