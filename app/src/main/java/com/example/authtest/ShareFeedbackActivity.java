@@ -50,6 +50,7 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.navigation_view);
 
         ImageView hamburgerIcon = findViewById(R.id.hamburger_icon);
+
         if (hamburgerIcon != null) {
             hamburgerIcon.setOnClickListener(view -> {
                 drawerLayout.openDrawer(GravityCompat.START);
@@ -154,7 +155,13 @@ public class ShareFeedbackActivity extends AppCompatActivity {
             selectedStarRating = rating;
         }
 
-        ImageView[] stars = {star1, star2, star3, star4, star5};
+        ImageView[] stars = {
+                star1,
+                star2,
+                star3,
+                star4,
+                star5
+        };
 
         for (int i = 0; i < stars.length; i++) {
             if (stars[i] != null) {
