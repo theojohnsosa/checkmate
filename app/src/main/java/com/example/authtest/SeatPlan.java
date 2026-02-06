@@ -18,10 +18,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class SeatPlan extends AppCompatActivity {
 
@@ -37,6 +41,7 @@ public class SeatPlan extends AppCompatActivity {
     private List<StudentAttendanceModel> sortedStudentList = new ArrayList<>();
     private TextView occupiedText;
     private TextView vacantText;
+    private String classStartTime;
     private static final int totalSeats = 40;
 
     @Override
@@ -127,6 +132,8 @@ public class SeatPlan extends AppCompatActivity {
                     }
 
                     if (documentSnapshot != null && documentSnapshot.exists()) {
+                        classStartTime = documentSnapshot.getString("startTime");
+
                         List<String> students =
                                 (List<String>) documentSnapshot.get("allowedStudentEmails");
 
@@ -272,7 +279,38 @@ public class SeatPlan extends AppCompatActivity {
     }
 
     private String getAttendanceStatus(long markedTimestamp) {
-        return "Present";
+        if (classStartTime == null || classStartTime.isEmpty()) {
+            return "Present";
+        }
+
+        try {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
+            Date startTime = timeFormat.parse(classStartTime);
+            Date markedTime = new Date(markedTimestamp);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String today = dateFormat.format(markedTime);
+            String startTimeString = today + " " + classStartTime;
+
+            SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd h:mm a", Locale.getDefault());
+            Date classStartDateTime = fullFormat.parse(startTimeString);
+
+            if (classStartDateTime == null) return "Present";
+
+            long differenceMs = markedTimestamp - classStartDateTime.getTime();
+            long differenceMinutes = differenceMs / (60 * 1000);
+
+            if (differenceMinutes <= 15) {
+                return "Present";
+            } else if (differenceMinutes <= 30) {
+                return "Late";
+            } else {
+                return "Absent";
+            }
+
+        } catch (ParseException e) {
+            return "Present";
+        }
     }
 
     private void sortAndUpdateSeats(List<StudentAttendanceModel> studentList) {
