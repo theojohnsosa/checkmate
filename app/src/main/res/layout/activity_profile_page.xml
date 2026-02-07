@@ -122,7 +122,6 @@
                         android:textSize="30sp"
                         android:textStyle="bold"
                         android:layout_marginTop="0dp"/>
-
                 </LinearLayout>
 
                 <LinearLayout

@@ -18,7 +18,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class StudentSeatDialog extends Dialog {
 
-
     public interface OnStatusChangedListener {
         void onStatusChanged();
     }
@@ -27,6 +26,7 @@ public class StudentSeatDialog extends Dialog {
     private final StudentAttendanceModel student;
     private final String classId;
     private final OnStatusChangedListener statusChangedListener;
+    private final boolean isTeacher; // NEW: Track if user is teacher
 
     private AppCompatButton falseButton;
     private AppCompatButton undoButton;
@@ -36,16 +36,19 @@ public class StudentSeatDialog extends Dialog {
     private TextView attendanceStatusText;
     private CardView statusBadge;
 
+    // UPDATED CONSTRUCTOR: Add isTeacher parameter
     public StudentSeatDialog(
             Context context,
             StudentAttendanceModel student,
             String classId,
-            OnStatusChangedListener listener
+            OnStatusChangedListener listener,
+            boolean isTeacher
     ) {
         super(context);
         this.student = student;
         this.classId = classId;
         this.statusChangedListener = listener;
+        this.isTeacher = isTeacher;
     }
 
     @Override
@@ -87,26 +90,35 @@ public class StudentSeatDialog extends Dialog {
         // Display initial status
         updateStatusUI(previousStatus);
 
-        // Load whether student was already False-marked in Firestore
-        checkIfAlreadyFalseMarked();
+        // NEW: Hide buttons if user is a student
+        if (!isTeacher) {
+            if (falseButton != null) {
+                falseButton.setVisibility(View.GONE);
+            }
+            if (undoButton != null) {
+                undoButton.setVisibility(View.GONE);
+            }
+        } else {
+            // Only load false-marked status for teachers
+            checkIfAlreadyFalseMarked();
+        }
 
         // Close button
         if (closeButton != null) {
             closeButton.setOnClickListener(view -> closeDialog());
         }
 
-        // False button
-        if (falseButton != null) {
+        // False button (only for teachers)
+        if (falseButton != null && isTeacher) {
             falseButton.setOnClickListener(view -> markAsFalse());
         }
 
-        // Undo button
-        if (undoButton != null) {
+        // Undo button (only for teachers)
+        if (undoButton != null && isTeacher) {
             undoButton.setOnClickListener(view -> undoFalseMarking());
         }
     }
 
-    // Check Firestore if student was already marked False
     private void checkIfAlreadyFalseMarked() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -158,7 +170,6 @@ public class StudentSeatDialog extends Dialog {
 
         statusBadge.setCardBackgroundColor(bgColor);
         attendanceStatusText.setTextColor(textColor);
-
     }
 
     // Mark student as False in Firestore
@@ -209,10 +220,15 @@ public class StudentSeatDialog extends Dialog {
                         "originalStatus", null
                 )
                 .addOnSuccessListener(unused -> {
+
                     isFalseMarked = false;
                     student.setAttendanceStatus(previousStatus);
                     updateStatusUI(previousStatus);
                     hideUndoButton();
+
+                    if (statusChangedListener != null) {
+                        statusChangedListener.onStatusChanged();
+                    }
                     Toast.makeText(getContext(), "Undo successful", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
@@ -220,19 +236,17 @@ public class StudentSeatDialog extends Dialog {
                 });
     }
 
-    // Show Undo button and hide False button
     private void showUndoButton() {
         if (undoButton != null) undoButton.setVisibility(View.VISIBLE);
         if (falseButton != null) falseButton.setVisibility(View.GONE);
     }
 
-    // Hide Undo button and show False button
+
     private void hideUndoButton() {
         if (undoButton != null) undoButton.setVisibility(View.GONE);
         if (falseButton != null) falseButton.setVisibility(View.VISIBLE);
     }
 
-    // Close dialog
     public void closeDialog() {
         if (isShowing()) dismiss();
     }

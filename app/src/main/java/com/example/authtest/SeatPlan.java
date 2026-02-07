@@ -165,24 +165,47 @@ public class SeatPlan extends AppCompatActivity {
         if (seatNumber <= sortedStudentList.size()) {
             StudentAttendanceModel student = sortedStudentList.get(seatNumber - 1);
 
-            StudentSeatDialog dialog = new StudentSeatDialog(
-                    this,
-                    student,
-                    currentClassId,
-                    new StudentSeatDialog.OnStatusChangedListener() {
-                        @Override
-                        public void onStatusChanged() {
-                            // Refresh the seat colors and counters when status changes
-                            refreshSeatCounters();
-                            // Optionally reload student data to ensure sync
-                            loadSeatPlanForClass(currentClassId);
-                        }
-                    }
-            );
-            dialog.show();
+            checkUserTypeAndShowDialog(student);
         } else {
             Toast.makeText(this, "Seat " + seatNumber + " is empty", Toast.LENGTH_SHORT).show();
         }
+    }
+    private void checkUserTypeAndShowDialog(StudentAttendanceModel student) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    boolean isTeacher = false;
+
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+                        isTeacher = userType != null && "Teacher".equalsIgnoreCase(userType.trim());
+                    }
+
+                    // Show dialog with appropriate permissions
+                    StudentSeatDialog dialog = new StudentSeatDialog(
+                            this,
+                            student,
+                            currentClassId,
+                            new StudentSeatDialog.OnStatusChangedListener() {
+                                @Override
+                                public void onStatusChanged() {
+                                    refreshSeatCounters();
+                                    loadSeatPlanForClass(currentClassId);
+                                }
+                            },
+                            isTeacher  // Pass the isTeacher flag
+                    );
+                    dialog.show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error checking user permissions", Toast.LENGTH_SHORT).show();
+                });
     }
     private void refreshSeatCounters() {
         int occupiedCount = 0;
