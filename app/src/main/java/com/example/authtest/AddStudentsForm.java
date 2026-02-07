@@ -2,7 +2,6 @@ package com.example.authtest;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
@@ -29,9 +28,9 @@ public class AddStudentsForm extends AppCompatActivity {
     private AppCompatButton addStudentButton;
     private EditText studentEmailInput;
     private FirebaseFirestore db;
-    private static final String TAG = "AddStudentsForm";
     private FirebaseAuth mAuth;
     private String classId;
+    private static final String TAG = "AddStudentsForm";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -239,10 +238,6 @@ public class AddStudentsForm extends AppCompatActivity {
     private void addStudentToClass() {
         String studentEmail = studentEmailInput.getText().toString().trim().toLowerCase();
 
-        Log.d(TAG, "=== ADD STUDENT DEBUG ===");
-        Log.d(TAG, "Input email: " + studentEmail);
-        Log.d(TAG, "Class ID: " + classId);
-
         if (studentEmail.isEmpty()) {
             studentEmailInput.setError("Email is required");
             return;
@@ -262,30 +257,15 @@ public class AddStudentsForm extends AppCompatActivity {
         addStudentButton.setText("Adding Student...");
 
         String teacherId = mAuth.getCurrentUser().getUid();
-        Log.d(TAG, "Teacher ID: " + teacherId);
-
         checkIfStudentExists(studentEmail, teacherId);
     }
 
     private void checkIfStudentExists(String studentEmail, String teacherId) {
-        Log.d(TAG, "Checking if student exists: " + studentEmail);
-
         db.collection("users")
                 .whereEqualTo("schoolEmail", studentEmail)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    Log.d(TAG, "Query completed. Documents found: " + querySnapshot.size());
-
-                    if (!querySnapshot.isEmpty()) {
-                        querySnapshot.forEach(doc -> {
-                            Log.d(TAG, "Found student: " + doc.getId());
-                            Log.d(TAG, "Student email in DB: " + doc.getString("schoolEmail"));
-                            Log.d(TAG, "Student userType: " + doc.getString("userType"));
-                        });
-                    }
-
                     if (querySnapshot.isEmpty()) {
-                        Log.e(TAG, "NO STUDENT FOUND with email: " + studentEmail);
                         resetButton();
                         Toast.makeText(this, "Student account not found", Toast.LENGTH_SHORT).show();
                         return;
@@ -294,13 +274,10 @@ public class AddStudentsForm extends AppCompatActivity {
                     checkIfAlreadyAddedToClass(studentEmail, teacherId);
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Firestore query FAILED: " + e.getMessage(), e);
                     resetButton();
                     Toast.makeText(this, "Error verifying student: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
-
-
 
     private void checkIfAlreadyAddedToClass(String studentEmail, String teacherId) {
         db.collection("allClasses")
@@ -308,8 +285,7 @@ public class AddStudentsForm extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(document -> {
                     if (!document.exists()) {
-                        resetButton();
-                        Toast.makeText(this, "Class not found", Toast.LENGTH_SHORT).show();
+                        findClassByCode(studentEmail, teacherId);
                         return;
                     }
 
@@ -326,13 +302,48 @@ public class AddStudentsForm extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     resetButton();
-                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error checking class: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
-    private void addStudentToClassFirebase(String studentEmail, String teacherId) {
-        addStudentButton.setText("Adding Student...");
+    private void findClassByCode(String studentEmail, String teacherId) {
+        db.collection("allClasses")
+                .whereEqualTo("classCode", classId)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        resetButton();
+                        Toast.makeText(this, "Class not found", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
+                    String actualClassId = querySnapshot.getDocuments().get(0).getId();
+
+                    AddStudentsForm.this.classId = actualClassId;
+
+                    checkStudentInFoundClass(querySnapshot.getDocuments().get(0), studentEmail, teacherId);
+                })
+                .addOnFailureListener(e -> {
+                    resetButton();
+                    Toast.makeText(this, "Error finding class: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void checkStudentInFoundClass(com.google.firebase.firestore.DocumentSnapshot document, String studentEmail, String teacherId) {
+        List<String> allowedEmails =
+                (List<String>) document.get("allowedStudentEmails");
+
+        if (allowedEmails != null && allowedEmails.contains(studentEmail)) {
+            studentEmailInput.setError("Student already added");
+            resetButton();
+            return;
+        }
+
+        addStudentToClassFirebase(studentEmail, teacherId);
+    }
+
+    private void addStudentToClassFirebase(String studentEmail, String teacherId) {
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
@@ -356,7 +367,7 @@ public class AddStudentsForm extends AppCompatActivity {
                             })
                             .addOnFailureListener(e -> {
                                 resetButton();
-                                Toast.makeText(this, "Failed to update allClasses: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Failed to update class list: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });
                 })
                 .addOnFailureListener(e -> {
