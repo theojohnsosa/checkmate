@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -168,20 +167,18 @@ public class ClassInformation extends AppCompatActivity {
 
                 if (!isStudent) {
                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                        Log.d("ClassInfo", "Forced visibility check: studentList.size=" + studentList.size());
                         if (!studentList.isEmpty()) {
                             View searchBarContainer = findViewById(R.id.searchBarContainer);
                             if (searchBarContainer != null) {
                                 searchBarContainer.setVisibility(View.VISIBLE);
-                                Log.d("ClassInfo", "searchBarContainer set to VISIBLE");
                             }
+
                             if (studentsRecyclerView != null) {
                                 studentsRecyclerView.setVisibility(View.VISIBLE);
-                                Log.d("ClassInfo", "studentsRecyclerView set to VISIBLE");
                             }
+
                             if (studentsAttendedHeader != null) {
                                 studentsAttendedHeader.setVisibility(View.VISIBLE);
-                                Log.d("ClassInfo", "studentsAttendedHeader set to VISIBLE");
                             }
                         }
                     }, 1500);
@@ -859,11 +856,7 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void loadStudentList() {
-        Log.d("ClassInfo", "=== loadStudentList() START ===");
-        Log.d("ClassInfo", "classId: " + classId);
-
         if (classId == null || classId.isEmpty()) {
-            Log.e("ClassInfo", "ERROR: classId is null or empty!");
             updateStudentsHeaderVisibility();
             return;
         }
@@ -872,14 +865,11 @@ public class ClassInformation extends AppCompatActivity {
                 .document(classId)
                 .get()
                 .addOnSuccessListener(classDoc -> {
-                    Log.d("ClassInfo", "Class doc retrieved, exists=" + classDoc.exists());
 
                     if (classDoc.exists()) {
                         List<String> allowedEmails = (List<String>) classDoc.get("allowedStudentEmails");
-                        Log.d("ClassInfo", "allowedEmails count: " + (allowedEmails != null ? allowedEmails.size() : 0));
 
                         if (allowedEmails == null || allowedEmails.isEmpty()) {
-                            Log.d("ClassInfo", "No allowed emails found");
                             studentList.clear();
                             studentAdapter.setStudents(studentList);
                             updateStudentsHeaderVisibility();
@@ -913,19 +903,15 @@ public class ClassInformation extends AppCompatActivity {
                                             );
 
                                             studentList.add(student);
-                                            Log.d("ClassInfo", "Added student: " + student.getFullName());
                                             checkStudentAttendance(student);
                                         } else {
-                                            Log.d("ClassInfo", "User not found for: " + cleanEmail);
                                             queryAlternativeEmail(cleanEmail, email);
                                         }
 
                                         loadedCount[0]++;
-                                        Log.d("ClassInfo", "Progress: " + loadedCount[0] + "/" + totalEmails);
                                         checkIfAllLoaded(loadedCount[0], totalEmails);
                                     })
                                     .addOnFailureListener(e -> {
-                                        Log.e("ClassInfo", "Error querying user: " + e.getMessage());
                                         StudentAttendanceModel student = new StudentAttendanceModel(
                                                 null, email, "Unknown", "User"
                                         );
@@ -937,12 +923,10 @@ public class ClassInformation extends AppCompatActivity {
                                     });
                         }
                     } else {
-                        Log.e("ClassInfo", "Class document does not exist!");
                         updateStudentsHeaderVisibility();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("ClassInfo", "Error loading class: " + e.getMessage());
                     updateStudentsHeaderVisibility();
                 });
     }
@@ -987,10 +971,8 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void checkIfAllLoaded(int loadedCount, int totalEmails) {
-        Log.d("ClassInfo", "checkIfAllLoaded: " + loadedCount + "/" + totalEmails);
 
         if (loadedCount == totalEmails) {
-            Log.d("ClassInfo", "All loaded! studentList size: " + studentList.size());
 
             sortStudentsByLastName();
 
@@ -1000,10 +982,8 @@ public class ClassInformation extends AppCompatActivity {
             studentSearchBar.setText("");
 
             studentAdapter.setStudents(new ArrayList<>(studentList));
-            Log.d("ClassInfo", "Adapter updated with students");
 
             updateStudentsHeaderVisibility();
-            Log.d("ClassInfo", "Visibility updated");
 
             setupStudentsListener();
         }
@@ -1145,23 +1125,19 @@ public class ClassInformation extends AppCompatActivity {
 
     private void updateStudentsHeaderVisibility() {
         boolean hasStudents = !studentList.isEmpty();
-        Log.d("ClassInfo", "updateStudentsHeaderVisibility: hasStudents=" + hasStudents + ", size=" + studentList.size());
 
         if (studentsAttendedHeader != null) {
             studentsAttendedHeader.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
-            Log.d("ClassInfo", "studentsAttendedHeader set to " + (hasStudents ? "VISIBLE" : "GONE"));
         }
 
         View searchBarContainer = findViewById(R.id.searchBarContainer);
 
         if (searchBarContainer != null) {
             searchBarContainer.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
-            Log.d("ClassInfo", "searchBarContainer set to " + (hasStudents ? "VISIBLE" : "GONE"));
         }
 
         if (studentsRecyclerView != null) {
             studentsRecyclerView.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
-            Log.d("ClassInfo", "studentsRecyclerView set to " + (hasStudents ? "VISIBLE" : "GONE"));
         }
     }
 
@@ -1291,13 +1267,11 @@ public class ClassInformation extends AppCompatActivity {
                         if (totalStudentsCount == null) {
                             View statsCard = binding.attendanceStatsCard.getRoot();
                             totalStudentsCount = statsCard.findViewById(R.id.totalStudentsCount);
-                            Log.d("ClassInfo", "Reinitalized totalStudentsCount");
                         }
 
                         Long studentCount = snapshot.getLong("students");
                         if (studentCount != null && totalStudentsCount != null) {
                             totalStudentsCount.setText(String.valueOf(studentCount));
-                            Log.d("ClassInfo", "Set total students to: " + studentCount);
                         }
 
                         updateAttendanceStats();
