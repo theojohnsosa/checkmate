@@ -732,7 +732,6 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                     for (var document : queryDocumentSnapshots) {
                         ClassModel classModel = document.toObject(ClassModel.class);
                         if (classModel != null) {
-                            // Don't call setId() - store the ID in a map instead
                             classIdMap.put(classModel, document.getId());
                             archivedClasses.add(classModel);
                         }
@@ -767,7 +766,14 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
     public void onClassClick(ClassModel classModel) {
         Intent intent = new Intent(ArchiveActivity.this, ClassInformation.class);
         intent.putExtra("CLASS_MODEL", classModel);
-        intent.putExtra("CLASS_CODE", classModel.getClassCode());
+
+        String classId = classIdMap.get(classModel);
+        if (classId != null) {
+            intent.putExtra("CLASS_ID", classId);
+        } else {
+            intent.putExtra("CLASS_CODE", classModel.getClassCode());
+        }
+
         startActivity(intent);
     }
 }

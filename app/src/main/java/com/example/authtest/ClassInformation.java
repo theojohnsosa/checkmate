@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -151,9 +152,9 @@ public class ClassInformation extends AppCompatActivity {
 
                 if (!isStudent) {
                     setupTeacherView(classModel);
+                    setupStudentListRecyclerView();
                     setupAttendanceStatsListener();
                     setupClassInfoListener();
-                    setupStudentListRecyclerView();
                     diagnoseFirestoreStructure();
                     loadStudentList();
                 } else {
@@ -164,6 +165,27 @@ public class ClassInformation extends AppCompatActivity {
 
                 loadRecentSessions();
                 setupClassInfo(classModel);
+
+                if (!isStudent) {
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        Log.d("ClassInfo", "Forced visibility check: studentList.size=" + studentList.size());
+                        if (!studentList.isEmpty()) {
+                            View searchBarContainer = findViewById(R.id.searchBarContainer);
+                            if (searchBarContainer != null) {
+                                searchBarContainer.setVisibility(View.VISIBLE);
+                                Log.d("ClassInfo", "searchBarContainer set to VISIBLE");
+                            }
+                            if (studentsRecyclerView != null) {
+                                studentsRecyclerView.setVisibility(View.VISIBLE);
+                                Log.d("ClassInfo", "studentsRecyclerView set to VISIBLE");
+                            }
+                            if (studentsAttendedHeader != null) {
+                                studentsAttendedHeader.setVisibility(View.VISIBLE);
+                                Log.d("ClassInfo", "studentsAttendedHeader set to VISIBLE");
+                            }
+                        }
+                    }, 1500);
+                }
 
             } else {
                 Toast.makeText(this, "Class data could not be loaded.", Toast.LENGTH_SHORT).show();
@@ -187,9 +209,6 @@ public class ClassInformation extends AppCompatActivity {
         }
     }
 
-    /**
-     * Query Firestore to find the document ID by classCode
-     */
     private void queryClassIdByCode(String classCode, ClassModel classModel) {
         if (classCode == null || classCode.isEmpty()) {
             Toast.makeText(this, "Invalid class code", Toast.LENGTH_SHORT).show();
@@ -208,9 +227,9 @@ public class ClassInformation extends AppCompatActivity {
 
                         if (!isStudent) {
                             setupTeacherView(classModel);
+                            setupStudentListRecyclerView();
                             setupAttendanceStatsListener();
                             setupClassInfoListener();
-                            setupStudentListRecyclerView();
                             diagnoseFirestoreStructure();
                             loadStudentList();
                         } else {
@@ -840,7 +859,12 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void loadStudentList() {
+        Log.d("ClassInfo", "=== loadStudentList() START ===");
+        Log.d("ClassInfo", "classId: " + classId);
+
         if (classId == null || classId.isEmpty()) {
+            Log.e("ClassInfo", "ERROR: classId is null or empty!");
+            updateStudentsHeaderVisibility();
             return;
         }
 
@@ -848,10 +872,14 @@ public class ClassInformation extends AppCompatActivity {
                 .document(classId)
                 .get()
                 .addOnSuccessListener(classDoc -> {
+                    Log.d("ClassInfo", "Class doc retrieved, exists=" + classDoc.exists());
+
                     if (classDoc.exists()) {
                         List<String> allowedEmails = (List<String>) classDoc.get("allowedStudentEmails");
+                        Log.d("ClassInfo", "allowedEmails count: " + (allowedEmails != null ? allowedEmails.size() : 0));
 
                         if (allowedEmails == null || allowedEmails.isEmpty()) {
+                            Log.d("ClassInfo", "No allowed emails found");
                             studentList.clear();
                             studentAdapter.setStudents(studentList);
                             updateStudentsHeaderVisibility();
@@ -885,15 +913,19 @@ public class ClassInformation extends AppCompatActivity {
                                             );
 
                                             studentList.add(student);
+                                            Log.d("ClassInfo", "Added student: " + student.getFullName());
                                             checkStudentAttendance(student);
                                         } else {
+                                            Log.d("ClassInfo", "User not found for: " + cleanEmail);
                                             queryAlternativeEmail(cleanEmail, email);
                                         }
 
                                         loadedCount[0]++;
+                                        Log.d("ClassInfo", "Progress: " + loadedCount[0] + "/" + totalEmails);
                                         checkIfAllLoaded(loadedCount[0], totalEmails);
                                     })
                                     .addOnFailureListener(e -> {
+                                        Log.e("ClassInfo", "Error querying user: " + e.getMessage());
                                         StudentAttendanceModel student = new StudentAttendanceModel(
                                                 null, email, "Unknown", "User"
                                         );
@@ -904,7 +936,14 @@ public class ClassInformation extends AppCompatActivity {
                                         checkIfAllLoaded(loadedCount[0], totalEmails);
                                     });
                         }
+                    } else {
+                        Log.e("ClassInfo", "Class document does not exist!");
+                        updateStudentsHeaderVisibility();
                     }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ClassInfo", "Error loading class: " + e.getMessage());
+                    updateStudentsHeaderVisibility();
                 });
     }
 
@@ -948,7 +987,11 @@ public class ClassInformation extends AppCompatActivity {
     }
 
     private void checkIfAllLoaded(int loadedCount, int totalEmails) {
+        Log.d("ClassInfo", "checkIfAllLoaded: " + loadedCount + "/" + totalEmails);
+
         if (loadedCount == totalEmails) {
+            Log.d("ClassInfo", "All loaded! studentList size: " + studentList.size());
+
             sortStudentsByLastName();
 
             filteredStudentList.clear();
@@ -957,7 +1000,11 @@ public class ClassInformation extends AppCompatActivity {
             studentSearchBar.setText("");
 
             studentAdapter.setStudents(new ArrayList<>(studentList));
+            Log.d("ClassInfo", "Adapter updated with students");
+
             updateStudentsHeaderVisibility();
+            Log.d("ClassInfo", "Visibility updated");
+
             setupStudentsListener();
         }
     }
@@ -1012,13 +1059,18 @@ public class ClassInformation extends AppCompatActivity {
                         student.setTimestamp(null);
                     }
 
-                    studentAdapter.notifyDataSetChanged();
+                    if (studentAdapter != null) {
+                        studentAdapter.notifyDataSetChanged();
+                    }
                 })
                 .addOnFailureListener(e -> {
                     student.setAttendanceStatus("Not Marked");
                     student.setMarked(false);
                     student.setTimestamp(null);
-                    studentAdapter.notifyDataSetChanged();
+
+                    if (studentAdapter != null) {
+                        studentAdapter.notifyDataSetChanged();
+                    }
                 });
     }
 
@@ -1093,19 +1145,23 @@ public class ClassInformation extends AppCompatActivity {
 
     private void updateStudentsHeaderVisibility() {
         boolean hasStudents = !studentList.isEmpty();
+        Log.d("ClassInfo", "updateStudentsHeaderVisibility: hasStudents=" + hasStudents + ", size=" + studentList.size());
 
         if (studentsAttendedHeader != null) {
             studentsAttendedHeader.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
+            Log.d("ClassInfo", "studentsAttendedHeader set to " + (hasStudents ? "VISIBLE" : "GONE"));
         }
 
         View searchBarContainer = findViewById(R.id.searchBarContainer);
 
         if (searchBarContainer != null) {
             searchBarContainer.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
+            Log.d("ClassInfo", "searchBarContainer set to " + (hasStudents ? "VISIBLE" : "GONE"));
         }
 
         if (studentsRecyclerView != null) {
             studentsRecyclerView.setVisibility(hasStudents ? View.VISIBLE : View.GONE);
+            Log.d("ClassInfo", "studentsRecyclerView set to " + (hasStudents ? "VISIBLE" : "GONE"));
         }
     }
 
@@ -1220,6 +1276,10 @@ public class ClassInformation extends AppCompatActivity {
     private void setupAttendanceStatsListener() {
         if (classId == null || classId.isEmpty()) return;
 
+        if (statsListener != null) {
+            statsListener.remove();
+        }
+
         statsListener = db.collection("allClasses")
                 .document(classId)
                 .addSnapshotListener((snapshot, error) -> {
@@ -1228,9 +1288,16 @@ public class ClassInformation extends AppCompatActivity {
                     }
 
                     if (snapshot != null && snapshot.exists()) {
+                        if (totalStudentsCount == null) {
+                            View statsCard = binding.attendanceStatsCard.getRoot();
+                            totalStudentsCount = statsCard.findViewById(R.id.totalStudentsCount);
+                            Log.d("ClassInfo", "Reinitalized totalStudentsCount");
+                        }
+
                         Long studentCount = snapshot.getLong("students");
-                        if (studentCount != null) {
+                        if (studentCount != null && totalStudentsCount != null) {
                             totalStudentsCount.setText(String.valueOf(studentCount));
+                            Log.d("ClassInfo", "Set total students to: " + studentCount);
                         }
 
                         updateAttendanceStats();
@@ -1248,23 +1315,31 @@ public class ClassInformation extends AppCompatActivity {
         for (StudentAttendanceModel student : studentList) {
             if (student.isMarked() && student.getTimestamp() != null) {
                 String status = student.getAttendanceStatus();
-                switch (status) {
-                    case "Present":
-                        present++;
-                        break;
-                    case "Late":
-                        late++;
-                        break;
-                    case "Absent":
-                        absent++;
-                        break;
+                if (status != null) {
+                    switch (status) {
+                        case "Present":
+                            present++;
+                            break;
+                        case "Late":
+                            late++;
+                            break;
+                        case "Absent":
+                            absent++;
+                            break;
+                    }
                 }
             }
         }
 
-        presentCount.setText(String.valueOf(present));
-        lateCount.setText(String.valueOf(late));
-        absentCount.setText(String.valueOf(absent));
+        if (presentCount != null) {
+            presentCount.setText(String.valueOf(present));
+        }
+        if (lateCount != null) {
+            lateCount.setText(String.valueOf(late));
+        }
+        if (absentCount != null) {
+            absentCount.setText(String.valueOf(absent));
+        }
     }
 
     private void setupClassInfoListener() {
