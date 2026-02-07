@@ -26,7 +26,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StudentHome extends AppCompatActivity {
 
@@ -41,6 +43,7 @@ public class StudentHome extends AppCompatActivity {
     private NavigationView navigationView;
     private EditText classSearchBar;
     private ImageView clearSearchButton;
+    private Map<ClassModel, String> classDocIdMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -238,17 +241,24 @@ public class StudentHome extends AppCompatActivity {
         }
 
         String studentId = mAuth.getCurrentUser().getUid();
-        String classId = classItem.getClassCode();
+
+        String enrollmentDocId = classDocIdMap.get(classItem);
+        if (enrollmentDocId == null) {
+            Toast.makeText(StudentHome.this, "Error: Could not find enrollment record", Toast.LENGTH_SHORT).show();
+            classAdapter.notifyItemChanged(position);
+            return;
+        }
 
         db.collection("users")
                 .document(studentId)
                 .collection("enrolledClasses")
-                .document(classId)
+                .document(enrollmentDocId)
                 .update("isArchived", true)
                 .addOnSuccessListener(unused -> {
                     try {
                         if (position >= 0 && position < classList.size()) {
-                            classList.remove(position);
+                            ClassModel removed = classList.remove(position);
+                            classDocIdMap.remove(removed);
                             classAdapter.notifyItemRemoved(position);
                             classAdapter.notifyItemRangeChanged(position, classList.size());
                         } else {
@@ -427,6 +437,7 @@ public class StudentHome extends AppCompatActivity {
 
         classList.clear();
         filteredClasses.clear();
+        classDocIdMap.clear();
         classAdapter.notifyDataSetChanged();
 
         db.collection("users")
@@ -466,8 +477,7 @@ public class StudentHome extends AppCompatActivity {
                                         if (classDoc.exists()) {
                                             ClassModel model = classDoc.toObject(ClassModel.class);
                                             if (model != null) {
-                                                // Don't call setId() - the id field no longer exists
-                                                // Firebase document ID is accessible via classDoc.getId()
+                                                classDocIdMap.put(model, doc.getId());
                                                 classList.add(model);
                                             }
                                         }
