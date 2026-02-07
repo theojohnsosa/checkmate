@@ -1222,18 +1222,49 @@ public class ClassInformation extends AppCompatActivity {
 
         statsListener = db.collection("allClasses")
                 .document(classId)
-                .collection("attendanceRecords")
-                .addSnapshotListener((snapshots, error) -> {
+                .addSnapshotListener((snapshot, error) -> {
                     if (error != null) {
                         return;
                     }
 
-                    if (snapshots != null) {
-                        calculateAttendanceStats(snapshots.getDocuments());
+                    if (snapshot != null && snapshot.exists()) {
+                        Long studentCount = snapshot.getLong("students");
+                        if (studentCount != null) {
+                            totalStudentsCount.setText(String.valueOf(studentCount));
+                        }
+
+                        updateAttendanceStats();
                     }
                 });
 
         setupRecentSessionsListener();
+    }
+
+    private void updateAttendanceStats() {
+        int present = 0;
+        int late = 0;
+        int absent = 0;
+
+        for (StudentAttendanceModel student : studentList) {
+            if (student.isMarked() && student.getTimestamp() != null) {
+                String status = student.getAttendanceStatus();
+                switch (status) {
+                    case "Present":
+                        present++;
+                        break;
+                    case "Late":
+                        late++;
+                        break;
+                    case "Absent":
+                        absent++;
+                        break;
+                }
+            }
+        }
+
+        presentCount.setText(String.valueOf(present));
+        lateCount.setText(String.valueOf(late));
+        absentCount.setText(String.valueOf(absent));
     }
 
     private void setupClassInfoListener() {
