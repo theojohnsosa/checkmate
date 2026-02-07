@@ -338,7 +338,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         ClassModel classModel = document.toObject(ClassModel.class);
-                        // Don't call setId() - store the ID in a map instead
                         classIdMap.put(classModel, document.getId());
 
                         Boolean isArchived = document.getBoolean("isArchived");
@@ -379,6 +378,12 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     public void onClassClick(ClassModel classModel) {
         Intent intent = new Intent(TeacherHome.this, ClassInformation.class);
         intent.putExtra("CLASS_MODEL", classModel);
+
+        String documentId = classIdMap.get(classModel);
+        if (documentId != null) {
+            intent.putExtra("CLASS_ID", documentId);
+        }
+
         intent.putExtra("CLASS_CODE", classModel.getClassCode());
         startActivity(intent);
     }

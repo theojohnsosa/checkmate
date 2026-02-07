@@ -2,6 +2,7 @@ package com.example.authtest;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
@@ -28,6 +29,7 @@ public class AddStudentsForm extends AppCompatActivity {
     private AppCompatButton addStudentButton;
     private EditText studentEmailInput;
     private FirebaseFirestore db;
+    private static final String TAG = "AddStudentsForm";
     private FirebaseAuth mAuth;
     private String classId;
 
@@ -237,6 +239,10 @@ public class AddStudentsForm extends AppCompatActivity {
     private void addStudentToClass() {
         String studentEmail = studentEmailInput.getText().toString().trim().toLowerCase();
 
+        Log.d(TAG, "=== ADD STUDENT DEBUG ===");
+        Log.d(TAG, "Input email: " + studentEmail);
+        Log.d(TAG, "Class ID: " + classId);
+
         if (studentEmail.isEmpty()) {
             studentEmailInput.setError("Email is required");
             return;
@@ -256,15 +262,30 @@ public class AddStudentsForm extends AppCompatActivity {
         addStudentButton.setText("Adding Student...");
 
         String teacherId = mAuth.getCurrentUser().getUid();
+        Log.d(TAG, "Teacher ID: " + teacherId);
+
         checkIfStudentExists(studentEmail, teacherId);
     }
 
     private void checkIfStudentExists(String studentEmail, String teacherId) {
+        Log.d(TAG, "Checking if student exists: " + studentEmail);
+
         db.collection("users")
-                .whereEqualTo("email", studentEmail)
+                .whereEqualTo("schoolEmail", studentEmail)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
+                    Log.d(TAG, "Query completed. Documents found: " + querySnapshot.size());
+
+                    if (!querySnapshot.isEmpty()) {
+                        querySnapshot.forEach(doc -> {
+                            Log.d(TAG, "Found student: " + doc.getId());
+                            Log.d(TAG, "Student email in DB: " + doc.getString("schoolEmail"));
+                            Log.d(TAG, "Student userType: " + doc.getString("userType"));
+                        });
+                    }
+
                     if (querySnapshot.isEmpty()) {
+                        Log.e(TAG, "NO STUDENT FOUND with email: " + studentEmail);
                         resetButton();
                         Toast.makeText(this, "Student account not found", Toast.LENGTH_SHORT).show();
                         return;
@@ -273,10 +294,13 @@ public class AddStudentsForm extends AppCompatActivity {
                     checkIfAlreadyAddedToClass(studentEmail, teacherId);
                 })
                 .addOnFailureListener(e -> {
+                    Log.e(TAG, "Firestore query FAILED: " + e.getMessage(), e);
                     resetButton();
                     Toast.makeText(this, "Error verifying student: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
+
 
     private void checkIfAlreadyAddedToClass(String studentEmail, String teacherId) {
         db.collection("allClasses")
