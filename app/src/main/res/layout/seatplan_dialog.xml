@@ -36,7 +36,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/closeButton1"
             android:text="Close"
@@ -44,7 +43,28 @@
             android:textColor="#FFFFFF"
             android:background="@drawable/dialog_remove_button"
             android:layout_width="115dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/falseButton"
+            android:text="False"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/false_button"
+            android:layout_width="115dp"
+            android:layout_height="wrap_content"
+            android:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/undoButton"
+            android:text="Undo"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/false_button"
+            android:layout_width="115dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
 
     </LinearLayout>
 

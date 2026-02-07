@@ -38,6 +38,31 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
     public void onBindViewHolder(@NonNull StudentViewHolder holder, int position) {
         StudentAttendanceModel student = studentList.get(position);
         holder.bind(student);
+        holder.studentNameText.setText(student.getFullName());
+
+        String status = student.getAttendanceStatus();
+
+        if ("False".equalsIgnoreCase(status)) {
+            holder.attendanceStatusText.setText("False");
+            holder.attendanceStatusText.setTextColor(0xFFFFFFFF);
+            holder.attendanceStatusText.setBackgroundColor(0xFF004BF9);
+        } else if ("Present".equalsIgnoreCase(status)) {
+            holder.attendanceStatusText.setText("Present");
+            holder.attendanceStatusText.setTextColor(0xFFFFFFFF);
+            holder.attendanceStatusText.setBackgroundColor(0XFF2F9E44);
+        } else if ("Late".equalsIgnoreCase(status)) {
+            holder.attendanceStatusText.setText("Late");
+            holder.attendanceStatusText.setTextColor(0xFFFFFFFF);
+            holder.attendanceStatusText.setBackgroundColor(0xFFF59F00);// Light orange
+        } else if ("Absent".equalsIgnoreCase(status)) {
+            holder.attendanceStatusText.setText("Absent");
+            holder.attendanceStatusText.setTextColor(0xFFFFFFFF);
+            holder.attendanceStatusText.setBackgroundColor(0xFFC92A2A);// Red
+        } else {
+            holder.attendanceStatusText.setText("Not Marked");
+            holder.attendanceStatusText.setTextColor(0xFF828282);
+            holder.attendanceStatusText.setBackgroundColor(0xFF2C2C2C);// Gray
+        }
     }
 
     @Override
@@ -58,6 +83,7 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         if (position >= 0 && position < studentList.size()) {
             studentList.remove(position);
             notifyItemRemoved(position);
+            notifyItemRangeChanged(position, studentList.size());
         }
     }
 

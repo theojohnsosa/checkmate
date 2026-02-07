@@ -41,6 +41,9 @@ public class SeatPlan extends AppCompatActivity {
     private List<StudentAttendanceModel> sortedStudentList = new ArrayList<>();
     private TextView occupiedText;
     private TextView vacantText;
+    private TextView falseText;
+    private ListenerRegistration attendanceRecordsListener;
+
     private String classStartTime;
     private static final int totalSeats = 40;
 
@@ -84,6 +87,64 @@ public class SeatPlan extends AppCompatActivity {
 
         occupiedText = findViewById(R.id.occupiedText);
         vacantText = findViewById(R.id.vacantText);
+        falseText = findViewById(R.id.falseText);
+    }
+    private void setupAttendanceRecordsListener() {
+        if (currentClassId == null || currentClassId.isEmpty()) {
+            return;
+        }
+
+        if (attendanceRecordsListener != null) {
+            attendanceRecordsListener.remove();
+        }
+
+        attendanceRecordsListener = db.collection("allClasses")
+                .document(currentClassId)
+                .collection("attendanceRecords")
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        boolean needsUpdate = false;
+
+                        for (StudentAttendanceModel student : sortedStudentList) {
+                            if (student.getStudentId() != null) {
+                                for (var doc : snapshots.getDocuments()) {
+                                    if (doc.getId().equals(student.getStudentId())) {
+                                        Boolean falseMarked = doc.getBoolean("falseMarked");
+                                        Long timestamp = doc.getLong("timestamp");
+                                        Boolean marked = doc.getBoolean("marked");
+
+                                        String oldStatus = student.getAttendanceStatus();
+                                        String newStatus;
+
+                                        if (falseMarked != null && falseMarked) {
+                                            newStatus = "False";
+                                        } else if (marked != null && marked && timestamp != null) {
+                                            newStatus = getAttendanceStatus(timestamp);
+                                        } else {
+                                            newStatus = "Not Marked";
+                                        }
+
+                                        if (!oldStatus.equals(newStatus)) {
+                                            student.setAttendanceStatus(newStatus);
+                                            student.setMarked(marked != null && marked);
+                                            student.setTimestamp(timestamp);
+                                            needsUpdate = true;
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (needsUpdate) {
+                            updateSeatColors(sortedStudentList.size());
+                        }
+                    }
+                });
     }
 
     private void initializeSeatCards() {
@@ -98,16 +159,48 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
+
+
     private void onSeatClicked(int seatNumber) {
         if (seatNumber <= sortedStudentList.size()) {
             StudentAttendanceModel student = sortedStudentList.get(seatNumber - 1);
 
-            StudentSeatDialog dialog = new StudentSeatDialog(this, student);
+            StudentSeatDialog dialog = new StudentSeatDialog(
+                    this,
+                    student,
+                    currentClassId,
+                    new StudentSeatDialog.OnStatusChangedListener() {
+                        @Override
+                        public void onStatusChanged() {
+                            // Refresh the seat colors and counters when status changes
+                            refreshSeatCounters();
+                            // Optionally reload student data to ensure sync
+                            loadSeatPlanForClass(currentClassId);
+                        }
+                    }
+            );
             dialog.show();
         } else {
             Toast.makeText(this, "Seat " + seatNumber + " is empty", Toast.LENGTH_SHORT).show();
         }
     }
+    private void refreshSeatCounters() {
+        int occupiedCount = 0;
+        int falseCount = 0;
+
+        for (StudentAttendanceModel student : sortedStudentList) {
+            String status = student.getAttendanceStatus();
+            if ("False".equalsIgnoreCase(status)) {
+                falseCount++;
+            } else if (!"Not Marked".equalsIgnoreCase(status)) {
+                occupiedCount++;
+            }
+        }
+
+        updateSeatCounters(occupiedCount, falseCount);
+    }
+
+
 
     private void loadSeatPlanForClass(String classId) {
         clearSeatColors();
@@ -239,6 +332,8 @@ public class SeatPlan extends AppCompatActivity {
                 });
     }
 
+    // Replace checkStudentAttendance method in SeatPlan.java
+
     private void checkStudentAttendance(StudentAttendanceModel student) {
         if (currentClassId == null || student.getStudentId() == null) {
             student.setAttendanceStatus("Not Marked");
@@ -254,8 +349,14 @@ public class SeatPlan extends AppCompatActivity {
                     if (doc.exists()) {
                         Boolean marked = doc.getBoolean("marked");
                         Long timestamp = doc.getLong("timestamp");
+                        Boolean falseMarked = doc.getBoolean("falseMarked");
 
-                        if (marked != null && marked && timestamp != null) {
+                        // Check if marked as False first
+                        if (falseMarked != null && falseMarked) {
+                            student.setMarked(true);
+                            student.setTimestamp(timestamp);
+                            student.setAttendanceStatus("False");
+                        } else if (marked != null && marked && timestamp != null) {
                             student.setMarked(true);
                             student.setTimestamp(timestamp);
                             String status = getAttendanceStatus(timestamp);
@@ -307,6 +408,7 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
+
     private void sortAndUpdateSeats(List<StudentAttendanceModel> studentList) {
         Collections.sort(studentList, (student1, student2) -> {
             String lastName1 = student1.getLastName() != null ? student1.getLastName().toLowerCase() : "";
@@ -326,6 +428,8 @@ public class SeatPlan extends AppCompatActivity {
         sortedStudentList = new ArrayList<>(studentList);
 
         updateSeatColors(studentList.size());
+        setupAttendanceRecordsListener();
+
     }
 
     private void clearSeatColors() {
@@ -337,31 +441,50 @@ public class SeatPlan extends AppCompatActivity {
 
     private void updateSeatColors(int studentCount) {
         int emptyColor = ContextCompat.getColor(this, R.color.empty_seat);
-        int occupiedColor = ContextCompat.getColor(this, R.color.occupied_seat);
+        int occupiedColor = ContextCompat.getColor(this, R.color.occupied_seat); // Green
+        int falseColor = ContextCompat.getColor(this, R.color.false_seat); // Orange
+
+        int occupiedCount = 0;
+        int falseCount = 0;
+
         for (int i = 0; i < seatCards.length; i++) {
             if (i < studentCount) {
-                seatCards[i].setCardBackgroundColor(occupiedColor);
+                StudentAttendanceModel student = sortedStudentList.get(i);
+                String status = student.getAttendanceStatus();
+
+                if ("False".equalsIgnoreCase(status)) {
+                    seatCards[i].setCardBackgroundColor(falseColor);
+                    falseCount++;
+                } else {
+                    seatCards[i].setCardBackgroundColor(occupiedColor);
+                    occupiedCount++;
+                }
             } else {
                 seatCards[i].setCardBackgroundColor(emptyColor);
             }
         }
-        updateSeatCounters(studentCount);
+
+        // Update counters dynamically
+        updateSeatCounters(occupiedCount, falseCount);
     }
 
-    private void updateSeatCounters(int occupiedCount) {
-        int vacantCount = totalSeats - occupiedCount;
+    private void updateSeatCounters(int occupiedCount, int falseCount) {
+        int totalOccupied = occupiedCount + falseCount;
+        int vacantCount = totalSeats - totalOccupied;
 
-        String occupied = " Occupied";
-        String vacant = " Vacant";
-        occupiedText.setText(occupiedCount + occupied);
-        vacantText.setText(vacantCount + vacant);
+        occupiedText.setText(occupiedCount + " Occupied");
+        vacantText.setText(vacantCount + " Vacant");
+        falseText.setText(falseCount + " False");
     }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (classListener != null) classListener.remove();
+        if (attendanceRecordsListener != null) attendanceRecordsListener.remove();
     }
+
 
     private void setupNavigationDrawer() {
         navigationView.setNavigationItemSelectedListener(item -> {
