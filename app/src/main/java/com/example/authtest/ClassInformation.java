@@ -1022,8 +1022,14 @@ public class ClassInformation extends AppCompatActivity {
                     if (doc.exists()) {
                         Boolean marked = doc.getBoolean("marked");
                         Long timestamp = doc.getLong("timestamp");
+                        Boolean falseMarked = doc.getBoolean("falseMarked");        ;
 
-                        if (marked != null && marked && timestamp != null) {
+                        if (falseMarked != null && falseMarked) {
+                            student.setMarked(true);
+                            student.setTimestamp(timestamp);
+                            student.setAttendanceStatus("False");
+                        }
+                        else if (marked != null && marked && timestamp != null) {
                             student.setMarked(true);
                             student.setTimestamp(timestamp);
                             String status = getAttendanceStatus(timestamp);
@@ -1053,6 +1059,8 @@ public class ClassInformation extends AppCompatActivity {
                     }
                 });
     }
+
+    // Replace setupStudentsListener method in ClassInformation.java
 
     private void setupStudentsListener() {
         if (classId == null || classId.isEmpty()) {
@@ -1085,20 +1093,30 @@ public class ClassInformation extends AppCompatActivity {
                                 if (attendanceDoc != null) {
                                     Boolean marked = attendanceDoc.getBoolean("marked");
                                     Long timestamp = attendanceDoc.getLong("timestamp");
+                                    Boolean falseMarked = attendanceDoc.getBoolean("falseMarked");
 
-                                    if (marked != null && marked && timestamp != null) {
-                                        String newStatus = getAttendanceStatus(timestamp);
-                                        String oldStatus = student.getAttendanceStatus();
+                                    String oldStatus = student.getAttendanceStatus();
+                                    String newStatus;
 
+                                    // Check for False status first
+                                    if (falseMarked != null && falseMarked) {
+                                        newStatus = "False";
+                                        if (!"False".equals(oldStatus)) {
+                                            updated = true;
+                                        }
+                                        student.setMarked(true);
+                                        student.setTimestamp(timestamp);
+                                        student.setAttendanceStatus("False");
+                                    } else if (marked != null && marked && timestamp != null) {
+                                        newStatus = getAttendanceStatus(timestamp);
                                         if (!newStatus.equals(oldStatus)) {
                                             updated = true;
                                         }
-
                                         student.setMarked(true);
                                         student.setTimestamp(timestamp);
                                         student.setAttendanceStatus(newStatus);
                                     } else {
-                                        if (!student.getAttendanceStatus().equals("Not Marked")) {
+                                        if (!oldStatus.equals("Not Marked")) {
                                             updated = true;
                                         }
                                         student.setAttendanceStatus("Not Marked");

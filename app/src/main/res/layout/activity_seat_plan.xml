@@ -312,7 +312,7 @@
                     android:textStyle="bold"
                     android:textColor="#2F9E44"
                     android:textSize="15sp"
-                    android:layout_marginRight="80dp"/>
+                    android:layout_marginRight="40dp"/>
 
                 <TextView
                     android:id="@+id/vacantText"
@@ -322,6 +322,16 @@
                     android:textStyle="bold"
                     android:textColor="#828282"
                     android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/falseText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="False"
+                    android:textStyle="bold"
+                    android:textColor="#004BF9"
+                    android:textSize="15sp"
+                    android:layout_marginLeft="40dp"/>
 
             </LinearLayout>
 
