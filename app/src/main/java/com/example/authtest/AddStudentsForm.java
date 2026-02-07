@@ -30,6 +30,7 @@ public class AddStudentsForm extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String classId;
+    private static final String TAG = "AddStudentsForm";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -261,7 +262,7 @@ public class AddStudentsForm extends AppCompatActivity {
 
     private void checkIfStudentExists(String studentEmail, String teacherId) {
         db.collection("users")
-                .whereEqualTo("email", studentEmail)
+                .whereEqualTo("schoolEmail", studentEmail)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     if (querySnapshot.isEmpty()) {
@@ -284,8 +285,7 @@ public class AddStudentsForm extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(document -> {
                     if (!document.exists()) {
-                        resetButton();
-                        Toast.makeText(this, "Class not found", Toast.LENGTH_SHORT).show();
+                        findClassByCode(studentEmail, teacherId);
                         return;
                     }
 
@@ -302,13 +302,48 @@ public class AddStudentsForm extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     resetButton();
-                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error checking class: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
-    private void addStudentToClassFirebase(String studentEmail, String teacherId) {
-        addStudentButton.setText("Adding Student...");
+    private void findClassByCode(String studentEmail, String teacherId) {
+        db.collection("allClasses")
+                .whereEqualTo("classCode", classId)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        resetButton();
+                        Toast.makeText(this, "Class not found", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
+                    String actualClassId = querySnapshot.getDocuments().get(0).getId();
+
+                    AddStudentsForm.this.classId = actualClassId;
+
+                    checkStudentInFoundClass(querySnapshot.getDocuments().get(0), studentEmail, teacherId);
+                })
+                .addOnFailureListener(e -> {
+                    resetButton();
+                    Toast.makeText(this, "Error finding class: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void checkStudentInFoundClass(com.google.firebase.firestore.DocumentSnapshot document, String studentEmail, String teacherId) {
+        List<String> allowedEmails =
+                (List<String>) document.get("allowedStudentEmails");
+
+        if (allowedEmails != null && allowedEmails.contains(studentEmail)) {
+            studentEmailInput.setError("Student already added");
+            resetButton();
+            return;
+        }
+
+        addStudentToClassFirebase(studentEmail, teacherId);
+    }
+
+    private void addStudentToClassFirebase(String studentEmail, String teacherId) {
         db.collection("users")
                 .document(teacherId)
                 .collection("classes")
@@ -332,7 +367,7 @@ public class AddStudentsForm extends AppCompatActivity {
                             })
                             .addOnFailureListener(e -> {
                                 resetButton();
-                                Toast.makeText(this, "Failed to update allClasses: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Failed to update class list: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });
                 })
                 .addOnFailureListener(e -> {
