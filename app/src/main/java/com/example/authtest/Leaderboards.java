@@ -55,7 +55,7 @@ public class Leaderboards extends AppCompatActivity {
         setupBackPressHandler();
         initializeViews();
         setupBackButton();
-        loadCurrentUserInfo(); // Load user info immediately for bottom bar
+        loadCurrentUserInfo(); 
         loadLeaderboardData();
         checkUserTypeAndConfigureMenu();
     }
@@ -170,7 +170,6 @@ public class Leaderboards extends AppCompatActivity {
                     }
 
                     if (userPointsMap.isEmpty()) {
-                        // No leaderboard data available, user info already loaded
                         return;
                     }
 
@@ -183,7 +182,6 @@ public class Leaderboards extends AppCompatActivity {
 
     private void fetchUserNamesAndDisplay(List<LeaderboardEntry> entries) {
         if (entries.isEmpty()) {
-            // Silently return - user info already loaded in bottom bar
             return;
         }
 
@@ -252,7 +250,6 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void updateTopThreeCards(List<LeaderboardEntry> top10) {
-        // Show the podium container now that we have data
         if (podiumContainer != null) {
             podiumContainer.setVisibility(View.VISIBLE);
         }
@@ -282,13 +279,10 @@ public class Leaderboards extends AppCompatActivity {
                 TextView tv = (TextView) child;
 
                 if (i == 0) {
-                    // First TextView: "Top X" label
                     tv.setText("Top " + position);
                 } else if (i == 1) {
-                    // Second TextView: Points
                     tv.setText(entry.points + " pts");
                 } else if (i == 2) {
-                    // Third TextView: Full name
                     tv.setText(entry.fullName);
                 }
             }
