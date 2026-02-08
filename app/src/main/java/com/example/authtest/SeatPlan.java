@@ -165,24 +165,46 @@ public class SeatPlan extends AppCompatActivity {
         if (seatNumber <= sortedStudentList.size()) {
             StudentAttendanceModel student = sortedStudentList.get(seatNumber - 1);
 
-            StudentSeatDialog dialog = new StudentSeatDialog(
-                    this,
-                    student,
-                    currentClassId,
-                    new StudentSeatDialog.OnStatusChangedListener() {
-                        @Override
-                        public void onStatusChanged() {
-                            // Refresh the seat colors and counters when status changes
-                            refreshSeatCounters();
-                            // Optionally reload student data to ensure sync
-                            loadSeatPlanForClass(currentClassId);
-                        }
-                    }
-            );
-            dialog.show();
+            checkUserTypeAndShowDialog(student);
         } else {
             Toast.makeText(this, "Seat " + seatNumber + " is empty", Toast.LENGTH_SHORT).show();
         }
+    }
+    private void checkUserTypeAndShowDialog(StudentAttendanceModel student) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    boolean isTeacher = false;
+
+                    if (documentSnapshot.exists()) {
+                        String userType = documentSnapshot.getString("userType");
+                        isTeacher = userType != null && "Teacher".equalsIgnoreCase(userType.trim());
+                    }
+
+                    StudentSeatDialog dialog = new StudentSeatDialog(
+                            this,
+                            student,
+                            currentClassId,
+                            new StudentSeatDialog.OnStatusChangedListener() {
+                                @Override
+                                public void onStatusChanged() {
+                                    refreshSeatCounters();
+                                    loadSeatPlanForClass(currentClassId);
+                                }
+                            },
+                            isTeacher
+                    );
+                    dialog.show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error checking user permissions", Toast.LENGTH_SHORT).show();
+                });
     }
     private void refreshSeatCounters() {
         int occupiedCount = 0;
@@ -331,8 +353,6 @@ public class SeatPlan extends AppCompatActivity {
                 });
     }
 
-    // Replace checkStudentAttendance method in SeatPlan.java
-
     private void checkStudentAttendance(StudentAttendanceModel student) {
         if (currentClassId == null || student.getStudentId() == null) {
             student.setAttendanceStatus("Not Marked");
@@ -350,7 +370,6 @@ public class SeatPlan extends AppCompatActivity {
                         Long timestamp = doc.getLong("timestamp");
                         Boolean falseMarked = doc.getBoolean("falseMarked");
 
-                        // Check if marked as False first
                         if (falseMarked != null && falseMarked) {
                             student.setMarked(true);
                             student.setTimestamp(timestamp);
@@ -440,8 +459,8 @@ public class SeatPlan extends AppCompatActivity {
 
     private void updateSeatColors(int studentCount) {
         int emptyColor = ContextCompat.getColor(this, R.color.empty_seat);
-        int occupiedColor = ContextCompat.getColor(this, R.color.occupied_seat); // Green
-        int falseColor = ContextCompat.getColor(this, R.color.false_seat); // Orange
+        int occupiedColor = ContextCompat.getColor(this, R.color.occupied_seat); 
+        int falseColor = ContextCompat.getColor(this, R.color.false_seat);
 
         int occupiedCount = 0;
         int falseCount = 0;
@@ -463,7 +482,6 @@ public class SeatPlan extends AppCompatActivity {
             }
         }
 
-        // Update counters dynamically
         updateSeatCounters(occupiedCount, falseCount);
     }
 

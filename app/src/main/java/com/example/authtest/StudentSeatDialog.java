@@ -18,15 +18,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class StudentSeatDialog extends Dialog {
 
-
     public interface OnStatusChangedListener {
         void onStatusChanged();
     }
 
-    // Fields
     private final StudentAttendanceModel student;
     private final String classId;
     private final OnStatusChangedListener statusChangedListener;
+    private final boolean isTeacher;
 
     private AppCompatButton falseButton;
     private AppCompatButton undoButton;
@@ -40,12 +39,14 @@ public class StudentSeatDialog extends Dialog {
             Context context,
             StudentAttendanceModel student,
             String classId,
-            OnStatusChangedListener listener
+            OnStatusChangedListener listener,
+            boolean isTeacher
     ) {
         super(context);
         this.student = student;
         this.classId = classId;
         this.statusChangedListener = listener;
+        this.isTeacher = isTeacher;
     }
 
     @Override
@@ -55,7 +56,6 @@ public class StudentSeatDialog extends Dialog {
         setContentView(R.layout.seatplan_dialog);
         setCancelable(false);
 
-        // Dialog window styling
         Window window = getWindow();
         if (window != null) {
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -65,7 +65,6 @@ public class StudentSeatDialog extends Dialog {
             );
         }
 
-        // UI elements
         TextView studentNameText = findViewById(R.id.studentNameText);
         TextView studentEmailText = findViewById(R.id.studentEmailText);
         attendanceStatusText = findViewById(R.id.attendanceStatusText);
@@ -74,39 +73,41 @@ public class StudentSeatDialog extends Dialog {
         falseButton = findViewById(R.id.falseButton);
         undoButton = findViewById(R.id.undoButton);
 
-        // Set student info
         studentNameText.setText(student.getFullName());
         studentEmailText.setText(student.getEmail());
 
-        // Initialize previous status
         previousStatus = student.getAttendanceStatus();
+        
         if (previousStatus == null || previousStatus.trim().isEmpty()) {
             previousStatus = "Not Marked";
         }
 
-        // Display initial status
         updateStatusUI(previousStatus);
 
-        // Load whether student was already False-marked in Firestore
-        checkIfAlreadyFalseMarked();
+        if (!isTeacher) {
+            if (falseButton != null) {
+                falseButton.setVisibility(View.GONE);
+            }
+            if (undoButton != null) {
+                undoButton.setVisibility(View.GONE);
+            }
+        } else {
+            checkIfAlreadyFalseMarked();
+        }
 
-        // Close button
         if (closeButton != null) {
             closeButton.setOnClickListener(view -> closeDialog());
         }
 
-        // False button
-        if (falseButton != null) {
+        if (falseButton != null && isTeacher) {
             falseButton.setOnClickListener(view -> markAsFalse());
         }
 
-        // Undo button
-        if (undoButton != null) {
+        if (undoButton != null && isTeacher) {
             undoButton.setOnClickListener(view -> undoFalseMarking());
         }
     }
 
-    // Check Firestore if student was already marked False
     private void checkIfAlreadyFalseMarked() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -130,11 +131,10 @@ public class StudentSeatDialog extends Dialog {
                 });
     }
 
-    // Update UI colors and text
     private void updateStatusUI(String status) {
         attendanceStatusText.setText(status);
 
-        int bgColor = 0xFF2C2C2C; // default
+        int bgColor = 0xFF2C2C2C; 
         int textColor = 0xFF828282;
 
         switch (status) {
@@ -158,10 +158,8 @@ public class StudentSeatDialog extends Dialog {
 
         statusBadge.setCardBackgroundColor(bgColor);
         attendanceStatusText.setTextColor(textColor);
-
     }
 
-    // Mark student as False in Firestore
     private void markAsFalse() {
         if (isFalseMarked) {
             Toast.makeText(getContext(), "Already marked as False", Toast.LENGTH_SHORT).show();
@@ -194,7 +192,6 @@ public class StudentSeatDialog extends Dialog {
                 });
     }
 
-    // Undo False marking
     private void undoFalseMarking() {
         if (!isFalseMarked) return;
 
@@ -209,10 +206,15 @@ public class StudentSeatDialog extends Dialog {
                         "originalStatus", null
                 )
                 .addOnSuccessListener(unused -> {
+
                     isFalseMarked = false;
                     student.setAttendanceStatus(previousStatus);
                     updateStatusUI(previousStatus);
                     hideUndoButton();
+
+                    if (statusChangedListener != null) {
+                        statusChangedListener.onStatusChanged();
+                    }
                     Toast.makeText(getContext(), "Undo successful", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
@@ -220,19 +222,17 @@ public class StudentSeatDialog extends Dialog {
                 });
     }
 
-    // Show Undo button and hide False button
     private void showUndoButton() {
         if (undoButton != null) undoButton.setVisibility(View.VISIBLE);
         if (falseButton != null) falseButton.setVisibility(View.GONE);
     }
 
-    // Hide Undo button and show False button
+
     private void hideUndoButton() {
         if (undoButton != null) undoButton.setVisibility(View.GONE);
         if (falseButton != null) falseButton.setVisibility(View.VISIBLE);
     }
 
-    // Close dialog
     public void closeDialog() {
         if (isShowing()) dismiss();
     }
