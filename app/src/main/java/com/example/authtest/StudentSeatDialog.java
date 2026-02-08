@@ -22,11 +22,10 @@ public class StudentSeatDialog extends Dialog {
         void onStatusChanged();
     }
 
-    // Fields
     private final StudentAttendanceModel student;
     private final String classId;
     private final OnStatusChangedListener statusChangedListener;
-    private final boolean isTeacher; // NEW: Track if user is teacher
+    private final boolean isTeacher;
 
     private AppCompatButton falseButton;
     private AppCompatButton undoButton;
@@ -36,7 +35,6 @@ public class StudentSeatDialog extends Dialog {
     private TextView attendanceStatusText;
     private CardView statusBadge;
 
-    // UPDATED CONSTRUCTOR: Add isTeacher parameter
     public StudentSeatDialog(
             Context context,
             StudentAttendanceModel student,
@@ -58,7 +56,6 @@ public class StudentSeatDialog extends Dialog {
         setContentView(R.layout.seatplan_dialog);
         setCancelable(false);
 
-        // Dialog window styling
         Window window = getWindow();
         if (window != null) {
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -68,7 +65,6 @@ public class StudentSeatDialog extends Dialog {
             );
         }
 
-        // UI elements
         TextView studentNameText = findViewById(R.id.studentNameText);
         TextView studentEmailText = findViewById(R.id.studentEmailText);
         attendanceStatusText = findViewById(R.id.attendanceStatusText);
@@ -77,20 +73,17 @@ public class StudentSeatDialog extends Dialog {
         falseButton = findViewById(R.id.falseButton);
         undoButton = findViewById(R.id.undoButton);
 
-        // Set student info
         studentNameText.setText(student.getFullName());
         studentEmailText.setText(student.getEmail());
 
-        // Initialize previous status
         previousStatus = student.getAttendanceStatus();
+        
         if (previousStatus == null || previousStatus.trim().isEmpty()) {
             previousStatus = "Not Marked";
         }
 
-        // Display initial status
         updateStatusUI(previousStatus);
 
-        // NEW: Hide buttons if user is a student
         if (!isTeacher) {
             if (falseButton != null) {
                 falseButton.setVisibility(View.GONE);
@@ -99,21 +92,17 @@ public class StudentSeatDialog extends Dialog {
                 undoButton.setVisibility(View.GONE);
             }
         } else {
-            // Only load false-marked status for teachers
             checkIfAlreadyFalseMarked();
         }
 
-        // Close button
         if (closeButton != null) {
             closeButton.setOnClickListener(view -> closeDialog());
         }
 
-        // False button (only for teachers)
         if (falseButton != null && isTeacher) {
             falseButton.setOnClickListener(view -> markAsFalse());
         }
 
-        // Undo button (only for teachers)
         if (undoButton != null && isTeacher) {
             undoButton.setOnClickListener(view -> undoFalseMarking());
         }
@@ -142,11 +131,10 @@ public class StudentSeatDialog extends Dialog {
                 });
     }
 
-    // Update UI colors and text
     private void updateStatusUI(String status) {
         attendanceStatusText.setText(status);
 
-        int bgColor = 0xFF2C2C2C; // default
+        int bgColor = 0xFF2C2C2C; 
         int textColor = 0xFF828282;
 
         switch (status) {
@@ -172,7 +160,6 @@ public class StudentSeatDialog extends Dialog {
         attendanceStatusText.setTextColor(textColor);
     }
 
-    // Mark student as False in Firestore
     private void markAsFalse() {
         if (isFalseMarked) {
             Toast.makeText(getContext(), "Already marked as False", Toast.LENGTH_SHORT).show();
@@ -205,7 +192,6 @@ public class StudentSeatDialog extends Dialog {
                 });
     }
 
-    // Undo False marking
     private void undoFalseMarking() {
         if (!isFalseMarked) return;
 
