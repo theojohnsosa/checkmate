@@ -187,7 +187,6 @@ public class SeatPlan extends AppCompatActivity {
                         isTeacher = userType != null && "Teacher".equalsIgnoreCase(userType.trim());
                     }
 
-                    // Show dialog with appropriate permissions
                     StudentSeatDialog dialog = new StudentSeatDialog(
                             this,
                             student,
@@ -199,7 +198,7 @@ public class SeatPlan extends AppCompatActivity {
                                     loadSeatPlanForClass(currentClassId);
                                 }
                             },
-                            isTeacher  // Pass the isTeacher flag
+                            isTeacher
                     );
                     dialog.show();
                 })
@@ -354,8 +353,6 @@ public class SeatPlan extends AppCompatActivity {
                 });
     }
 
-    // Replace checkStudentAttendance method in SeatPlan.java
-
     private void checkStudentAttendance(StudentAttendanceModel student) {
         if (currentClassId == null || student.getStudentId() == null) {
             student.setAttendanceStatus("Not Marked");
@@ -373,7 +370,6 @@ public class SeatPlan extends AppCompatActivity {
                         Long timestamp = doc.getLong("timestamp");
                         Boolean falseMarked = doc.getBoolean("falseMarked");
 
-                        // Check if marked as False first
                         if (falseMarked != null && falseMarked) {
                             student.setMarked(true);
                             student.setTimestamp(timestamp);
@@ -463,8 +459,8 @@ public class SeatPlan extends AppCompatActivity {
 
     private void updateSeatColors(int studentCount) {
         int emptyColor = ContextCompat.getColor(this, R.color.empty_seat);
-        int occupiedColor = ContextCompat.getColor(this, R.color.occupied_seat); // Green
-        int falseColor = ContextCompat.getColor(this, R.color.false_seat); // Orange
+        int occupiedColor = ContextCompat.getColor(this, R.color.occupied_seat); 
+        int falseColor = ContextCompat.getColor(this, R.color.false_seat);
 
         int occupiedCount = 0;
         int falseCount = 0;
@@ -486,7 +482,6 @@ public class SeatPlan extends AppCompatActivity {
             }
         }
 
-        // Update counters dynamically
         updateSeatCounters(occupiedCount, falseCount);
     }
 
