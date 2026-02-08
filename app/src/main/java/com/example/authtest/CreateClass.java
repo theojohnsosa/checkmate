@@ -2,6 +2,7 @@ package com.example.authtest;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -74,6 +75,21 @@ public class CreateClass extends AppCompatActivity {
         classNameInput = findViewById(R.id.classNameInput);
         subjectCodeInput = findViewById(R.id.subjectCodeInput);
         roomInput = findViewById(R.id.roomInput);
+
+        roomInput.setFilters(new InputFilter[]{
+                new InputFilter() {
+                    @Override
+                    public CharSequence filter(CharSequence source, int start, int end,
+                                               android.text.Spanned dest, int dstart, int dend) {
+                        for (int i = start; i < end; i++) {
+                            if (!Character.isDigit(source.charAt(i))) {
+                                return "";
+                            }
+                        }
+                        return null;
+                    }
+                }
+        });
 
         monToggle = findViewById(R.id.monToggle);
         tueToggle = findViewById(R.id.tueToggle);
