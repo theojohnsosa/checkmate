@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -397,7 +396,6 @@ public class Faqs extends AppCompatActivity {
     private void navigateToUserHome() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -415,19 +413,12 @@ public class Faqs extends AppCompatActivity {
                                 startActivity(new Intent(Faqs.this, StudentHome.class));
                             } else if ("Teacher".equalsIgnoreCase(userType.trim())) {
                                 startActivity(new Intent(Faqs.this, TeacherHome.class));
-                            } else {
-                                Toast.makeText(Faqs.this, "Unknown user type: " + userType, Toast.LENGTH_SHORT).show();
                             }
-                        } else {
-                            Toast.makeText(Faqs.this, "User type not found in document", Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        Toast.makeText(Faqs.this, "User document not found", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
                     drawerLayout.closeDrawer(GravityCompat.START);
-                    Toast.makeText(Faqs.this, "Error loading user info: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

@@ -30,7 +30,6 @@ public class AddStudentsForm extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String classId;
-    private static final String TAG = "AddStudentsForm";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

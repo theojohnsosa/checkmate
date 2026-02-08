@@ -28,7 +28,6 @@ import java.util.Map;
 
 public class AttendanceStreak extends AppCompatActivity {
 
-    private static final String TAG = "AttendanceStreak";
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private DrawerLayout drawerLayout;

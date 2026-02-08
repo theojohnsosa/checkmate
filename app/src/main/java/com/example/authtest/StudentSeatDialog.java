@@ -15,6 +15,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FieldValue;
 
 public class StudentSeatDialog extends Dialog {
 
@@ -77,7 +78,7 @@ public class StudentSeatDialog extends Dialog {
         studentEmailText.setText(student.getEmail());
 
         previousStatus = student.getAttendanceStatus();
-        
+
         if (previousStatus == null || previousStatus.trim().isEmpty()) {
             previousStatus = "Not Marked";
         }
@@ -134,7 +135,7 @@ public class StudentSeatDialog extends Dialog {
     private void updateStatusUI(String status) {
         attendanceStatusText.setText(status);
 
-        int bgColor = 0xFF2C2C2C; 
+        int bgColor = 0xFF2C2C2C;
         int textColor = 0xFF828282;
 
         switch (status) {
@@ -166,17 +167,25 @@ public class StudentSeatDialog extends Dialog {
             return;
         }
 
+        String studentId = student.getStudentId();
+        if (studentId == null || studentId.isEmpty()) {
+            Toast.makeText(getContext(), "Error: Student ID is missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("allClasses")
                 .document(classId)
                 .collection("attendanceRecords")
-                .document(student.getStudentId())
+                .document(studentId)
                 .update(
                         "falseMarked", true,
                         "originalStatus", previousStatus
                 )
                 .addOnSuccessListener(unused -> {
+                    incrementViolations(db, studentId);
+
                     isFalseMarked = true;
                     student.setAttendanceStatus("False");
                     updateStatusUI("False");
@@ -195,17 +204,24 @@ public class StudentSeatDialog extends Dialog {
     private void undoFalseMarking() {
         if (!isFalseMarked) return;
 
+        String studentId = student.getStudentId();
+        if (studentId == null || studentId.isEmpty()) {
+            Toast.makeText(getContext(), "Error: Student ID is missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("allClasses")
                 .document(classId)
                 .collection("attendanceRecords")
-                .document(student.getStudentId())
+                .document(studentId)
                 .update(
                         "falseMarked", false,
                         "originalStatus", null
                 )
                 .addOnSuccessListener(unused -> {
+                    decrementViolations(db, studentId);
 
                     isFalseMarked = false;
                     student.setAttendanceStatus(previousStatus);
@@ -215,6 +231,7 @@ public class StudentSeatDialog extends Dialog {
                     if (statusChangedListener != null) {
                         statusChangedListener.onStatusChanged();
                     }
+
                     Toast.makeText(getContext(), "Undo successful", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
@@ -222,11 +239,45 @@ public class StudentSeatDialog extends Dialog {
                 });
     }
 
+    private void incrementViolations(FirebaseFirestore db, String studentId) {
+        db.collection("users")
+                .document(studentId)
+                .update("violations", FieldValue.increment(1))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Violations updated", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+
+                    db.collection("users")
+                            .document(studentId)
+                            .set(new java.util.HashMap<String, Object>() {{
+                                put("violations", 1);
+                            }}, com.google.firebase.firestore.SetOptions.merge())
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(getContext(), "Violations field created", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e2 -> {
+                                Toast.makeText(getContext(), "Failed to update violations: " + e2.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                });
+    }
+
+    private void decrementViolations(FirebaseFirestore db, String studentId) {
+        db.collection("users")
+                .document(studentId)
+                .update("violations", FieldValue.increment(-1))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Violations updated", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Failed to update violations: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
     private void showUndoButton() {
         if (undoButton != null) undoButton.setVisibility(View.VISIBLE);
         if (falseButton != null) falseButton.setVisibility(View.GONE);
     }
-
 
     private void hideUndoButton() {
         if (undoButton != null) undoButton.setVisibility(View.GONE);

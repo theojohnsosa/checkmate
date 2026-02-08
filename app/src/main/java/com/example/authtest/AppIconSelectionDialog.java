@@ -19,7 +19,7 @@ public class AppIconSelectionDialog extends Dialog {
     private final Context context;
     private final Runnable onConfirm;
     private final Runnable onCancel;
-    private static final String TAG = "AppIconDialog";
+    private static final String TAG = "AppIconDialog1";
 
     private static final String[] AliasNames = {
             "IconWhiteAlias",

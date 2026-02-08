@@ -1060,8 +1060,6 @@ public class ClassInformation extends AppCompatActivity {
                 });
     }
 
-    // Replace setupStudentsListener method in ClassInformation.java
-
     private void setupStudentsListener() {
         if (classId == null || classId.isEmpty()) {
             return;
@@ -1098,7 +1096,6 @@ public class ClassInformation extends AppCompatActivity {
                                     String oldStatus = student.getAttendanceStatus();
                                     String newStatus;
 
-                                    // Check for False status first
                                     if (falseMarked != null && falseMarked) {
                                         newStatus = "False";
                                         if (!"False".equals(oldStatus)) {

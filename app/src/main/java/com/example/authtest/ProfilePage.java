@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.LinearLayout;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -32,6 +33,10 @@ public class ProfilePage extends AppCompatActivity {
     private TextView profileUserType;
     private TextView profileYear;
     private Button logoutButton;
+
+    private LinearLayout violationsContainer;
+    private TextView violationsCountText;
+    private ImageView violationIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +68,10 @@ public class ProfilePage extends AppCompatActivity {
         profileUserType = findViewById(R.id.profile_user_type);
         profileYear = findViewById(R.id.profile_year);
         logoutButton = findViewById(R.id.logoutButton);
+
+        violationsContainer = findViewById(R.id.violations_container);
+        violationsCountText = findViewById(R.id.violations_count_text);
+        violationIcon = findViewById(R.id.violation_icon);
     }
 
     private void setupBackButton() {
@@ -229,6 +238,7 @@ public class ProfilePage extends AppCompatActivity {
             userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
         }
     }
+
     private void checkUserTypeAndConfigureMenu() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -244,13 +254,20 @@ public class ProfilePage extends AppCompatActivity {
 
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                            if (violationsContainer != null) {
+                                violationsContainer.setVisibility(View.GONE);
+                            }
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
                     navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+                    if (violationsContainer != null) {
+                        violationsContainer.setVisibility(View.GONE);
+                    }
                 });
     }
+
     private void loadUserProfileInfo() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
@@ -283,12 +300,23 @@ public class ProfilePage extends AppCompatActivity {
                             profileDepartment.setText(department != null && !department.isEmpty() ? department : "N/A");
                             profileUserType.setText(userType != null && !userType.isEmpty() ? userType : "N/A");
                             profileYear.setText(year != null && !year.isEmpty() ? year : "N/A");
+
+                            if (userType != null && "Student".equalsIgnoreCase(userType.trim())) {
+                                loadViolationsCount(documentSnapshot);
+                            } else {
+                                if (violationsContainer != null) {
+                                    violationsContainer.setVisibility(View.GONE);
+                                }
+                            }
                         } else {
                             profileUserName.setText("User");
                             profileSchoolNumber.setText("N/A");
                             profileDepartment.setText("N/A");
                             profileUserType.setText("N/A");
                             profileYear.setText("N/A");
+                            if (violationsContainer != null) {
+                                violationsContainer.setVisibility(View.GONE);
+                            }
                         }
                     })
                     .addOnFailureListener(e -> {
@@ -297,7 +325,26 @@ public class ProfilePage extends AppCompatActivity {
                         profileDepartment.setText("N/A");
                         profileUserType.setText("N/A");
                         profileYear.setText("N/A");
+                        if (violationsContainer != null) {
+                            violationsContainer.setVisibility(View.GONE);
+                        }
                     });
+        }
+    }
+
+    private void loadViolationsCount(com.google.firebase.firestore.DocumentSnapshot documentSnapshot) {
+        Long violationsCount = documentSnapshot.getLong("violations");
+
+        if (violationsCount == null) {
+            violationsCount = 0L;
+        }
+
+        if (violationsContainer != null) {
+            violationsContainer.setVisibility(View.VISIBLE);
+            if (violationsCountText != null) {
+                String violationText = violationsCount + " " + (violationsCount == 1 ? "Violation" : "Violations");
+                violationsCountText.setText(violationText);
+            }
         }
     }
 }

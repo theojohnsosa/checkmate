@@ -53,15 +53,15 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         } else if ("Late".equalsIgnoreCase(status)) {
             holder.attendanceStatusText.setText("Late");
             holder.attendanceStatusText.setTextColor(0xFFFFFFFF);
-            holder.attendanceStatusText.setBackgroundColor(0xFFF59F00);// Light orange
+            holder.attendanceStatusText.setBackgroundColor(0xFFF59F00);
         } else if ("Absent".equalsIgnoreCase(status)) {
             holder.attendanceStatusText.setText("Absent");
             holder.attendanceStatusText.setTextColor(0xFFFFFFFF);
-            holder.attendanceStatusText.setBackgroundColor(0xFFC92A2A);// Red
+            holder.attendanceStatusText.setBackgroundColor(0xFFC92A2A);
         } else {
             holder.attendanceStatusText.setText("Not Marked");
             holder.attendanceStatusText.setTextColor(0xFF828282);
-            holder.attendanceStatusText.setBackgroundColor(0xFF2C2C2C);// Gray
+            holder.attendanceStatusText.setBackgroundColor(0xFF2C2C2C);
         }
     }
 

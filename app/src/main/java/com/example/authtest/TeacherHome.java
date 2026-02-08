@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -44,7 +43,7 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
     private List<ClassModel> filteredClasses = new ArrayList<>();
     private EditText classSearchBar;
     private ImageView clearSearchButton;
-    private Map<ClassModel, String> classIdMap = new HashMap<>();  // Map to store classId for each ClassModel
+    private Map<ClassModel, String> classIdMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -474,7 +473,6 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
             return;
         }
 
-        // Get the classId from the map
         String classId = classIdMap.get(classItem);
         if (classId == null) {
             Toast.makeText(TeacherHome.this, "Error: Class ID not found", Toast.LENGTH_SHORT).show();
