@@ -125,11 +125,13 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/podiumContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="25dp"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:visibility="gone">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -142,7 +144,7 @@
                         android:layout_marginEnd="8dp">
 
                         <TextView
-                            android:text="Andrie Hitomo"
+                            android:text=""
                             android:textStyle="bold"
                             android:textSize="16sp"
                             android:textColor="#000000"
@@ -152,7 +154,7 @@
                             android:gravity="center" />
 
                         <TextView
-                            android:text="32 pts"
+                            android:text=""
                             android:textColor="#C9722A"
                             android:textStyle="bold"
                             android:textSize="18sp"
@@ -161,7 +163,7 @@
                             android:layout_marginBottom="4dp" />
 
                         <TextView
-                            android:text="Top 2"
+                            android:text=""
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:textColor="#000000"
@@ -181,7 +183,7 @@
                         android:layout_marginHorizontal="4dp">
 
                         <TextView
-                            android:text="Gab Baluyot"
+                            android:text=""
                             android:textStyle="bold"
                             android:textSize="18sp"
                             android:textColor="#000000"
@@ -191,7 +193,7 @@
                             android:gravity="center" />
 
                         <TextView
-                            android:text="50 pts"
+                            android:text=""
                             android:textColor="#C92A2A"
                             android:textStyle="bold"
                             android:textSize="20sp"
@@ -200,7 +202,7 @@
                             android:layout_marginBottom="8dp" />
 
                         <TextView
-                            android:text="Top 1"
+                            android:text=""
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="#000000"
@@ -220,7 +222,7 @@
                         android:layout_marginStart="8dp">
 
                         <TextView
-                            android:text="Jasser Bloso"
+                            android:text=""
                             android:textStyle="bold"
                             android:textSize="16sp"
                             android:textColor="#000000"
@@ -230,7 +232,7 @@
                             android:gravity="center" />
 
                         <TextView
-                            android:text="20 pts"
+                            android:text=""
                             android:textColor="#F59F00"
                             android:textStyle="bold"
                             android:textSize="18sp"
@@ -239,7 +241,7 @@
                             android:layout_marginBottom="4dp" />
 
                         <TextView
-                            android:text="Top 3"
+                            android:text=""
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:textColor="#000000"
@@ -255,272 +257,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/leaderboard_item_bg"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:layout_marginBottom="10dp">
-
-                        <TextView
-                            android:text="4"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp" />
-
-                        <TextView
-                            android:text="Jeffry Enema"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:text="19 pts"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/leaderboard_item_bg"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:layout_marginBottom="10dp">
-
-                        <TextView
-                            android:text="5"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp" />
-
-                        <TextView
-                            android:text="Raffy Tulfo Jr."
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:text="18 pts"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/leaderboard_item_bg"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:layout_marginBottom="10dp">
-
-                        <TextView
-                            android:text="6"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp" />
-
-                        <TextView
-                            android:text="Jeffry Enema"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:text="17 pts"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/leaderboard_item_bg"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:layout_marginBottom="10dp">
-
-                        <TextView
-                            android:text="7"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp" />
-
-                        <TextView
-                            android:text="Raffy Tulfo Jr."
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:text="16 pts"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/leaderboard_item_bg"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:layout_marginBottom="10dp">
-
-                        <TextView
-                            android:text="8"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp" />
-
-                        <TextView
-                            android:text="Raffy Tulfo Jr."
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:text="15 pts"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/leaderboard_item_bg"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:layout_marginBottom="10dp">
-
-                        <TextView
-                            android:text="9"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp" />
-
-                        <TextView
-                            android:text="Jeffry Enema"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:text="14 pts"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/leaderboard_item_bg"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:layout_marginBottom="0dp">
-
-                        <TextView
-                            android:text="10"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp" />
-
-                        <TextView
-                            android:text="Raffy Tulfo Jr."
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:text="13 pts"
-                            android:textColor="#000000"
-                            android:textStyle="bold"
-                            android:textSize="14sp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -542,7 +278,7 @@
             android:paddingEnd="16dp">
 
             <TextView
-                android:text="56"
+                android:text=""
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:textSize="14sp"
@@ -552,7 +288,7 @@
 
             <TextView
                 android:id="@+id/userRankingName"
-                android:text="Theojohn Sosa"
+                android:text=""
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:textSize="14sp"
@@ -562,7 +298,7 @@
 
             <TextView
                 android:id="@+id/userRankingPoints"
-                android:text="2 pts"
+                android:text=""
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:textSize="14sp"

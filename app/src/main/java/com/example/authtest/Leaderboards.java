@@ -33,6 +33,7 @@ public class Leaderboards extends AppCompatActivity {
     private TextView userRankingPoints;
     private TextView userRankingPosition;
     private LinearLayout rankingListContainer;
+    private LinearLayout podiumContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +55,7 @@ public class Leaderboards extends AppCompatActivity {
         setupBackPressHandler();
         initializeViews();
         setupBackButton();
+        loadCurrentUserInfo(); 
         loadLeaderboardData();
         checkUserTypeAndConfigureMenu();
     }
@@ -63,6 +65,7 @@ public class Leaderboards extends AppCompatActivity {
         userRankingName = findViewById(R.id.userRankingName);
         userRankingPoints = findViewById(R.id.userRankingPoints);
         rankingListContainer = findViewById(R.id.rankingListContainer);
+        podiumContainer = findViewById(R.id.podiumContainer);
 
         View parent = (View) userRankingName.getParent();
         if (parent instanceof LinearLayout) {
@@ -81,6 +84,39 @@ public class Leaderboards extends AppCompatActivity {
         backButton.setOnClickListener(view -> {
             finish();
         });
+    }
+
+    private void loadCurrentUserInfo() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String firstName = documentSnapshot.getString("firstName");
+                        String lastName = documentSnapshot.getString("lastName");
+                        String fullName = ((firstName != null ? firstName : "") +
+                                (lastName != null ? " " + lastName : "")).trim();
+                        userRankingName.setText(fullName.isEmpty() ? "User" : fullName);
+                    } else {
+                        userRankingName.setText("User");
+                    }
+                    userRankingPoints.setText("0 pts");
+                    if (userRankingPosition != null) {
+                        userRankingPosition.setText("-");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    userRankingName.setText("User");
+                    userRankingPoints.setText("0 pts");
+                    if (userRankingPosition != null) {
+                        userRankingPosition.setText("-");
+                    }
+                });
     }
 
     private void loadLeaderboardData() {
@@ -133,13 +169,19 @@ public class Leaderboards extends AppCompatActivity {
                         }
                     }
 
+                    if (userPointsMap.isEmpty()) {
+                        return;
+                    }
+
                     fetchUserNamesAndDisplay(new ArrayList<>(userPointsMap.values()));
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to load leaderboard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
     private void fetchUserNamesAndDisplay(List<LeaderboardEntry> entries) {
         if (entries.isEmpty()) {
-            Toast.makeText(this, "No leaderboard data available", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -208,36 +250,23 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void updateTopThreeCards(List<LeaderboardEntry> top10) {
-        LinearLayout podiumContainer = (LinearLayout) rankingListContainer.getParent();
-
-        View podiumView = null;
-        for (int i = 0; i < ((LinearLayout) podiumContainer).getChildCount(); i++) {
-            View child = ((LinearLayout) podiumContainer).getChildAt(i);
-            if (child instanceof LinearLayout) {
-                View firstChild = ((LinearLayout) child).getChildAt(0);
-                if (firstChild instanceof LinearLayout &&
-                        ((LinearLayout) firstChild).getChildCount() == 3) {
-                    podiumView = child;
-                    break;
-                }
-            }
+        if (podiumContainer != null) {
+            podiumContainer.setVisibility(View.VISIBLE);
         }
 
-        if (podiumView != null && podiumView instanceof LinearLayout) {
-            LinearLayout podium = (LinearLayout) podiumView;
-
-            if (top10.size() >= 2 && podium.getChildCount() > 0) {
-                LinearLayout top2Card = (LinearLayout) podium.getChildAt(0);
+        if (podiumContainer != null && podiumContainer.getChildCount() >= 3) {
+            if (top10.size() >= 2) {
+                LinearLayout top2Card = (LinearLayout) podiumContainer.getChildAt(0);
                 updateCardData(top2Card, top10.get(1), 2);
             }
 
-            if (top10.size() >= 1 && podium.getChildCount() > 1) {
-                LinearLayout top1Card = (LinearLayout) podium.getChildAt(1);
+            if (top10.size() >= 1) {
+                LinearLayout top1Card = (LinearLayout) podiumContainer.getChildAt(1);
                 updateCardData(top1Card, top10.get(0), 1);
             }
 
-            if (top10.size() >= 3 && podium.getChildCount() > 2) {
-                LinearLayout top3Card = (LinearLayout) podium.getChildAt(2);
+            if (top10.size() >= 3) {
+                LinearLayout top3Card = (LinearLayout) podiumContainer.getChildAt(2);
                 updateCardData(top3Card, top10.get(2), 3);
             }
         }
@@ -248,14 +277,13 @@ public class Leaderboards extends AppCompatActivity {
             View child = card.getChildAt(i);
             if (child instanceof TextView) {
                 TextView tv = (TextView) child;
-                String hint = tv.getText().toString();
 
-                if (hint.contains("Hitomo") || hint.contains("Baluyot") || hint.contains("Bloso")) {
-                    tv.setText(entry.fullName);
-                } else if (hint.contains("pts")) {
-                    tv.setText(entry.points + " pts");
-                } else if (hint.contains("Top")) {
+                if (i == 0) {
                     tv.setText("Top " + position);
+                } else if (i == 1) {
+                    tv.setText(entry.points + " pts");
+                } else if (i == 2) {
+                    tv.setText(entry.fullName);
                 }
             }
         }
@@ -265,7 +293,7 @@ public class Leaderboards extends AppCompatActivity {
         LinearLayout itemLayout = new LinearLayout(this);
         itemLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                (int) (60 * getResources().getDisplayMetrics().density) 
+                (int) (60 * getResources().getDisplayMetrics().density)
         ));
         itemLayout.setOrientation(LinearLayout.HORIZONTAL);
         itemLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
@@ -283,7 +311,7 @@ public class Leaderboards extends AppCompatActivity {
 
         TextView positionText = new TextView(this);
         positionText.setText(String.valueOf(position));
-        positionText.setTextColor(0xFF000000);  
+        positionText.setTextColor(0xFF000000);
         positionText.setTextSize(14);
         positionText.setTypeface(null, android.graphics.Typeface.BOLD);
         LinearLayout.LayoutParams posParams = new LinearLayout.LayoutParams(
@@ -309,7 +337,7 @@ public class Leaderboards extends AppCompatActivity {
 
         TextView pointsText = new TextView(this);
         pointsText.setText(entry.points + " pts");
-        pointsText.setTextColor(0xFF000000);  
+        pointsText.setTextColor(0xFF000000);
         pointsText.setTextSize(14);
         pointsText.setTypeface(null, android.graphics.Typeface.BOLD);
         pointsText.setLayoutParams(new LinearLayout.LayoutParams(
