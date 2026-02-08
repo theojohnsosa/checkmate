@@ -101,6 +101,9 @@ public class CreateClass extends AppCompatActivity {
         startTimeInput = findViewById(R.id.startTimeInput);
         endTimeInput = findViewById(R.id.endTimeInput);
 
+        startTimeInput.setKeyListener(null);
+        endTimeInput.setKeyListener(null);
+
         createClassButton = findViewById(R.id.createClassButton);
         backButton = findViewById(R.id.backButton);
     }
@@ -348,6 +351,17 @@ public class CreateClass extends AppCompatActivity {
 
         endTimeInput.setOnClickListener(view -> {
             endTimeInput.showDropDown();
+        });
+        startTimeInput.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
+                startTimeInput.showDropDown();
+            }
+        });
+
+        endTimeInput.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
+                endTimeInput.showDropDown();
+            }
         });
     }
 
