@@ -7,8 +7,15 @@ public class StudentAttendanceModel {
     private String firstName;
     private String lastName;
     private String attendanceStatus;
+    private String originalStatus;
     private Long timestamp;
     private boolean marked;
+    private boolean falseMarked;
+    private String classId;
+
+    public StudentAttendanceModel() {
+
+    }
 
     public StudentAttendanceModel(String studentId, String email, String firstName, String lastName) {
         this.studentId = studentId;
@@ -16,7 +23,9 @@ public class StudentAttendanceModel {
         this.firstName = firstName;
         this.lastName = lastName;
         this.attendanceStatus = "Not Marked";
+        this.originalStatus = null;
         this.marked = false;
+        this.falseMarked = false;
     }
 
     public String getStudentId() {
@@ -63,6 +72,14 @@ public class StudentAttendanceModel {
         this.attendanceStatus = attendanceStatus;
     }
 
+    public String getOriginalStatus() {
+        return originalStatus;
+    }
+
+    public void setOriginalStatus(String originalStatus) {
+        this.originalStatus = originalStatus;
+    }
+
     public Long getTimestamp() {
         return timestamp;
     }
@@ -77,5 +94,21 @@ public class StudentAttendanceModel {
 
     public void setMarked(boolean marked) {
         this.marked = marked;
+    }
+
+    public boolean isFalseMarked() {
+        return falseMarked;
+    }
+
+    public void setFalseMarked(boolean falseMarked) {
+        this.falseMarked = falseMarked;
+    }
+
+    public String getClassId() {
+        return classId;
+    }
+
+    public void setClassId(String classId) {
+        this.classId = classId;
     }
 }
