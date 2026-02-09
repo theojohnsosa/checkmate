@@ -55,7 +55,7 @@ public class Leaderboards extends AppCompatActivity {
         setupBackPressHandler();
         initializeViews();
         setupBackButton();
-        loadCurrentUserInfo(); // Load user info immediately for bottom bar
+        loadCurrentUserInfo();
         loadLeaderboardData();
         checkUserTypeAndConfigureMenu();
     }
@@ -120,7 +120,6 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void loadLeaderboardData() {
-        // First, get all attendance data to calculate points
         db.collection("attendance")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -170,12 +169,10 @@ public class Leaderboards extends AppCompatActivity {
                         }
                     }
 
-                    // Now fetch all students and merge with points data
                     fetchAllStudents(userPointsMap);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to load leaderboard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    // Still try to load all students even if attendance fails
                     fetchAllStudents(new HashMap<>());
                 });
     }
@@ -200,7 +197,6 @@ public class Leaderboards extends AppCompatActivity {
 
                         LeaderboardEntry entry = userPointsMap.get(userId);
                         if (entry == null) {
-                            // Student has no points yet
                             entry = new LeaderboardEntry();
                             entry.userId = userId;
                             entry.points = 0;
@@ -245,25 +241,21 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void updateTopThreeCards(List<LeaderboardEntry> top10) {
-        // Show the podium container now that we have data
         if (podiumContainer != null) {
             podiumContainer.setVisibility(View.VISIBLE);
         }
 
         if (podiumContainer != null && podiumContainer.getChildCount() >= 3) {
-            // Left card = 2nd place
             if (top10.size() >= 2) {
                 LinearLayout top2Card = (LinearLayout) podiumContainer.getChildAt(0);
                 updateCardData(top2Card, top10.get(1), 2);
             }
 
-            // Center card = 1st place
             if (top10.size() >= 1) {
                 LinearLayout top1Card = (LinearLayout) podiumContainer.getChildAt(1);
                 updateCardData(top1Card, top10.get(0), 1);
             }
-
-            // Right card = 3rd place
+            
             if (top10.size() >= 3) {
                 LinearLayout top3Card = (LinearLayout) podiumContainer.getChildAt(2);
                 updateCardData(top3Card, top10.get(2), 3);
@@ -278,13 +270,10 @@ public class Leaderboards extends AppCompatActivity {
                 TextView tv = (TextView) child;
 
                 if (i == 0) {
-                    // First TextView: Full name (top)
                     tv.setText(entry.fullName);
                 } else if (i == 1) {
-                    // Second TextView: Points (middle)
                     tv.setText(entry.points + " pts");
                 } else if (i == 2) {
-                    // Third TextView: "Top X" label (bottom)
                     tv.setText("Top " + position);
                 }
             }
