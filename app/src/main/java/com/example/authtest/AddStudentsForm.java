@@ -165,7 +165,7 @@ public class AddStudentsForm extends AppCompatActivity {
                             Toast.makeText(AddStudentsForm.this, "User type not found in document", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(AddStudentsForm.this, "User document not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddStudentsForm.this, "The user document was not found", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
