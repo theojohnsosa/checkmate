@@ -3,6 +3,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="empty_seat">#2C2C2C</color>
-    <color name = "occupied_seat" >#2F9E44</color>
+    <color name = "occupied_seat" >#FFFFFF</color>
     <color name = "false_seat" >#004BF9</color>
 </resources>
