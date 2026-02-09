@@ -55,7 +55,7 @@ public class Leaderboards extends AppCompatActivity {
         setupBackPressHandler();
         initializeViews();
         setupBackButton();
-        loadCurrentUserInfo(); 
+        loadCurrentUserInfo();
         loadLeaderboardData();
         checkUserTypeAndConfigureMenu();
     }
@@ -169,60 +169,51 @@ public class Leaderboards extends AppCompatActivity {
                         }
                     }
 
-                    if (userPointsMap.isEmpty()) {
-                        return;
-                    }
-
-                    fetchUserNamesAndDisplay(new ArrayList<>(userPointsMap.values()));
+                    fetchAllStudents(userPointsMap);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to load leaderboard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    fetchAllStudents(new HashMap<>());
                 });
     }
 
-    private void fetchUserNamesAndDisplay(List<LeaderboardEntry> entries) {
-        if (entries.isEmpty()) {
-            return;
-        }
+    private void fetchAllStudents(Map<String, LeaderboardEntry> userPointsMap) {
+        db.collection("users")
+                .whereEqualTo("userType", "Student")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<LeaderboardEntry> allEntries = new ArrayList<>();
 
-        final int[] loadedCount = {0};
-        final int totalEntries = entries.size();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        String userId = doc.getId();
+                        String firstName = doc.getString("firstName");
+                        String lastName = doc.getString("lastName");
+                        String fullName = ((firstName != null ? firstName : "") +
+                                (lastName != null ? " " + lastName : "")).trim();
 
-        for (LeaderboardEntry entry : entries) {
-            db.collection("users")
-                    .document(entry.userId)
-                    .get()
-                    .addOnSuccessListener(doc -> {
-                        if (doc.exists()) {
-                            String firstName = doc.getString("firstName");
-                            String lastName = doc.getString("lastName");
-                            entry.fullName = ((firstName != null ? firstName : "") +
-                                    (lastName != null ? " " + lastName : "")).trim();
-
-                            if (entry.fullName.isEmpty()) {
-                                entry.fullName = "Unknown User";
-                            }
-                        } else {
-                            entry.fullName = "Unknown User";
+                        if (fullName.isEmpty()) {
+                            fullName = "Unknown User";
                         }
 
-                        loadedCount[0]++;
-
-                        if (loadedCount[0] == totalEntries) {
-                            displayLeaderboard(entries);
-                            loadUserRanking(entries);
+                        LeaderboardEntry entry = userPointsMap.get(userId);
+                        if (entry == null) {
+                            entry = new LeaderboardEntry();
+                            entry.userId = userId;
+                            entry.points = 0;
+                            entry.earliestTimestamp = Long.MAX_VALUE;
                         }
-                    })
-                    .addOnFailureListener(e -> {
-                        entry.fullName = "Unknown User";
-                        loadedCount[0]++;
+                        entry.fullName = fullName;
+                        allEntries.add(entry);
+                    }
 
-                        if (loadedCount[0] == totalEntries) {
-                            displayLeaderboard(entries);
-                            loadUserRanking(entries);
-                        }
-                    });
-        }
+                    if (!allEntries.isEmpty()) {
+                        displayLeaderboard(allEntries);
+                        loadUserRanking(allEntries);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to load students: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void displayLeaderboard(List<LeaderboardEntry> entries) {
@@ -264,7 +255,7 @@ public class Leaderboards extends AppCompatActivity {
                 LinearLayout top1Card = (LinearLayout) podiumContainer.getChildAt(1);
                 updateCardData(top1Card, top10.get(0), 1);
             }
-
+            
             if (top10.size() >= 3) {
                 LinearLayout top3Card = (LinearLayout) podiumContainer.getChildAt(2);
                 updateCardData(top3Card, top10.get(2), 3);
@@ -279,11 +270,11 @@ public class Leaderboards extends AppCompatActivity {
                 TextView tv = (TextView) child;
 
                 if (i == 0) {
-                    tv.setText("Top " + position);
+                    tv.setText(entry.fullName);
                 } else if (i == 1) {
                     tv.setText(entry.points + " pts");
                 } else if (i == 2) {
-                    tv.setText(entry.fullName);
+                    tv.setText("Top " + position);
                 }
             }
         }
