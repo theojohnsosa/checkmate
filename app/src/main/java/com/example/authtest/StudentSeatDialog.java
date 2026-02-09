@@ -162,11 +162,6 @@ public class StudentSeatDialog extends Dialog {
     }
 
     private void markAsFalse() {
-        if (isFalseMarked) {
-            Toast.makeText(getContext(), "Already marked as False", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         String studentId = student.getStudentId();
         if (studentId == null || studentId.isEmpty()) {
             Toast.makeText(getContext(), "Error: Student ID is missing", Toast.LENGTH_SHORT).show();
