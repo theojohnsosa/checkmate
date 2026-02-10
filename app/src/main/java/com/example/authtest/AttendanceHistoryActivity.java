@@ -22,6 +22,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+// Shows students/teachers list of classes they've attended or created
 public class AttendanceHistoryActivity extends AppCompatActivity {
 
     private RecyclerView historyRecyclerView;
@@ -38,6 +39,11 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
     private ImageView clearSearchButton;
     private LinearLayout searchBarContainer;
 
+    /*
+        Determines if user is student or teacher via email domain check
+        Calls appropriate load method: loadStudentHistory() or loadTeacherHistory()
+        Sets up search functionality and RecyclerView
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +86,11 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         historyRecyclerView.setNestedScrollingEnabled(true);
     }
 
+    /*
+        Implements TextWatcher on search EditText
+        Filters history list based on className, classCode, or subjectCode matches
+        Shows/hides clear button based on search query content
+     */
     private void setupHistorySearch() {
         historySearchBar.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -108,6 +119,11 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         });
     }
 
+    /*
+        Creates new filtered list containing only matching items
+        Updates adapter with filtered list
+        Shows empty state layout if no results
+     */
     private void filterHistory(String searchQuery) {
         filteredHistory.clear();
 
@@ -149,6 +165,12 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
         }
     }
 
+    /*
+        Retrieves enrolledClasses subcollection from student's user document
+        For each enrolled class, fetches full ClassModel from allClasses collection
+        Uses counter pattern to track when all classes are loaded
+        Sorts history by date descending after all loads complete
+     */
     private void loadStudentHistory() {
         String studentId = mAuth.getCurrentUser().getUid();
 
@@ -223,6 +245,11 @@ public class AttendanceHistoryActivity extends AppCompatActivity {
                 });
     }
 
+    /*
+        Retrieves classes subcollection from teacher's user document
+        Directly maps document to ClassModel (no additional queries needed)
+        Simpler than student path since teacher owns the class data directly
+     */
     private void loadTeacherHistory() {
         String teacherId = mAuth.getCurrentUser().getUid();
 
