@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+// Activity showing privacy policy text and "Agree" button
 public class PrivacyPolicy extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
@@ -21,6 +22,12 @@ public class PrivacyPolicy extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
+    /*
+         Sets up navigation drawer with same pattern as other activities
+         Hides "Attendance Streak" menu item since teachers access this
+         Shows privacy policy text from layout resource
+         Agree button just shows toast (policy agreement isn't enforced)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
