@@ -7,8 +7,15 @@ import android.os.Looper;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+// Introductory splash screen shown for 3 seconds on app launch
 public class SplashScreen extends AppCompatActivity {
 
+    /*
+         Shows splash screen layout for 3000 milliseconds (3 seconds)
+         Uses Handler with Looper.getMainLooper() to schedule delayed action
+         After 3 seconds, navigates to SignIn activity and finishes self
+         Users see splash before login screen
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
