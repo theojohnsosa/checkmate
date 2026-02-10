@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+// Shows user profile information (name, email, school number, department, violations for students)
 public class ProfilePage extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
@@ -239,6 +240,11 @@ public class ProfilePage extends AppCompatActivity {
         }
     }
 
+    /*
+         If user is not student, hides "Attendance Streak" menu item
+         Also hides violations container for non-students
+         Teachers don't have violation records
+     */
     private void checkUserTypeAndConfigureMenu() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -268,6 +274,12 @@ public class ProfilePage extends AppCompatActivity {
                 });
     }
 
+    /*
+         Queries user document from Firestore
+         Retrieves firstName, lastName, schoolNumber, department, userType, yearLevel
+         Displays all fields, or "N/A" if not available
+         If student, calls loadViolationsCount()
+     */
     private void loadUserProfileInfo() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
@@ -332,6 +344,11 @@ public class ProfilePage extends AppCompatActivity {
         }
     }
 
+    /*
+         Gets violations field from student's user document
+         Displays violation count with singular/plural grammar
+         Shows violations container only if violations > 0
+     */
     private void loadViolationsCount(com.google.firebase.firestore.DocumentSnapshot documentSnapshot) {
         Long violationsCount = documentSnapshot.getLong("violations");
 
