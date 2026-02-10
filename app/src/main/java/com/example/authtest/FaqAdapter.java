@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
+// RecyclerView adapter for FAQ expandable items
 public class FaqAdapter extends RecyclerView.Adapter<FaqAdapter.FAQViewHolder> {
 
     private List<FaqItem> faqList;
@@ -23,6 +24,12 @@ public class FaqAdapter extends RecyclerView.Adapter<FaqAdapter.FAQViewHolder> {
         return new FAQViewHolder(view);
     }
 
+    /*
+         Determines if current item is expanded (position == expandedPosition)
+         Sets answer container visibility based on expansion state
+         Rotates expand icon 90 degrees for expanded items
+         Sets up click listener to toggle expansion
+     */
     @Override
     public void onBindViewHolder(FAQViewHolder holder, int position) {
         FaqItem item = faqList.get(position);
@@ -34,6 +41,11 @@ public class FaqAdapter extends RecyclerView.Adapter<FaqAdapter.FAQViewHolder> {
         return faqList.size();
     }
 
+    /*
+         Replaces internal FAQ list with filtered results
+         Resets expandedPosition to -1 (collapse all)
+         Calls notifyDataSetChanged() to refresh UI
+     */
     public void setFilteredList(List<FaqItem> filteredList) {
         this.faqList = filteredList;
         expandedPosition = -1;
@@ -56,6 +68,12 @@ public class FaqAdapter extends RecyclerView.Adapter<FaqAdapter.FAQViewHolder> {
             faqItemContainer = itemView.findViewById(R.id.faqItemContainer);
         }
 
+        /*
+             Toggles expanded state when item clicked
+             Notifies adapter of previous expanded item change (to collapse it)
+             Notifies adapter of new expanded item change (to expand it)
+             Only one item expanded at a time
+         */
         public void bind(FaqItem item, int position, int expandedPosition) {
             questionText.setText(item.getQuestion());
             answerText.setText(item.getAnswer());
