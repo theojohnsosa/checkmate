@@ -1,5 +1,6 @@
 package com.example.authtest;
 
+// Data model for attendance history information
 public class AttendanceHistoryModel {
 
     private String classId;
@@ -10,6 +11,10 @@ public class AttendanceHistoryModel {
     private String endTime;
     private long dateAdded;
 
+    /*
+        Stores class ID, name, code, subject code, time range
+        Stores date when student enrolled or class was created (dateAdded timestamp)
+     */
     public AttendanceHistoryModel(
             String classId,
             String className,
@@ -26,6 +31,12 @@ public class AttendanceHistoryModel {
         this.endTime = endTime;
         this.dateAdded = dateAdded;
     }
+
+    /*
+        Standard accessor methods for each field
+        Allows other classes to read/modify attendance history data
+        Follows JavaBean naming conventions
+     */
 
     public String getClassId() {
         return classId;
