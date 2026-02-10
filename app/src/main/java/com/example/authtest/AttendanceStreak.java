@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+// Displays student's 30-day attendance heat map (green = present, dark = absent/no class)
 public class AttendanceStreak extends AppCompatActivity {
 
     private FirebaseFirestore db;
@@ -39,8 +40,6 @@ public class AttendanceStreak extends AppCompatActivity {
     private String userId;
     private static final String COLOR_BLACK = "#1A1A1A";
     private static final String COLOR_GREEN = "#26A641";
-
-    // Real-time listener — kept so we can remove it in onDestroy
     private ListenerRegistration attendanceListener;
 
     @Override
@@ -78,7 +77,7 @@ public class AttendanceStreak extends AppCompatActivity {
         setupBackPressHandler();
         checkUserTypeAndConfigureMenu();
         initializeStreakViews();
-        listenAttendanceData(); // real-time instead of one-time get()
+        listenAttendanceData();
     }
 
     @Override
@@ -89,6 +88,11 @@ public class AttendanceStreak extends AppCompatActivity {
         }
     }
 
+    /*
+        Creates array of 30 CardView references (5 weeks x 6 days/week)
+        Each card represents one day in the grid
+        IDs follow pattern: monday_week1, tuesday_week1, etc.
+     */
     private void initializeStreakViews() {
         longestStreakNumber = findViewById(R.id.longestStreakNumber);
         initializeStreakCards();
@@ -131,6 +135,11 @@ public class AttendanceStreak extends AppCompatActivity {
         streakCards.add(findViewById(R.id.saturday_week5));
     }
 
+    /*
+        Calculates which Monday to start the 30-day grid from
+        Goes back 29 days and finds the previous Monday
+        Zeros out time components so dates are comparable
+     */
     private Calendar getGridStartMonday() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, -29);
@@ -146,10 +155,11 @@ public class AttendanceStreak extends AppCompatActivity {
         return cal;
     }
 
-    /**
-     * Replaces the old loadAttendanceData() one-time .get() with a real-time
-     * addSnapshotListener(). Now whenever a teacher sets falseMarked=true/false
-     * on any attendance document, the streak grid updates instantly.
+    /*
+        Queries attendance collection for current user
+        Filters records by date range matching 30-day grid
+        Creates HashMap mapping date string to attendance status
+        Only keeps "present" status records (filters out late/absent)
      */
     private void listenAttendanceData() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
@@ -161,7 +171,6 @@ public class AttendanceStreak extends AppCompatActivity {
         String startStr = dateFormat.format(gridStart.getTime());
         String endStr   = dateFormat.format(gridEnd.getTime());
 
-        // Remove any previous listener before attaching a new one
         if (attendanceListener != null) {
             attendanceListener.remove();
         }
@@ -183,13 +192,17 @@ public class AttendanceStreak extends AppCompatActivity {
                         String status = doc.getString("status");
                         Boolean falseMarked = doc.getBoolean("falseMarked");
 
-                        if (date == null) continue;
+                        if (date == null) {
+                            continue;
+                        }
 
-                        // Skip if marked as false — streak card goes dark
-                        if (falseMarked != null && falseMarked) continue;
+                        if (falseMarked != null && falseMarked) {
+                            continue;
+                        }
 
-                        // Only count "present" status for streaks
-                        if (!"present".equals(status)) continue;
+                        if (!"present".equals(status)) {
+                            continue;
+                        }
 
                         if (date.compareTo(startStr) >= 0 && date.compareTo(endStr) <= 0) {
                             if (!"present".equals(attendanceMap.get(date))) {
@@ -202,6 +215,12 @@ public class AttendanceStreak extends AppCompatActivity {
                 });
     }
 
+    /*
+        Iterates through all 30 days in grid
+        For each day, looks up attendance status in map
+        Calculates longest current streak while iterating
+        Updates card colors and streak display
+     */
     private void updateStreakDisplay(Map<String, String> attendanceMap) {
         Calendar calendar = getGridStartMonday();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
@@ -236,6 +255,10 @@ public class AttendanceStreak extends AppCompatActivity {
         longestStreakNumber.setText(String.valueOf(longestStreak));
     }
 
+    /*
+        Sets card background to green (#26A641) if "present"
+        Sets card background to dark (#1A1A1A) if not present or no class
+     */
     private void updateCardColor(CardView card, String status) {
         card.setCardBackgroundColor(
                 "present".equals(status)
