@@ -56,6 +56,11 @@ public class AppIconSelectionDialog extends Dialog {
     private int selectedIconIndex = -1;
     private int currentlyEnabledIndex = -1;
 
+    /*
+        Creates a custom dialog with transparent background
+        Sets dialog dimensions to 92% of screen width
+        Calls findCurrentIcon() to detect which icons alias is currently enabled
+     */
     public AppIconSelectionDialog(Context context, Runnable onConfirm, Runnable onCancel) {
         super(context);
         this.context = context;
@@ -80,6 +85,11 @@ public class AppIconSelectionDialog extends Dialog {
         setupActionButtons();
     }
 
+    /*
+        Iterates through AliasNames array containing all available app icons variants
+        Uses PackageManager.getComponentEnabledSetting() to check which icon is currently active
+        Stores the currently enabled index in currentlyEnabledIndex variable
+     */
     private void findCurrentIcon() {
         PackageManager pm = context.getPackageManager();
         String packageName = context.getPackageName();
@@ -105,6 +115,11 @@ public class AppIconSelectionDialog extends Dialog {
         updateCheckmarks();
     }
 
+    /*
+        Creates click listeners for each of the 5 icon option buttons
+        Updates selectedIconIndex when user taps an icon
+        Calls updateCheckmarks() to visually indicate selection
+     */
     private void setupIconButtonListeners() {
         for (int i = 0; i < IconButtonIds.length; i++) {
             final int index = i;
@@ -164,6 +179,11 @@ public class AppIconSelectionDialog extends Dialog {
         });
     }
 
+    /*
+        Shows checkmark ImageView for selected icon
+        Hides checkmarks for all other icons
+        Provides visual feedback to user
+     */
     private void updateCheckmarks() {
         for (int i = 0; i < CheckmarkIds.length; i++) {
             ImageView checkmark = findViewById(CheckmarkIds[i]);
@@ -177,6 +197,12 @@ public class AppIconSelectionDialog extends Dialog {
         }
     }
 
+    /*
+        Disables all icon aliases by setting them to COMPONENT_ENABLED_STATE_DISABLED
+        Enables only the selected icon alias
+        Uses DONT_KILL_APP flag so app remains running during icon change
+        Shows toast confirming the change
+     */
     private void changeIcon() {
         PackageManager pm = context.getPackageManager();
         String packageName = context.getPackageName();
