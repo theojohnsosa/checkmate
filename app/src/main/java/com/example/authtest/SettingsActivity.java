@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+// App settings including appearance, notifications, do-not-disturb, and links to policy documents
 public class SettingsActivity extends AppCompatActivity {
 
     private Switch appearanceToggle;
@@ -78,6 +79,10 @@ public class SettingsActivity extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
     }
 
+    /*
+         Appearance and Notifications toggles show "feature coming soon" toast
+         Do-Not-Disturb toggle calls toggleDoNotDisturb()
+     */
     private void setupToggleListeners() {
         appearanceToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Toast.makeText(this, "Appearance feature coming soon", Toast.LENGTH_SHORT).show();
@@ -92,6 +97,12 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    /*
+         Checks if has DO_NOT_DISTURB permission (requires Android 12+)
+         Uses NotificationManager.setInterruptionFilter() to enable/disable DND
+         Sets INTERRUPTION_FILTER_NONE to enable, INTERRUPTION_FILTER_ALL to disable
+         Shows toast confirming state change
+     */
     private void toggleDoNotDisturb(boolean enable) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!notificationManager.isNotificationPolicyAccessGranted()) {
@@ -145,6 +156,13 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    /*
+         App Icon button: opens AppIconSelectionDialog
+         Share Feedback: opens ShareFeedbackActivity
+         Terms/Privacy: opens respective activities
+         FAQs: opens Faqs activity
+         Logout: shows LogoutConfirmationDialog
+     */
     private void setupButtonListeners() {
         appIconButton.setOnClickListener(view -> {
             openAppIcon();
