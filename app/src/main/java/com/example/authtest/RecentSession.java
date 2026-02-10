@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+// Data model for attendance session (time range when attendance was recorded)
 public class RecentSession implements Serializable {
 
     private String sessionId;
@@ -15,10 +16,10 @@ public class RecentSession implements Serializable {
     private String endTime;
     private String date;
 
-    public RecentSession() {
-
-    }
-
+    /*
+         Takes sessionId, classId, sessionStartTime, sessionEndTime as parameters
+         Calls formatTimes() to convert timestamps to display strings
+     */
     public RecentSession(String sessionId, String classId, long sessionStartTime, long sessionEndTime) {
         this.sessionId = sessionId;
         this.classId = classId;
@@ -27,6 +28,12 @@ public class RecentSession implements Serializable {
         formatTimes();
     }
 
+    /*
+         Uses SimpleDateFormat to convert long timestamps to date/time strings
+         Date format: "MM/dd/yyyy"
+         Time format: "h:mm a" (12-hour with AM/PM)
+         Stores formatted strings for UI display
+     */
     private void formatTimes() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
         SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
@@ -97,6 +104,10 @@ public class RecentSession implements Serializable {
         this.date = date;
     }
 
+    /*
+         Returns concatenated string: "startTime - endTime"
+         Example: "9:00 AM - 9:47 AM"
+     */
     public String getSessionTimeRange() {
         return startTime + " - " + endTime;
     }
