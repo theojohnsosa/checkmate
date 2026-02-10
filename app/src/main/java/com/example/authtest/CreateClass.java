@@ -23,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+// Activity for teachers to create new classes
 public class CreateClass extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
@@ -71,6 +72,11 @@ public class CreateClass extends AppCompatActivity {
         });
     }
 
+    /*
+        Finds all EditText, ToggleButton, and AutoCompleteTextView references
+        Sets up input filters on room field to only accept digits
+        Disables keyboard on time inputs (dropdown-only)
+     */
     private void bindViews() {
         classNameInput = findViewById(R.id.classNameInput);
         subjectCodeInput = findViewById(R.id.subjectCodeInput);
@@ -309,7 +315,11 @@ public class CreateClass extends AppCompatActivity {
         return parts[0];
     }
 
-
+    /*
+     * Builds ClassModel from form inputs
+     * Saves to both teacher's classes subcollection and allClasses collection
+     * Uses document ID from teacher's collection as the classId in allClasses
+     */
     private void createClass(ClassModel model) {
         String teacherId = mAuth.getCurrentUser().getUid();
 
@@ -332,6 +342,12 @@ public class CreateClass extends AppCompatActivity {
                 });
     }
 
+    /*
+        Creates array of time strings from 7 AM to 9 PM
+        Generates times in format: "7:00 AM", "8:00 AM", etc.
+        Creates ArrayAdapter and sets on AutoCompleteTextView
+        Shows dropdown on click or focus
+     */
     private void setupTimeDropdowns() {
         List<String> times = new ArrayList<>();
         for (int i = 7; i <= 21; i++) {
@@ -365,6 +381,11 @@ public class CreateClass extends AppCompatActivity {
         });
     }
 
+    /*
+        Checks state of each day toggle button
+        Builds list of selected day abbreviations (Mon, Tue, etc.)
+        Joins with "/" separator: "Mon/Wed/Fri"
+     */
     private String getSelectedDays() {
         List<String> days = new ArrayList<>();
         if (monToggle.isChecked()) days.add("Mon");
@@ -376,6 +397,11 @@ public class CreateClass extends AppCompatActivity {
         return String.join("/", days);
     }
 
+    /*
+         Creates random 6-character alphanumeric code
+         Uses characters from A-Z and 0-9
+         Ensures unique identifier for joining classes
+     */
     private String generateClassCode() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         StringBuilder code = new StringBuilder();
@@ -385,6 +411,11 @@ public class CreateClass extends AppCompatActivity {
         return code.toString();
     }
 
+    /*
+         Checks all required fields are non-empty
+         Verifies at least one day is selected
+         Returns false if validation fails, sets error on field
+     */
     private boolean validateInputs() {
         if (classNameInput.getText().toString().trim().isEmpty()) {
             classNameInput.setError("Required");
