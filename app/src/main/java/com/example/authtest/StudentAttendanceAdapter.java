@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+// RecyclerView adapter for displaying student attendance list
 public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttendanceAdapter.StudentViewHolder> {
 
     private List<StudentAttendanceModel> studentList = new ArrayList<>();
@@ -34,6 +35,16 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         return new StudentViewHolder(view);
     }
 
+    /*
+     Sets student name from StudentAttendanceModel
+     Gets attendance status string (Present/Late/Absent/Not Marked/False)
+     Sets status text and background color based on status:
+         Blue background for "False"
+         Green (#2F9E44) for "Present"
+         Orange (#F59F00) for "Late"
+         Red (#C92A2A) for "Absent"
+         Dark gray (#2C2C2C) for "Not Marked"
+     */
     @Override
     public void onBindViewHolder(@NonNull StudentViewHolder holder, int position) {
         StudentAttendanceModel student = studentList.get(position);
@@ -70,6 +81,10 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         return studentList.size();
     }
 
+    /*
+         Replaces internal list with new student data
+         Calls notifyDataSetChanged() to refresh adapter display
+     */
     public void setStudents(List<StudentAttendanceModel> students) {
         if (students == null) {
             this.studentList = new ArrayList<>();
@@ -79,6 +94,10 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         notifyDataSetChanged();
     }
 
+    /*
+         Removes student at given position from list
+         Calls notifyItemRemoved() then notifyItemRangeChanged() to update view
+     */
     public void removeStudent(int position) {
         if (position >= 0 && position < studentList.size()) {
             studentList.remove(position);
@@ -87,6 +106,10 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentAttend
         }
     }
 
+    /*
+         Returns StudentAttendanceModel at position with bounds checking
+         Returns null if position invalid
+     */
     public StudentAttendanceModel getStudentAt(int position) {
         if (position >= 0 && position < studentList.size()) {
             return studentList.get(position);
