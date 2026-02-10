@@ -15,11 +15,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.List;
 
+// Dialog allowing students to join classes by entering class code
 public class JoinClassDialog extends Dialog {
 
     private final Runnable onSuccess;
     private AppCompatButton joinButton;
 
+    /*
+         Creates dialog with transparent background
+         Sets up EditText for code input and Join/Cancel buttons
+     */
     public JoinClassDialog(Context context, Runnable onSuccess) {
         super(context);
         this.onSuccess = onSuccess;
@@ -48,6 +53,12 @@ public class JoinClassDialog extends Dialog {
             dismiss();
         });
 
+        /*
+             Gets entered class code and converts to uppercase
+             Validates code is not empty
+             Gets current user's email for authorization check
+             Queries allClasses collection for matching classCode
+         */
         joinButton.setOnClickListener(view -> {
             String classCode = codeInput.getText().toString().trim().toUpperCase();
 
@@ -127,6 +138,11 @@ public class JoinClassDialog extends Dialog {
         });
     }
 
+    /*
+         Queries student's enrolledClasses subcollection for this classId
+         Shows error if student already enrolled
+         Otherwise calls addEnrolledClass()
+     */
     private void checkIfAlreadyEnrolled(
             FirebaseFirestore db,
             String studentId,
@@ -157,6 +173,12 @@ public class JoinClassDialog extends Dialog {
                 });
     }
 
+    /*
+         Creates enrollment data with classId, code, name, enrolledAt timestamp
+         Saves to student's enrolledClasses subcollection
+         Shows success message and calls onSuccess runnable
+         Parent activity can then refresh student's class list
+     */
     private void addEnrolledClass(
             FirebaseFirestore db,
             String studentId,
