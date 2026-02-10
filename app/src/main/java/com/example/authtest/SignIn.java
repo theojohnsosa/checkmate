@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import com.google.firebase.auth.FirebaseAuth;
 
+// Login screen for existing users
 public class SignIn extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -41,6 +42,13 @@ public class SignIn extends AppCompatActivity {
         });
     }
 
+    /*
+        Gets email and password from EditText inputs
+        Calls validateInputs() to check both fields
+        Uses FirebaseAuth.signInWithEmailAndPassword() for authentication
+        On success, checks email domain to route to StudentHome or TeacherHome
+        On failure, shows error message from Firebase
+     */
     private void signInUser() {
         String schoolEmail = schoolEmailInput.getText().toString().trim();
         String password = passwordInput.getText().toString().trim();
@@ -86,6 +94,12 @@ public class SignIn extends AppCompatActivity {
 
     }
 
+    /*
+         Checks email not empty
+         Checks email format with Patterns.EMAIL_ADDRESS regex
+         Checks password not empty
+         Sets error on field and requests focus for first failing field
+     */
     private boolean validateInputs(String schoolEmail, String password) {
         if (schoolEmail.isEmpty()) {
             schoolEmailInput.setError("Email is required");
