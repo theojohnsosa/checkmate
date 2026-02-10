@@ -1,11 +1,16 @@
 package com.example.authtest;
 
+// Data model for FAQ question/answer pairs
 public class FaqItem {
 
     private String question;
     private String answer;
     private String category;
 
+    /*
+        Takes question, answer, and category strings
+        Stores all three fields for retrieval
+     */
     public FaqItem(
             String question,
             String answer,
@@ -15,6 +20,11 @@ public class FaqItem {
         this.answer = answer;
         this.category = category;
     }
+
+    /*
+        Provides access to all three fields
+        Allows filtering by category and searching by question/answer text
+     */
 
     public String getQuestion() {
         return question;
