@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+// Shows visual seating chart with student attendance status colors
 public class SeatPlan extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
@@ -89,6 +90,12 @@ public class SeatPlan extends AppCompatActivity {
         vacantText = findViewById(R.id.vacantText);
         falseText = findViewById(R.id.falseText);
     }
+
+    /*
+         Real-time listener on attendance records collection
+         When teacher marks as "False" or changes status, seat colors update immediately
+         Parent activity doesn't need to refresh
+     */
     private void setupAttendanceRecordsListener() {
         if (currentClassId == null || currentClassId.isEmpty()) {
             return;
@@ -147,6 +154,11 @@ public class SeatPlan extends AppCompatActivity {
                 });
     }
 
+    /*
+         Finds CardView references for 40 seats (seatPlanCard1 through seatPlanCard40)
+         Sets up click listener for each seat to show student details dialog
+         Seats mapped by position in sorted student list
+     */
     private void initializeSeatCards() {
         for (int i = 0; i < 40; i++) {
             int resId = getResources().getIdentifier("seatPlanCard" + (i + 1), "id", getPackageName());
@@ -159,8 +171,10 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
-
-
+    /*
+         Opens StudentSeatDialog with selected student's info
+         Only opens if seat number <= total students (has student assigned)
+     */
     private void onSeatClicked(int seatNumber) {
         if (seatNumber <= sortedStudentList.size()) {
             StudentAttendanceModel student = sortedStudentList.get(seatNumber - 1);
@@ -219,8 +233,10 @@ public class SeatPlan extends AppCompatActivity {
         updateSeatCounters(occupiedCount, falseCount);
     }
 
-
-
+    /*
+         Retrieves allowed student emails from class document
+         Calls fetchAndSortStudents() to get full student data
+     */
     private void loadSeatPlanForClass(String classId) {
         clearSeatColors();
 
@@ -251,6 +267,12 @@ public class SeatPlan extends AppCompatActivity {
                 });
     }
 
+    /*
+         For each allowed email, queries users collection to get StudentAttendanceModel
+         Checks student's attendance status from attendanceRecords
+         Sorts students by last name, then first name
+         Calls updateSeatColors() with sorted list
+     */
     private void fetchAndSortStudents(List<String> allowedEmails) {
         if (allowedEmails == null || allowedEmails.isEmpty()) {
             updateSeatColors(0);
@@ -454,6 +476,13 @@ public class SeatPlan extends AppCompatActivity {
         }
     }
 
+    /*
+     Sets seat colors based on attendance status:
+        Green = Present/Late/Absent (marked)
+        Dark = Not Marked
+        Empty = No student assigned to seat
+     Updates seat counter displays
+     */
     private void updateSeatColors(int studentCount) {
         int emptyColor = ContextCompat.getColor(this, R.color.empty_seat);
         int occupiedColor = ContextCompat.getColor(this, R.color.occupied_seat); 
