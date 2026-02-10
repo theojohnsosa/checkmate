@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+// Shows detailed attendance records for a specific session
 public class SessionDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = "SessionDetailsActivity";
@@ -57,6 +58,11 @@ public class SessionDetailsActivity extends AppCompatActivity {
     private ImageView clearSearchButton;
     private TextView studentsAttendedHeader;
 
+    /*
+         Retrieves classId, sessionId, and session timing from Intent extras
+         Sets up student list RecyclerView and search functionality
+         Calls loadSessionAttendanceData()
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -317,6 +323,11 @@ public class SessionDetailsActivity extends AppCompatActivity {
         studentAdapter.setStudents(new ArrayList<>(filteredStudentList));
     }
 
+    /*
+         Enables left swipe to delete student record from session
+         Shows confirmation dialog before deletion
+         Updates stats after deletion
+     */
     private void setupSwipeToDelete() {
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             private final ColorDrawable background = new ColorDrawable(Color.parseColor("#C92A2A"));
@@ -385,6 +396,12 @@ public class SessionDetailsActivity extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(studentsRecyclerView);
     }
 
+    /*
+         Queries recentSessions > sessionId > attendanceRecords subcollection
+         For each attendance record, retrieves full student name/email from users collection
+         Uses counter pattern to track when all students loaded
+         Sorts students by last name after loading complete
+     */
     private void loadSessionAttendanceData() {
         if (classId == null || classId.isEmpty() || sessionId == null || sessionId.isEmpty()) {
             Toast.makeText(this, "Error: Invalid session data", Toast.LENGTH_SHORT).show();
@@ -514,6 +531,12 @@ public class SessionDetailsActivity extends AppCompatActivity {
                     navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                 });
     }
+
+    /*
+         Counts students with each attendance status
+         Updates display with total, present, late, absent counts
+         Called after all students loaded and whenever data updates
+     */
     private void calculateAndUpdateStats() {
 
         if (totalStudentsCount == null || presentCount == null ||
@@ -580,6 +603,11 @@ public class SessionDetailsActivity extends AppCompatActivity {
         }
     }
 
+    /*
+         Deletes attendance record for student from session
+         Removes from adapter and list
+         Shows toast confirming deletion
+     */
     private void removeStudentFromSession(StudentAttendanceModel student, int position) {
         if (classId == null || sessionId == null) {
             Toast.makeText(this, "Error: Invalid session", Toast.LENGTH_SHORT).show();
