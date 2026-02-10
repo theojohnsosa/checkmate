@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+// Registration screen for new users
 public class SignUp extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -30,6 +31,11 @@ public class SignUp extends AppCompatActivity {
     private AppCompatButton signUpButton;
     private AppCompatButton hasAccountButton;
 
+    /*
+         Sets up ArrayAdapters for userType, department, yearLevel AutoCompleteTextView dropdowns
+         Configures dropdowns to show on click or focus
+         Sets setKeyListener(null) to make fields dropdown-only (can't type)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,6 +140,12 @@ public class SignUp extends AppCompatActivity {
         });
     }
 
+    /*
+         Gets all form input values
+         Calls validateInputs() to check all required fields
+         Uses FirebaseAuth.createUserWithEmailAndPassword() to create account
+         Calls saveUserToFirestore() if account creation succeeds
+     */
     private void createAccount() {
         String firstName = firstNameInput.getText().toString().trim();
         String lastName = lastNameInput.getText().toString().trim();
@@ -188,6 +200,14 @@ public class SignUp extends AppCompatActivity {
                 });
     }
 
+    /*
+         Checks firstName, lastName, password not empty
+         Checks email is valid NU MOA format
+         Calls isValidNUMOAEmail() for format validation
+         Calls isValidSchoolNumber() for school number format
+         Checks all dropdowns have selections
+         Sets error on field for first failing validation
+     */
     private boolean validateInputs(
             String firstName,
             String lastName,
@@ -273,6 +293,12 @@ public class SignUp extends AppCompatActivity {
         return true;
     }
 
+    /*
+     Regex pattern differs by userType:
+        Student: ^[a-zA-Z]+@students.nu-moa.edu.ph$ (name part letters only)
+        Teacher: ^[a-zA-Z]+@nu-moa.edu.ph$ (name part letters only)
+     Ensures email matches required domain
+     */
     private boolean isValidNUMOAEmail(String email, String userType) {
         if (email == null || email.isEmpty()) {
             return false;
@@ -308,6 +334,11 @@ public class SignUp extends AppCompatActivity {
         return true;
     }
 
+    /*
+         Pattern: ^(201[9]|202[0-5])-[0-9]{7}$
+         Requires year 2019-2025, dash, 7 digits
+         Example: 2023-1234567
+     */
     private boolean isValidSchoolNumber(String schoolNumber) {
         if (schoolNumber == null || schoolNumber.isEmpty()) {
             return false;
@@ -317,6 +348,14 @@ public class SignUp extends AppCompatActivity {
 
         return schoolNumber.matches(pattern);
     }
+
+    /*
+         Creates user document in users collection
+         Includes firstName, lastName, schoolEmail, userType, department, schoolNumber, yearLevel
+         Sets createdAt timestamp
+         Routes to StudentHome or TeacherHome after success
+         If Firestore save fails, deletes the created Firebase Auth account
+     */
     private void saveUserToFirestore(
             String userId,
             String firstName,
