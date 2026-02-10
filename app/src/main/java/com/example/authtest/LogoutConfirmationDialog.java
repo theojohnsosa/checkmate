@@ -9,12 +9,19 @@ import android.view.Window;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
 
+// Confirmation dialog when user logs out
 public class LogoutConfirmationDialog extends Dialog {
 
     private final Runnable onConfirm;
     private final Runnable onCancel;
     private AppCompatButton logoutButton;
 
+    /*
+         Takes onConfirm and onCancel runnables as parameters
+         Displays message: "Are you sure you want to logout of your account?"
+         Logout button calls onConfirm (which signs out and navigates to SignIn)
+         Cancel button calls onCancel to close dialog
+     */
     public LogoutConfirmationDialog(
             Context context,
             Runnable onConfirm,
