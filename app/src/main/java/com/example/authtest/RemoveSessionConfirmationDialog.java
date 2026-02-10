@@ -9,12 +9,18 @@ import android.view.Window;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
 
+// Confirmation dialog when removing student from class
 public class RemoveSessionConfirmationDialog extends Dialog {
 
     private final Runnable onConfirm;
     private final Runnable onCancel;
     private AppCompatButton removeButton;
 
+    /*
+         Personalizes message: "Are you sure you want to remove [studentName] from this class?"
+         Allows teacher to confirm student removal
+         Cancel preserves student enrollment
+     */
     public RemoveSessionConfirmationDialog(
             Context context,
             String sessionDate,
