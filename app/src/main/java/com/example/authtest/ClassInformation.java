@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+// Shows detailed information about a specific class and its attendance
 public class ClassInformation extends AppCompatActivity {
 
     private static final String TAG = "ClassInformation";
@@ -78,6 +79,12 @@ public class ClassInformation extends AppCompatActivity {
     private ListenerRegistration recentSessionsListener;
     private long attendanceSessionStartTime = 0;
 
+    /*
+        Retrieves ClassModel from Intent extras
+        Sets up attendance stats card, student list RecyclerView
+        Calls checkUserTypeAndSetupUI() to show different UI for teachers vs students
+        If student: shows attendance marking button; if teacher: shows add students button
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -855,6 +862,12 @@ public class ClassInformation extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(studentsRecyclerView);
     }
 
+    /*
+        Retrieves allowedStudentEmails array from class document
+        For each email, queries users collection to get student details
+        Creates StudentAttendanceModel objects with fetched data
+        Uses counter pattern to know when all student lookups complete
+     */
     private void loadStudentList() {
         if (classId == null || classId.isEmpty()) {
             updateStudentsHeaderVisibility();
@@ -1005,6 +1018,12 @@ public class ClassInformation extends AppCompatActivity {
         });
     }
 
+    /*
+        For each student, queries attendanceRecords subcollection
+        Retrieves marked status and timestamp
+        Calculates attendance status (Present/Late/Absent) based on time difference
+        Updates StudentAttendanceModel with attendance information
+     */
     private void checkStudentAttendance(StudentAttendanceModel student) {
         if (classId == null || student.getStudentId() == null) {
             student.setAttendanceStatus("Not Marked");
@@ -1217,6 +1236,12 @@ public class ClassInformation extends AppCompatActivity {
                 });
     }
 
+    /*
+        Sets attendance card UI with start/end buttons
+        Toggles isSessionActive on button click
+        Calls updateAttendanceStatusInFirestore() to sync with database
+        Sets up listener to receive attendance updates in real-time
+     */
     private void setupTeacherView(ClassModel classModel) {
         AttendanceCardBinding attendanceBinding = binding.attendanceCard;
         attendanceBinding.classCodeText.setText(classModel.getClassCode() != null ? classModel.getClassCode() : "N/A");
@@ -1231,6 +1256,12 @@ public class ClassInformation extends AppCompatActivity {
         });
     }
 
+    /*
+        Configures student attendance card for marking attendance
+        Sets up real-time listener for attendance session status
+        When session is active, enables "Mark Attendance" button
+        Calls saveAttendanceForStreak() to record attendance for leaderboard/streak
+     */
     private void setupStudentView(ClassModel classModel) {
         StudentsAttendanceStatusCardBinding studentCard = binding.studentAttendanceCard;
 
@@ -1264,6 +1295,11 @@ public class ClassInformation extends AppCompatActivity {
         }
     }
 
+    /*
+        Uses addSnapshotsListener() for real-time updates
+        Recalculates present/late/absent counts whenever attendance changes
+        Updates UI immediately without requiring page refresh
+     */
     private void setupAttendanceStatsListener() {
         if (classId == null || classId.isEmpty()) return;
 
@@ -1399,6 +1435,11 @@ public class ClassInformation extends AppCompatActivity {
         absentCount.setText(String.valueOf(absent));
     }
 
+    /*
+        Parses class start time and student mark time
+        Calculates time difference in minutes
+        Returns "Present" if <= 15 min, "Late" if <= 30 min, "Absent" otherwise
+     */
     private String getAttendanceStatus(long markedTimestamp) {
         if (classStartTime == null || classStartTime.isEmpty()) {
             return "Present";
@@ -1676,6 +1717,12 @@ public class ClassInformation extends AppCompatActivity {
                 });
     }
 
+    /*
+        Called when attendance session ends
+        Creates recentSession document with session timing data
+        Copies all attendanceRecords to session's subcollection for permanent history
+        Clears live attendanceRecords after archiving
+     */
     private void saveRecentSessionWithRecords(long endTime) {
         if (classId == null || classId.isEmpty()) {
             return;
@@ -1775,6 +1822,11 @@ public class ClassInformation extends AppCompatActivity {
                 });
     }
 
+    /*
+        Deletes all attendanceRecords for the session
+        Resets student attendance status display to "Not Marked"
+        Prepares system for next attendance session
+     */
     private void clearAllAttendanceRecords() {
         if (classId == null || classId.isEmpty()) return;
 
