@@ -1,5 +1,6 @@
 package com.example.authtest;
 
+// Data model for student attendance information
 public class StudentAttendanceModel {
 
     private String studentId;
@@ -13,10 +14,11 @@ public class StudentAttendanceModel {
     private boolean falseMarked;
     private String classId;
 
-    public StudentAttendanceModel() {
-
-    }
-
+    /*
+         Takes studentId, email, firstName, lastName parameters
+         Initializes attendanceStatus to "Not Marked"
+         Sets marked to false
+     */
     public StudentAttendanceModel(String studentId, String email, String firstName, String lastName) {
         this.studentId = studentId;
         this.email = email;
@@ -27,6 +29,12 @@ public class StudentAttendanceModel {
         this.marked = false;
         this.falseMarked = false;
     }
+
+    /*
+         Provides access to all student information fields
+         getFullName() concatenates first and last name
+         Allows parent activities to read/modify attendance data
+     */
 
     public String getStudentId() {
         return studentId;
