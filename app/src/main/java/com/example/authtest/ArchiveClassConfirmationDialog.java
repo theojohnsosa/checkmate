@@ -9,12 +9,19 @@ import android.view.Window;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
 
+// Confirmation dialog when teacher archives a class
 public class ArchiveClassConfirmationDialog extends Dialog {
 
     private final Runnable onConfirm;
     private final Runnable onCancel;
     private AppCompatButton archiveButton;
 
+    /*
+        Takes className parameter to personalize the confirmation message
+        Sets up transparent dialog with custom layout
+        Displays message: "Are you sure you want to archive [className]?"
+        Has Cancel and Archive Buttons
+     */
     public ArchiveClassConfirmationDialog(
             Context context,
             String className,
@@ -44,6 +51,8 @@ public class ArchiveClassConfirmationDialog extends Dialog {
 
         messageText.setText("Are you sure you want to archive \"" + className + "\"?");
 
+        // Runnable pattern allows parent activity to handle the archive action
+        // Cancel button: dismisses dialog and calls onCancel runnable
         cancelButton.setOnClickListener(view -> {
             dismiss();
             if (onCancel != null) {
@@ -51,6 +60,7 @@ public class ArchiveClassConfirmationDialog extends Dialog {
             }
         });
 
+        // Archive button: dismisses dialog and calls onConfirm runnable
         archiveButton.setOnClickListener(view -> {
             dismiss();
             if (onConfirm != null) {
