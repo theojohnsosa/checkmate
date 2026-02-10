@@ -201,9 +201,6 @@ public class SeatPlan extends AppCompatActivity {
                             isTeacher
                     );
                     dialog.show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error checking user permissions", Toast.LENGTH_SHORT).show();
                 });
     }
     private void refreshSeatCounters() {

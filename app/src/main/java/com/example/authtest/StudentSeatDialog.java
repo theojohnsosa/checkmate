@@ -191,8 +191,8 @@ public class StudentSeatDialog extends Dialog {
                     }
                     Toast.makeText(getContext(), "Marked as False", Toast.LENGTH_SHORT).show();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Failed to mark as False: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                .addOnFailureListener(unused -> {
+                    Toast.makeText(getContext(), "Cannot mark false yet", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -228,9 +228,6 @@ public class StudentSeatDialog extends Dialog {
                     }
 
                     Toast.makeText(getContext(), "Undo successful", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Failed to undo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -250,9 +247,6 @@ public class StudentSeatDialog extends Dialog {
                             }}, com.google.firebase.firestore.SetOptions.merge())
                             .addOnSuccessListener(aVoid -> {
                                 Toast.makeText(getContext(), "Violations field created", Toast.LENGTH_SHORT).show();
-                            })
-                            .addOnFailureListener(e2 -> {
-                                Toast.makeText(getContext(), "Failed to update violations: " + e2.getMessage(), Toast.LENGTH_SHORT).show();
                             });
                 });
     }
@@ -263,9 +257,6 @@ public class StudentSeatDialog extends Dialog {
                 .update("violations", FieldValue.increment(-1))
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(), "Violations updated", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Failed to update violations: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
