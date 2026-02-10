@@ -17,6 +17,10 @@ import androidx.cardview.widget.CardView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FieldValue;
 
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+
 public class StudentSeatDialog extends Dialog {
 
     public interface OnStatusChangedListener {
@@ -86,27 +90,15 @@ public class StudentSeatDialog extends Dialog {
         updateStatusUI(previousStatus);
 
         if (!isTeacher) {
-            if (falseButton != null) {
-                falseButton.setVisibility(View.GONE);
-            }
-            if (undoButton != null) {
-                undoButton.setVisibility(View.GONE);
-            }
+            if (falseButton != null) falseButton.setVisibility(View.GONE);
+            if (undoButton != null) undoButton.setVisibility(View.GONE);
         } else {
             checkIfAlreadyFalseMarked();
         }
 
-        if (closeButton != null) {
-            closeButton.setOnClickListener(view -> closeDialog());
-        }
-
-        if (falseButton != null && isTeacher) {
-            falseButton.setOnClickListener(view -> markAsFalse());
-        }
-
-        if (undoButton != null && isTeacher) {
-            undoButton.setOnClickListener(view -> undoFalseMarking());
-        }
+        if (closeButton != null) closeButton.setOnClickListener(view -> closeDialog());
+        if (falseButton != null && isTeacher) falseButton.setOnClickListener(view -> markAsFalse());
+        if (undoButton != null && isTeacher) undoButton.setOnClickListener(view -> undoFalseMarking());
     }
 
     private void checkIfAlreadyFalseMarked() {
@@ -179,6 +171,9 @@ public class StudentSeatDialog extends Dialog {
                         "originalStatus", previousStatus
                 )
                 .addOnSuccessListener(unused -> {
+                    // Mark false in attendance collection + remove streak/leaderboard data
+                    removeStreakAndLeaderboardData(db, studentId);
+
                     incrementViolations(db, studentId);
 
                     isFalseMarked = true;
@@ -186,9 +181,7 @@ public class StudentSeatDialog extends Dialog {
                     updateStatusUI("False");
                     showUndoButton();
 
-                    if (statusChangedListener != null) {
-                        statusChangedListener.onStatusChanged();
-                    }
+                    if (statusChangedListener != null) statusChangedListener.onStatusChanged();
                     Toast.makeText(getContext(), "Marked as False", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
@@ -207,30 +200,150 @@ public class StudentSeatDialog extends Dialog {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        // First, get the original timestamp from attendanceRecords so we can restore properly
         db.collection("allClasses")
                 .document(classId)
                 .collection("attendanceRecords")
                 .document(studentId)
-                .update(
-                        "falseMarked", false,
-                        "originalStatus", null
-                )
-                .addOnSuccessListener(unused -> {
-                    decrementViolations(db, studentId);
+                .get()
+                .addOnSuccessListener(doc -> {
+                    Long originalTimestamp = doc.getLong("timestamp");
 
-                    isFalseMarked = false;
-                    student.setAttendanceStatus(previousStatus);
-                    updateStatusUI(previousStatus);
-                    hideUndoButton();
+                    doc.getReference()
+                            .update(
+                                    "falseMarked", false,
+                                    "originalStatus", null
+                            )
+                            .addOnSuccessListener(unused -> {
+                                // Restore streak and leaderboard data if the original status was "Present"
+                                if ("Present".equals(previousStatus) && originalTimestamp != null) {
+                                    restoreStreakAndLeaderboardData(db, studentId, originalTimestamp);
+                                } else {
+                                    // Just unflag falseMarked in the attendance collection
+                                    unflagAttendanceCollection(db, studentId);
+                                }
 
-                    if (statusChangedListener != null) {
-                        statusChangedListener.onStatusChanged();
-                    }
+                                decrementViolations(db, studentId);
 
-                    Toast.makeText(getContext(), "Undo successful", Toast.LENGTH_SHORT).show();
+                                isFalseMarked = false;
+                                student.setAttendanceStatus(previousStatus);
+                                updateStatusUI(previousStatus);
+                                hideUndoButton();
+
+                                if (statusChangedListener != null) statusChangedListener.onStatusChanged();
+                                Toast.makeText(getContext(), "Undo successful", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(getContext(), "Failed to undo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Failed to undo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    /**
+     * When marking as False:
+     * - Find the attendance document for this student/class/today and set falseMarked = true
+     *   This makes AttendanceStreak skip it (streak goes dark) and Leaderboards skip it (point removed).
+     */
+    private void removeStreakAndLeaderboardData(FirebaseFirestore db, String studentId) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        String today = dateFormat.format(new java.util.Date());
+
+        db.collection("attendance")
+                .whereEqualTo("userId", studentId)
+                .whereEqualTo("classId", classId)
+                .whereEqualTo("date", today)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        // Setting falseMarked = true causes both AttendanceStreak and Leaderboards
+                        // to skip this record — streak card goes dark, point is no longer counted.
+                        doc.getReference().update("falseMarked", true)
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(getContext(),
+                                                "Failed to update attendance record: " + e.getMessage(),
+                                                Toast.LENGTH_SHORT).show()
+                                );
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(),
+                                "Failed to find attendance record: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    /**
+     * When undoing False on a "Present" student:
+     * - If an attendance doc already exists with falseMarked=true → set falseMarked=false to restore streak & leaderboard point.
+     * - If no attendance doc exists (it was never saved, e.g. marking happened before saveAttendanceForStreak ran)
+     *   → create one now so the streak and leaderboard are both restored.
+     */
+    private void restoreStreakAndLeaderboardData(FirebaseFirestore db, String studentId, long originalTimestamp) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        String today = dateFormat.format(new java.util.Date(originalTimestamp));
+
+        db.collection("attendance")
+                .whereEqualTo("userId", studentId)
+                .whereEqualTo("classId", classId)
+                .whereEqualTo("date", today)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Document exists — just clear the falseMarked flag
+                        for (com.google.firebase.firestore.QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            doc.getReference().update("falseMarked", false)
+                                    .addOnFailureListener(e ->
+                                            Toast.makeText(getContext(),
+                                                    "Failed to restore attendance record: " + e.getMessage(),
+                                                    Toast.LENGTH_SHORT).show()
+                                    );
+                        }
+                    } else {
+                        // No document found — create it so the streak and leaderboard are restored
+                        Map<String, Object> streakAttendance = new HashMap<>();
+                        streakAttendance.put("userId", studentId);
+                        streakAttendance.put("date", today);
+                        streakAttendance.put("status", "present");
+                        streakAttendance.put("timestamp", originalTimestamp);
+                        streakAttendance.put("classId", classId);
+                        streakAttendance.put("falseMarked", false);
+
+                        db.collection("attendance")
+                                .add(streakAttendance)
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(getContext(),
+                                                "Failed to restore attendance record: " + e.getMessage(),
+                                                Toast.LENGTH_SHORT).show()
+                                );
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(),
+                                "Failed to restore attendance record: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    /**
+     * For non-Present statuses on undo: just clear the falseMarked flag in attendance collection
+     * (no streak/leaderboard impact since only "present" records count).
+     */
+    private void unflagAttendanceCollection(FirebaseFirestore db, String studentId) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        String today = dateFormat.format(new java.util.Date());
+
+        db.collection("attendance")
+                .whereEqualTo("userId", studentId)
+                .whereEqualTo("classId", classId)
+                .whereEqualTo("date", today)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        doc.getReference().update("falseMarked", false);
+                    }
                 });
     }
 
@@ -242,7 +355,6 @@ public class StudentSeatDialog extends Dialog {
                     Toast.makeText(getContext(), "Violations updated", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
-
                     db.collection("users")
                             .document(studentId)
                             .set(new java.util.HashMap<String, Object>() {{

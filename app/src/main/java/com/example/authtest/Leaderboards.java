@@ -15,6 +15,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,6 +35,9 @@ public class Leaderboards extends AppCompatActivity {
     private TextView userRankingPosition;
     private LinearLayout rankingListContainer;
     private LinearLayout podiumContainer;
+
+    // Real-time listener for the attendance collection
+    private ListenerRegistration attendanceListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +59,17 @@ public class Leaderboards extends AppCompatActivity {
         setupBackPressHandler();
         initializeViews();
         setupBackButton();
-        loadCurrentUserInfo(); // Load user info immediately for bottom bar
-        loadLeaderboardData();
+        loadCurrentUserInfo();
+        listenLeaderboardData(); // real-time instead of one-time get()
         checkUserTypeAndConfigureMenu();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (attendanceListener != null) {
+            attendanceListener.remove();
+        }
     }
 
     private void initializeViews() {
@@ -81,16 +93,12 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void setupBackButton() {
-        backButton.setOnClickListener(view -> {
-            finish();
-        });
+        backButton.setOnClickListener(view -> finish());
     }
 
     private void loadCurrentUserInfo() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            return;
-        }
+        if (currentUser == null) return;
 
         db.collection("users")
                 .document(currentUser.getUid())
@@ -106,34 +114,48 @@ public class Leaderboards extends AppCompatActivity {
                         userRankingName.setText("User");
                     }
                     userRankingPoints.setText("0 pts");
-                    if (userRankingPosition != null) {
-                        userRankingPosition.setText("-");
-                    }
+                    if (userRankingPosition != null) userRankingPosition.setText("-");
                 })
                 .addOnFailureListener(e -> {
                     userRankingName.setText("User");
                     userRankingPoints.setText("0 pts");
-                    if (userRankingPosition != null) {
-                        userRankingPosition.setText("-");
-                    }
+                    if (userRankingPosition != null) userRankingPosition.setText("-");
                 });
     }
 
-    private void loadLeaderboardData() {
-        // First, get all attendance data to calculate points
-        db.collection("attendance")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+    /**
+     * Replaces the old loadLeaderboardData() one-time .get() with a real-time
+     * addSnapshotListener(). Now whenever a teacher sets falseMarked=true/false
+     * on any attendance document, the leaderboard recalculates and updates instantly.
+     */
+    private void listenLeaderboardData() {
+        if (attendanceListener != null) {
+            attendanceListener.remove();
+        }
+
+        attendanceListener = db.collection("attendance")
+                .addSnapshotListener((queryDocumentSnapshots, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Failed to load leaderboard: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        fetchAllStudents(new HashMap<>());
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots == null) return;
+
                     Map<String, List<AttendanceRecord>> attendanceByClass = new HashMap<>();
 
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        String userId = doc.getString("userId");
-                        String status = doc.getString("status");
-                        String date = doc.getString("date");
-                        String classId = doc.getString("classId");
-                        Long timestamp = doc.getLong("timestamp");
+                        String userId   = doc.getString("userId");
+                        String status   = doc.getString("status");
+                        String date     = doc.getString("date");
+                        String classId  = doc.getString("classId");
+                        Long timestamp  = doc.getLong("timestamp");
+                        Boolean falseMarked = doc.getBoolean("falseMarked");
 
+                        // Skip if not present or if marked as false — point is removed
                         if (userId == null || !"present".equals(status) || date == null) continue;
+                        if (falseMarked != null && falseMarked) continue;
 
                         String classKey = date + "_" + (classId != null ? classId : "default");
 
@@ -170,13 +192,7 @@ public class Leaderboards extends AppCompatActivity {
                         }
                     }
 
-                    // Now fetch all students and merge with points data
                     fetchAllStudents(userPointsMap);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to load leaderboard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    // Still try to load all students even if attendance fails
-                    fetchAllStudents(new HashMap<>());
                 });
     }
 
@@ -188,19 +204,16 @@ public class Leaderboards extends AppCompatActivity {
                     List<LeaderboardEntry> allEntries = new ArrayList<>();
 
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        String userId = doc.getId();
+                        String userId    = doc.getId();
                         String firstName = doc.getString("firstName");
-                        String lastName = doc.getString("lastName");
-                        String fullName = ((firstName != null ? firstName : "") +
+                        String lastName  = doc.getString("lastName");
+                        String fullName  = ((firstName != null ? firstName : "") +
                                 (lastName != null ? " " + lastName : "")).trim();
 
-                        if (fullName.isEmpty()) {
-                            fullName = "Unknown User";
-                        }
+                        if (fullName.isEmpty()) fullName = "Unknown User";
 
                         LeaderboardEntry entry = userPointsMap.get(userId);
                         if (entry == null) {
-                            // Student has no points yet
                             entry = new LeaderboardEntry();
                             entry.userId = userId;
                             entry.points = 0;
@@ -223,15 +236,11 @@ public class Leaderboards extends AppCompatActivity {
     private void displayLeaderboard(List<LeaderboardEntry> entries) {
         Collections.sort(entries, (a, b) -> {
             int pointsCompare = Integer.compare(b.points, a.points);
-            if (pointsCompare != 0) {
-                return pointsCompare;
-            }
+            if (pointsCompare != 0) return pointsCompare;
             return Long.compare(a.earliestTimestamp, b.earliestTimestamp);
         });
 
-        if (entries.isEmpty()) {
-            return;
-        }
+        if (entries.isEmpty()) return;
 
         int maxDisplay = Math.min(10, entries.size());
         List<LeaderboardEntry> top10 = entries.subList(0, maxDisplay);
@@ -245,25 +254,19 @@ public class Leaderboards extends AppCompatActivity {
     }
 
     private void updateTopThreeCards(List<LeaderboardEntry> top10) {
-        // Show the podium container now that we have data
         if (podiumContainer != null) {
             podiumContainer.setVisibility(View.VISIBLE);
         }
 
         if (podiumContainer != null && podiumContainer.getChildCount() >= 3) {
-            // Left card = 2nd place
             if (top10.size() >= 2) {
                 LinearLayout top2Card = (LinearLayout) podiumContainer.getChildAt(0);
                 updateCardData(top2Card, top10.get(1), 2);
             }
-
-            // Center card = 1st place
             if (top10.size() >= 1) {
                 LinearLayout top1Card = (LinearLayout) podiumContainer.getChildAt(1);
                 updateCardData(top1Card, top10.get(0), 1);
             }
-
-            // Right card = 3rd place
             if (top10.size() >= 3) {
                 LinearLayout top3Card = (LinearLayout) podiumContainer.getChildAt(2);
                 updateCardData(top3Card, top10.get(2), 3);
@@ -276,15 +279,11 @@ public class Leaderboards extends AppCompatActivity {
             View child = card.getChildAt(i);
             if (child instanceof TextView) {
                 TextView tv = (TextView) child;
-
                 if (i == 0) {
-                    // First TextView: Full name (top)
                     tv.setText(entry.fullName);
                 } else if (i == 1) {
-                    // Second TextView: Points (middle)
                     tv.setText(entry.points + " pts");
                 } else if (i == 2) {
-                    // Third TextView: "Top X" label (bottom)
                     tv.setText("Top " + position);
                 }
             }
@@ -301,10 +300,8 @@ public class Leaderboards extends AppCompatActivity {
         itemLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
         itemLayout.setBackgroundResource(R.drawable.leaderboard_item_bg);
         itemLayout.setPadding(
-                (int) (16 * getResources().getDisplayMetrics().density),
-                0,
-                (int) (16 * getResources().getDisplayMetrics().density),
-                0
+                (int) (16 * getResources().getDisplayMetrics().density), 0,
+                (int) (16 * getResources().getDisplayMetrics().density), 0
         );
 
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) itemLayout.getLayoutParams();
@@ -317,9 +314,7 @@ public class Leaderboards extends AppCompatActivity {
         positionText.setTextSize(14);
         positionText.setTypeface(null, android.graphics.Typeface.BOLD);
         LinearLayout.LayoutParams posParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         posParams.setMargins(0, 0, (int) (16 * getResources().getDisplayMetrics().density), 0);
         positionText.setLayoutParams(posParams);
         itemLayout.addView(positionText);
@@ -329,12 +324,7 @@ public class Leaderboards extends AppCompatActivity {
         nameText.setTextColor(0xFF000000);
         nameText.setTextSize(14);
         nameText.setTypeface(null, android.graphics.Typeface.BOLD);
-        LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-        );
-        nameText.setLayoutParams(nameParams);
+        nameText.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
         itemLayout.addView(nameText);
 
         TextView pointsText = new TextView(this);
@@ -343,9 +333,7 @@ public class Leaderboards extends AppCompatActivity {
         pointsText.setTextSize(14);
         pointsText.setTypeface(null, android.graphics.Typeface.BOLD);
         pointsText.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        ));
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         itemLayout.addView(pointsText);
 
         rankingListContainer.addView(itemLayout);
@@ -353,9 +341,7 @@ public class Leaderboards extends AppCompatActivity {
 
     private void loadUserRanking(List<LeaderboardEntry> allEntries) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            return;
-        }
+        if (currentUser == null) return;
 
         int userPosition = -1;
         LeaderboardEntry userEntry = null;
@@ -371,10 +357,7 @@ public class Leaderboards extends AppCompatActivity {
         if (userEntry != null) {
             userRankingName.setText(userEntry.fullName);
             userRankingPoints.setText(userEntry.points + " pts");
-
-            if (userRankingPosition != null) {
-                userRankingPosition.setText(String.valueOf(userPosition));
-            }
+            if (userRankingPosition != null) userRankingPosition.setText(String.valueOf(userPosition));
         } else {
             db.collection("users")
                     .document(currentUser.getUid())
@@ -382,8 +365,8 @@ public class Leaderboards extends AppCompatActivity {
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
-                            String lastName = documentSnapshot.getString("lastName");
-                            String fullName = ((firstName != null ? firstName : "") +
+                            String lastName  = documentSnapshot.getString("lastName");
+                            String fullName  = ((firstName != null ? firstName : "") +
                                     (lastName != null ? " " + lastName : "")).trim();
                             userRankingName.setText(fullName.isEmpty() ? "User" : fullName);
                         } else {
@@ -391,10 +374,7 @@ public class Leaderboards extends AppCompatActivity {
                         }
                     });
             userRankingPoints.setText("0 pts");
-
-            if (userRankingPosition != null) {
-                userRankingPosition.setText("-");
-            }
+            if (userRankingPosition != null) userRankingPosition.setText("-");
         }
     }
 
@@ -410,15 +390,12 @@ public class Leaderboards extends AppCompatActivity {
                 }
             }
         };
-        getOnBackPressedDispatcher()
-                .addCallback(this, callback);
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     private void checkUserTypeAndConfigureMenu() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            return;
-        }
+        if (currentUser == null) return;
 
         db.collection("users")
                 .document(currentUser.getUid())
@@ -426,7 +403,6 @@ public class Leaderboards extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
-
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                         }
@@ -449,14 +425,13 @@ public class Leaderboards extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_streak) {
                 drawerLayout.closeDrawer(GravityCompat.START);
-                Intent streakIntent = new Intent(Leaderboards.this, AttendanceStreak.class);
-                startActivity(streakIntent);
+                startActivity(new Intent(Leaderboards.this, AttendanceStreak.class));
                 return true;
-            }  else if (itemId == R.id.menu_leaderboards) {
+            } else if (itemId == R.id.menu_leaderboards) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(Leaderboards.this, Leaderboards.class));
                 return true;
-            }else if (itemId == R.id.menu_attendance_history) {
+            } else if (itemId == R.id.menu_attendance_history) {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 startActivity(new Intent(Leaderboards.this, AttendanceHistoryActivity.class));
                 return true;
@@ -470,10 +445,7 @@ public class Leaderboards extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_logout) {
                 LogoutConfirmationDialog confirmDialog = new LogoutConfirmationDialog(this, this::logout,
-                        () -> {
-                            drawerLayout.closeDrawer(GravityCompat.START);
-                        }
-                );
+                        () -> drawerLayout.closeDrawer(GravityCompat.START));
                 confirmDialog.show();
                 return true;
             }
@@ -495,10 +467,8 @@ public class Leaderboards extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     drawerLayout.closeDrawer(GravityCompat.START);
-
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
-
                         if (userType != null) {
                             if ("Student".equalsIgnoreCase(userType.trim())) {
                                 startActivity(new Intent(Leaderboards.this, StudentHome.class));
@@ -524,7 +494,7 @@ public class Leaderboards extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             View headerView = navigationView.getHeaderView(0);
-            TextView userNameTextView = headerView.findViewById(R.id.drawer_user_name);
+            TextView userNameTextView  = headerView.findViewById(R.id.drawer_user_name);
             TextView userEmailTextView = headerView.findViewById(R.id.drawer_user_email);
 
             db.collection("users")
@@ -533,25 +503,16 @@ public class Leaderboards extends AppCompatActivity {
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
                             String firstName = documentSnapshot.getString("firstName");
-                            String lastName = documentSnapshot.getString("lastName");
-                            String fullName = "";
-
-                            if (firstName != null && !firstName.isEmpty()) {
-                                fullName = firstName;
-                            }
-
-                            if (lastName != null && !lastName.isEmpty()) {
-                                fullName += (fullName.isEmpty() ? "" : " ") + lastName;
-                            }
-
+                            String lastName  = documentSnapshot.getString("lastName");
+                            String fullName  = "";
+                            if (firstName != null && !firstName.isEmpty()) fullName = firstName;
+                            if (lastName  != null && !lastName.isEmpty())  fullName += (fullName.isEmpty() ? "" : " ") + lastName;
                             userNameTextView.setText(fullName.isEmpty() ? "User" : fullName);
                         } else {
                             userNameTextView.setText("User");
                         }
                     })
-                    .addOnFailureListener(e -> {
-                        userNameTextView.setText("User");
-                    });
+                    .addOnFailureListener(e -> userNameTextView.setText("User"));
 
             userEmailTextView.setText(currentUser.getEmail() != null ? currentUser.getEmail() : "");
         }
