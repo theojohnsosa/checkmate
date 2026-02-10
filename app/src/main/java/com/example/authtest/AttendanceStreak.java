@@ -17,6 +17,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +39,9 @@ public class AttendanceStreak extends AppCompatActivity {
     private String userId;
     private static final String COLOR_BLACK = "#1A1A1A";
     private static final String COLOR_GREEN = "#26A641";
+
+    // Real-time listener — kept so we can remove it in onDestroy
+    private ListenerRegistration attendanceListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +78,15 @@ public class AttendanceStreak extends AppCompatActivity {
         setupBackPressHandler();
         checkUserTypeAndConfigureMenu();
         initializeStreakViews();
-        loadAttendanceData();
+        listenAttendanceData(); // real-time instead of one-time get()
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (attendanceListener != null) {
+            attendanceListener.remove();
+        }
     }
 
     private void initializeStreakViews() {
@@ -118,6 +130,7 @@ public class AttendanceStreak extends AppCompatActivity {
         streakCards.add(findViewById(R.id.friday_week5));
         streakCards.add(findViewById(R.id.saturday_week5));
     }
+
     private Calendar getGridStartMonday() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, -29);
@@ -133,7 +146,12 @@ public class AttendanceStreak extends AppCompatActivity {
         return cal;
     }
 
-    private void loadAttendanceData() {
+    /**
+     * Replaces the old loadAttendanceData() one-time .get() with a real-time
+     * addSnapshotListener(). Now whenever a teacher sets falseMarked=true/false
+     * on any attendance document, the streak grid updates instantly.
+     */
+    private void listenAttendanceData() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
         Calendar gridStart = getGridStartMonday();
@@ -143,19 +161,35 @@ public class AttendanceStreak extends AppCompatActivity {
         String startStr = dateFormat.format(gridStart.getTime());
         String endStr   = dateFormat.format(gridEnd.getTime());
 
-        db.collection("attendance")
+        // Remove any previous listener before attaching a new one
+        if (attendanceListener != null) {
+            attendanceListener.remove();
+        }
+
+        attendanceListener = db.collection("attendance")
                 .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+                .addSnapshotListener((queryDocumentSnapshots, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots == null) return;
+
                     Map<String, String> attendanceMap = new HashMap<>();
 
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         String date   = doc.getString("date");
                         String status = doc.getString("status");
+                        Boolean falseMarked = doc.getBoolean("falseMarked");
 
-                        if (date == null) {
-                            continue;
-                        }
+                        if (date == null) continue;
+
+                        // Skip if marked as false — streak card goes dark
+                        if (falseMarked != null && falseMarked) continue;
+
+                        // Only count "present" status for streaks
+                        if (!"present".equals(status)) continue;
 
                         if (date.compareTo(startStr) >= 0 && date.compareTo(endStr) <= 0) {
                             if (!"present".equals(attendanceMap.get(date))) {
@@ -165,10 +199,6 @@ public class AttendanceStreak extends AppCompatActivity {
                     }
 
                     updateStreakDisplay(attendanceMap);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    updateStreakDisplay(new HashMap<>());
                 });
     }
 
@@ -348,9 +378,7 @@ public class AttendanceStreak extends AppCompatActivity {
 
     private void checkUserTypeAndConfigureMenu() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            return;
-        }
+        if (currentUser == null) return;
 
         db.collection("users")
                 .document(currentUser.getUid())
@@ -358,7 +386,6 @@ public class AttendanceStreak extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String userType = documentSnapshot.getString("userType");
-
                         if (userType != null && !"Student".equalsIgnoreCase(userType.trim())) {
                             navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
                         }

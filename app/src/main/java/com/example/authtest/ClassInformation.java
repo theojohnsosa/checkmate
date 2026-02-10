@@ -1496,7 +1496,12 @@ public class ClassInformation extends AppCompatActivity {
                     hasMarkedAttendance = true;
                     attendanceTimestamp = formatTimestamp(timestamp);
                     showAttendanceMarkedState();
-                    saveAttendanceForStreak(studentId, timestamp);
+
+                    // Determine status and only save to attendance collection if "present"
+                    String status = getAttendanceStatus(timestamp);
+                    if ("Present".equals(status)) {
+                        saveAttendanceForStreak(studentId, timestamp);
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to mark attendance: " + e.getMessage(), Toast.LENGTH_SHORT).show();
