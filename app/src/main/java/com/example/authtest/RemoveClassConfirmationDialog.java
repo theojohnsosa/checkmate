@@ -9,12 +9,18 @@ import android.view.Window;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
 
+// Confirmation dialog when permanently deleting archived class
 public class RemoveClassConfirmationDialog extends Dialog {
 
     private final Runnable onConfirm;
     private final Runnable onCancel;
     private AppCompatButton removeButton;
 
+    /*
+         Personalizes message with class name
+         Shows: "Are you sure you want to remove [className]? This action cannot be undone."
+         Has Remove and Cancel buttons
+     */
     public RemoveClassConfirmationDialog(
             Context context,
             String className,
