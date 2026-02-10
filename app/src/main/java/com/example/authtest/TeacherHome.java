@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Main home screen for teachers showing their created classes
 public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnClassClickListener {
 
     private ActivityTeacherHomeBinding binding;
@@ -316,6 +317,12 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         classAdapter.setClasses(new ArrayList<>(filteredClasses));
     }
 
+    /*
+         Queries teacher's classes subcollection
+         Filters out archived classes (isArchived != true)
+         Stores document IDs in classIdMap for later use
+         Updates adapter when all classes loaded
+     */
     private void loadClasses() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -373,6 +380,11 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         classAdapter.setClasses(classes);
     }
 
+    /*
+         Called when user taps a class
+         Opens ClassInformation activity with ClassModel and document ID
+         Passes both CLASS_ID and CLASS_CODE for flexibility
+     */
     @Override
     public void onClassClick(ClassModel classModel) {
         Intent intent = new Intent(TeacherHome.this, ClassInformation.class);
@@ -387,6 +399,11 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         startActivity(intent);
     }
 
+    /*
+         ItemTouchHelper with right-swipe gesture
+         Shows ArchiveClassConfirmationDialog on swipe
+         Orange background (#FF8C00) with archive icon
+     */
     private void setupSwipeToDeleteClass() {
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             private final ColorDrawable archiveBackground = new ColorDrawable(Color.parseColor("#FF8C00"));
@@ -462,6 +479,13 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         itemTouchHelper.attachToRecyclerView(binding.classesRecyclerView);
     }
 
+    /*
+         Updates class document with isArchived = true in both locations:
+            teacher's classes subcollection
+            allClasses collection (global)
+         Removes from classList and updates adapter
+         Shows empty state if no classes remain
+     */
     private void archiveClass(ClassModel classItem, int position) {
         if (classItem == null) {
             Toast.makeText(TeacherHome.this, "Error: Invalid class data", Toast.LENGTH_SHORT).show();
