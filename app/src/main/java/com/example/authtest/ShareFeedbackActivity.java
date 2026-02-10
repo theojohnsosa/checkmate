@@ -20,6 +20,7 @@ import android.widget.TextView;
 import java.util.HashSet;
 import java.util.Set;
 
+// Feedback form where users rate app experience and select feelings
 public class ShareFeedbackActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
@@ -98,6 +99,12 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         submitFeedbackButton = findViewById(R.id.submitFeedbackButton);
     }
 
+    /*
+         12 feeling buttons across 4 categories
+         Click toggles button selection state
+         Uses selectedFeelingButtons HashSet to track selections
+         Updates button color based on selection: black text on colored background when selected
+     */
     private void setupFeelingButtonListeners() {
         AppCompatButton[] buttons = {
                 buttonSlow,
@@ -135,6 +142,11 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         }
     }
 
+    /*
+         5 star ImageViews for 1-5 rating
+         Clicking a star toggles selection (if already selected, deselects)
+         Updates star appearance: filled yellow for selected, gray for unselected
+     */
     private void setupStarRatingListeners() {
         ImageView[] stars = {star1, star2, star3, star4, star5};
 
@@ -174,6 +186,11 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         }
     }
 
+    /*
+         Two LinearLayout buttons: "No" and "Yes" for recommend question
+         Clicking toggles selection (deselects if already selected)
+         Updates icons and text color based on selection state
+     */
     private void setupRecommendationListeners() {
         if (recommendationNo != null) {
             recommendationNo.setOnClickListener(view -> {
@@ -273,6 +290,13 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         }
     }
 
+    /*
+     Checks at least one feeling selected
+     Checks star rating selected (not 0)
+     Checks recommendation selected
+     Checks feedback text not empty
+     Shows toast for first failing validation
+     */
     private boolean validateForm() {
         if (selectedFeelingButtons.isEmpty()) {
             Toast.makeText(this, "Please select at least one feeling", Toast.LENGTH_SHORT).show();
@@ -299,6 +323,12 @@ public class ShareFeedbackActivity extends AppCompatActivity {
         return true;
     }
 
+
+    /*
+         Shows success toast
+         Finishes activity
+         (Actual submission logic not implemented)
+     */
     private void submitFeedback() {
         Toast.makeText(this, "Feedback submitted successfully!", Toast.LENGTH_SHORT).show();
         finish();
