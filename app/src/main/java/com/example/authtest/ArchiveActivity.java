@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+// Shows archived classes for both students and teachers with unarchive/delete options
 public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.OnClassClickListener {
 
     private ActivityArchiveBinding binding;
@@ -303,6 +305,12 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         classAdapter.setClasses(new ArrayList<>(filteredClasses));
     }
 
+    /*
+        ItemTouchHelper with dual-direction swipe:
+        - Right Swipe: unarchive class (green: #2EAD00)
+        - Left Swipe: permanently deletes class (red: #C92A2A)
+        Shows appropriate confirmation dialogs
+     */
     private void setupSwipeToUnarchive() {
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             private final ColorDrawable unarchiveBackground = new ColorDrawable(Color.parseColor("#2EAD00"));
@@ -406,6 +414,11 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
         itemTouchHelper.attachToRecyclerView(binding.archivedClassesRecyclerView);
     }
 
+    /*
+        Swipe left on archived class shows delete confirmation
+        Delete is permanent and removes class entirely
+        Callback onComplete() is invoked after cleanup
+     */
     private void deleteClassFromArchive(ClassModel classItem, int position) {
         if (classItem == null) {
             Toast.makeText(ArchiveActivity.this, "Error: Invalid class data", Toast.LENGTH_SHORT).show();
@@ -480,6 +493,12 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 });
     }
 
+    /*
+        Gets all student emails from class document
+        For each email, queries users to find student ID
+        Deletes enrollment document from each student's enrolledClasses
+        Handles case where class was already deleted
+     */
     private void removeStudentEnrollmentsFromArchive(String classId, Runnable onComplete) {
         db.collection("allClasses")
                 .document(classId)
@@ -524,6 +543,12 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 });
     }
 
+    /*
+        Queries student's enrolledClasses subcollection with whereEqualTo("isArchived", true)
+        For each archived enrollment, fetches full ClassModel from allClasses
+        Uses counter pattern for parallel loading
+        Stores in archivedClasses list
+     */
     private void loadArchivedStudentClasses(String userId) {
         db.collection("users")
                 .document(userId)
@@ -602,6 +627,12 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 });
     }
 
+    /*
+        Branches to unarchiveTeacherClass() or unarchiveStudentClass() based on userType
+        Sets isArchived = false
+        Removes from archived list
+        Refreshes UI to show empty state if needed
+     */
     private void unarchiveClass(ClassModel classItem, int position) {
         String userId = mAuth.getCurrentUser().getUid();
         String classId = classIdMap.get(classItem);
@@ -631,6 +662,10 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 });
     }
 
+    /*
+        Updates both teacher's classes and allClasses documents
+        Sets isArchive = false
+     */
     private void unarchiveTeacherClass(String teacherId, String classId, int position) {
         db.collection("users")
                 .document(teacherId)
@@ -686,6 +721,11 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 });
     }
 
+    /*
+        Gets current user from FirebaseAuth
+        Queries user document to determine userType
+        Calls loadArchivedTeacherClasses() or loadArchivedStudentClasses()
+     */
     private void loadArchivedClasses() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -719,6 +759,12 @@ public class ArchiveActivity extends AppCompatActivity implements ClassAdapter.O
                 });
     }
 
+    /*
+        Queries teacher's classes subcollection with whereEqualTo("isArchived", true)
+        Directly converts documents to ClassModel objects
+        Stores in archivedClasses list
+        Updates UI and adapter
+     */
     private void loadArchivedTeacherClasses(String userId) {
         db.collection("users")
                 .document(userId)

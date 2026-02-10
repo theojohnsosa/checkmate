@@ -14,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.widget.AppCompatButton;
 
+/*
+    Confirmation dialog when teacher archives a class
+ */
 public class AppIconSelectionDialog extends Dialog {
 
     private final Context context;
