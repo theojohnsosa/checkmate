@@ -263,10 +263,12 @@ public class Leaderboards extends AppCompatActivity {
                 LinearLayout top2Card = (LinearLayout) podiumContainer.getChildAt(0);
                 updateCardData(top2Card, top10.get(1), 2);
             }
+          
             if (top10.size() >= 1) {
                 LinearLayout top1Card = (LinearLayout) podiumContainer.getChildAt(1);
                 updateCardData(top1Card, top10.get(0), 1);
             }
+          
             if (top10.size() >= 3) {
                 LinearLayout top3Card = (LinearLayout) podiumContainer.getChildAt(2);
                 updateCardData(top3Card, top10.get(2), 3);

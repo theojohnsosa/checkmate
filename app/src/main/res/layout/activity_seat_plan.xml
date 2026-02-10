@@ -310,7 +310,7 @@
                     android:layout_height="wrap_content"
                     android:text="Occupied"
                     android:textStyle="bold"
-                    android:textColor="#2F9E44"
+                    android:textColor="#FFFFFF"
                     android:textSize="15sp"
                     android:layout_marginRight="40dp"/>
 
