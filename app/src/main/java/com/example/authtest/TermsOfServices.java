@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+// Activity showing terms of service text
 public class TermsOfServices extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
@@ -21,6 +22,12 @@ public class TermsOfServices extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
+    /*
+         Sets up navigation drawer similar to other activities
+         Shows terms of service text from layout resource
+         Agree button shows "You have agreed to Terms of Service" toast
+         Agreement not enforced (just acknowledgment)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
