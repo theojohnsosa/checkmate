@@ -20,6 +20,8 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
+
+// Allows teachers to add students to their classes via school email
 public class AddStudentsForm extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
@@ -31,6 +33,12 @@ public class AddStudentsForm extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private String classId;
 
+    /*
+        Initializes Firebase instances (Firebase and Authentication)
+        Retrieves CLASS_ID from Intent extras passed from the previous activity
+        Sets up navigation drawer, back button handlers, and UI components
+        Validates that a class ID exists before proceeding
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +81,11 @@ public class AddStudentsForm extends AppCompatActivity {
         });
     }
 
+    /*
+        Queries Firestore to determine if current user is a teacher or student
+        Hides the "Attendance Streak" menu item if user is not a student (teachers don't have streaks)
+        Handles asynchronous response with success and failure blocks
+     */
     private void checkUserTypeAndConfigureMenu() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -234,6 +247,11 @@ public class AddStudentsForm extends AppCompatActivity {
         }
     }
 
+    /*
+        Validates email input (non-empty, valid format, must be @students. email)
+        Disables button during processing to prevent duplicate submissions
+        Calls checkIfStudentExists() to verify account exists
+     */
     private void addStudentToClass() {
         String studentEmail = studentEmailInput.getText().toString().trim().toLowerCase();
 
@@ -259,6 +277,11 @@ public class AddStudentsForm extends AppCompatActivity {
         checkIfStudentExists(studentEmail, teacherId);
     }
 
+    /*
+        Queries users collection with wherEqualTo() to find student by schoolEmail
+        Returns error if student not found
+        Proceeds to checkIfAlreadyAddedToClass() if student found
+     */
     private void checkIfStudentExists(String studentEmail, String teacherId) {
         db.collection("users")
                 .whereEqualTo("schoolEmail", studentEmail)
@@ -278,6 +301,11 @@ public class AddStudentsForm extends AppCompatActivity {
                 });
     }
 
+    /*
+        Retrieves class document from allClasses collection
+        Checks if student's email already exists is allowedStudentEmails array
+        Prevents duplicate student additions
+     */
     private void checkIfAlreadyAddedToClass(String studentEmail, String teacherId) {
         db.collection("allClasses")
                 .document(classId)
@@ -342,6 +370,11 @@ public class AddStudentsForm extends AppCompatActivity {
         addStudentToClassFirebase(studentEmail, teacherId);
     }
 
+    /*
+        Uses FieldValue.arrayUnion() to add student email to allowedStudentEmails array
+        Uses FieldValue.increment(1) to increment student count
+        Updates both teacher's class document and global allClasses document for consistency
+     */
     private void addStudentToClassFirebase(String studentEmail, String teacherId) {
         db.collection("users")
                 .document(teacherId)
