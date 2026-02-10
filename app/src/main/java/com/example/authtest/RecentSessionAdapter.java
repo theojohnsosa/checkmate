@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+// RecyclerView adapter for list of recent attendance sessions
 public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdapter.SessionViewHolder> {
 
     private List<RecentSession> sessionList = new ArrayList<>();
@@ -54,6 +55,11 @@ public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdap
         return sessionList.size();
     }
 
+    /*
+         Replaces internal session list with new data
+         Creates new ArrayList to avoid reference issues
+         Calls notifyDataSetChanged() to update UI
+     */
     public void setSessions(List<RecentSession> sessions) {
         if (sessions == null || sessions.isEmpty()) {
             this.sessionList.clear();
@@ -68,6 +74,10 @@ public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdap
         notifyDataSetChanged();
     }
 
+    /*
+         Returns session at given position with bounds checking
+         Returns null if position invalid
+     */
     public RecentSession getSessionAt(int position) {
         if (position >= 0 && position < sessionList.size()) {
             return sessionList.get(position);
@@ -75,6 +85,10 @@ public class RecentSessionAdapter extends RecyclerView.Adapter<RecentSessionAdap
         return null;
     }
 
+    /*
+         Returns session at given position with bounds checking
+         Returns null if position invalid
+     */
     public void triggerRemoval(RecentSession session, int position) {
         if (removeListener != null) {
             removeListener.onSessionRemove(session, position);
