@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Shows ranking of students by attendance points
 public class Leaderboards extends AppCompatActivity {
 
     private AppCompatButton backButton;
@@ -35,8 +36,6 @@ public class Leaderboards extends AppCompatActivity {
     private TextView userRankingPosition;
     private LinearLayout rankingListContainer;
     private LinearLayout podiumContainer;
-
-    // Real-time listener for the attendance collection
     private ListenerRegistration attendanceListener;
 
     @Override
@@ -60,7 +59,7 @@ public class Leaderboards extends AppCompatActivity {
         initializeViews();
         setupBackButton();
         loadCurrentUserInfo();
-        listenLeaderboardData(); // real-time instead of one-time get()
+        listenLeaderboardData();
         checkUserTypeAndConfigureMenu();
     }
 
@@ -123,10 +122,11 @@ public class Leaderboards extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Replaces the old loadLeaderboardData() one-time .get() with a real-time
-     * addSnapshotListener(). Now whenever a teacher sets falseMarked=true/false
-     * on any attendance document, the leaderboard recalculates and updates instantly.
+    /*
+         Sets up real-time listener on attendance collection (replaces one-time .get())
+         Whenever any attendance record changes (including falseMarked flag), leaderboard recalculates
+         Filters to only "present" status records that are NOT falseMarked
+         Builds map of attendance by class/date to find early-bird students
      */
     private void listenLeaderboardData() {
         if (attendanceListener != null) {
@@ -153,7 +153,6 @@ public class Leaderboards extends AppCompatActivity {
                         Long timestamp  = doc.getLong("timestamp");
                         Boolean falseMarked = doc.getBoolean("falseMarked");
 
-                        // Skip if not present or if marked as false — point is removed
                         if (userId == null || !"present".equals(status) || date == null) continue;
                         if (falseMarked != null && falseMarked) continue;
 
@@ -196,6 +195,12 @@ public class Leaderboards extends AppCompatActivity {
                 });
     }
 
+    /*
+         Queries all Student users from database
+         Combines with point map to create complete leaderboard
+         Even students with 0 points appear in ranking
+         Calls fetchUserNamesAndDisplay() to show full names
+     */
     private void fetchAllStudents(Map<String, LeaderboardEntry> userPointsMap) {
         db.collection("users")
                 .whereEqualTo("userType", "Student")
@@ -233,6 +238,12 @@ public class Leaderboards extends AppCompatActivity {
                 });
     }
 
+    /*
+         Sorts entries by points (descending) then earliest timestamp
+         Displays top 3 in podium cards at top of screen
+         Displays positions 4-10 in list below podium
+         Updates UI immediately
+     */
     private void displayLeaderboard(List<LeaderboardEntry> entries) {
         Collections.sort(entries, (a, b) -> {
             int pointsCompare = Integer.compare(b.points, a.points);
@@ -253,6 +264,11 @@ public class Leaderboards extends AppCompatActivity {
         }
     }
 
+    /*
+         Updates three LinearLayout cards for 1st, 2nd, 3rd place
+         Sets position text, point text, and student name
+         Arranges as: 2nd (left), 1st (center), 3rd (right)
+     */
     private void updateTopThreeCards(List<LeaderboardEntry> top10) {
         if (podiumContainer != null) {
             podiumContainer.setVisibility(View.VISIBLE);
@@ -292,6 +308,12 @@ public class Leaderboards extends AppCompatActivity {
         }
     }
 
+    /*
+         Creates LinearLayout for each ranking position
+         Adds position number, student name, and points
+         Applies styling and margins programmatically
+         Adds to rankingListContainer
+     */
     private void addLeaderboardItem(LeaderboardEntry entry, int position) {
         LinearLayout itemLayout = new LinearLayout(this);
         itemLayout.setLayoutParams(new LinearLayout.LayoutParams(
