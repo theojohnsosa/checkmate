@@ -7,6 +7,7 @@ import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.cardview.widget.CardView;
 
+// Reusable component card that displays attendance session controls for teachers
 public class AttendanceCard {
 
     private TextView bellIcon;
@@ -21,6 +22,11 @@ public class AttendanceCard {
         void onSessionEnded();
     }
 
+    /*
+        Finds all UI references from root view
+        Sets click listener on AttendanceButton that toggles isSessionActive
+        Calls listener callbacks when session starts/ends
+     */
     public void setup(View rootView) {
         bellIcon = rootView.findViewById(R.id.bellIcon);
         classCodeCard = rootView.findViewById(R.id.classCodeCard);
@@ -51,10 +57,21 @@ public class AttendanceCard {
         }
     }
 
+    /*
+        Stores reference to listener interface
+        Allows parent activity to respond to session state changes
+     */
     public void setOnAttendanceSessionListener(OnAttendanceSessionListener listener) {
         this.listener = listener;
     }
 
+    /*
+        Changes button text between "Start Attendance Session" and "End Attendance Session"
+        Updates button and bell icon background colors:
+        - Green (#2EAD00) = session inactive
+        - Red (#FA5252) = session active
+        Updates class code card background color accordingly
+     */
     private void updateState() {
         if (attendanceButton == null || bellIcon == null || classCodeCard == null) {
             return;
