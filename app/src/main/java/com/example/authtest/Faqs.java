@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// Activity showing searchable/filterable FAQ list
 public class Faqs extends AppCompatActivity {
 
     private EditText searchBar;
@@ -94,6 +95,11 @@ public class Faqs extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
     }
 
+    /*
+         Creates ArrayList of FaqItem objects
+         Manually adds 18 predefined FAQ items across 5 categories
+         Categories: General Information, Account and Access, For Teachers, For Students, General Troubleshooting
+     */
     private void initializeFAQData() {
         allFAQs = new ArrayList<>();
 
@@ -214,6 +220,11 @@ public class Faqs extends AppCompatActivity {
         filteredFAQs = new ArrayList<>(allFAQs);
     }
 
+    /*
+         Adds TextWatcher to search EditText
+         Calls filterFAQs() whenever user types
+         Shows clear button when search text is non-empty
+     */
     private void setupSearchFunctionality() {
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
@@ -241,6 +252,11 @@ public class Faqs extends AppCompatActivity {
         });
     }
 
+    /*
+         Each category button calls applyFilter() with category name
+         Updates button visual states to show which category is active
+         Retrieves all FAQs when "All" button tapped
+     */
     private void setupFilterButtons() {
         filterAllButton.setOnClickListener(view -> {
             applyFilter("All");
@@ -308,6 +324,12 @@ public class Faqs extends AppCompatActivity {
         button.setTextColor(0xFFFFFFFF);
     }
 
+    /*
+         Uses Java streams (filter/collect) to find matching items
+         Checks both category match AND search text match
+         Updates adapter with filtered list
+         Shows empty state if no results
+     */
     private void filterFAQs(String searchQuery) {
         filteredFAQs = allFAQs.stream()
                 .filter(faq -> {
