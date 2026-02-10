@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+// Data model for class information
 public class ClassModel implements Serializable {
 
     private String className;
@@ -21,13 +22,11 @@ public class ClassModel implements Serializable {
     private boolean isArchived = false;
     private long createdAt = 0;
 
-    public ClassModel() {
-        this.allowedStudentEmails = new ArrayList<>();
-        this.isAttendanceActive = false;
-        this.isArchived = false;
-        this.createdAt = 0;
-    }
-
+    /*
+        Default constructor initializes collection fields and boolean flags
+        Parameterized constructor sets all class properties
+        Initializes allowedStudentEmails as empty ArrayList
+     */
     public ClassModel(
             String className,
             String classCode,
@@ -92,38 +91,43 @@ public class ClassModel implements Serializable {
         return students;
     }
 
-    public void setStudents(int students) {
-        this.students = students;
-    }
-
     public List<String> getAllowedStudentEmails() {
         return allowedStudentEmails != null ? allowedStudentEmails : new ArrayList<>();
-    }
-
-    public void setAllowedStudentEmails(List<String> allowedStudentEmails) {
-        this.allowedStudentEmails = allowedStudentEmails;
     }
 
     public boolean isAttendanceActive() {
         return isAttendanceActive;
     }
 
-    public void setAttendanceActive(boolean attendanceActive) {
-        isAttendanceActive = attendanceActive;
-    }
-
     public boolean isArchived() {
         return isArchived;
-    }
-
-    public void setArchived(boolean archived) {
-        isArchived = archived;
     }
 
     public long getCreatedAt() {
         return createdAt;
     }
 
+    // setStudents(): updates student count when students join/leave
+    public void setStudents(int students) {
+        this.students = students;
+    }
+
+    // setAllowedStudentEmails(): updates list of allowed student emails
+    public void setAllowedStudentEmails(List<String> allowedStudentEmails) {
+        this.allowedStudentEmails = allowedStudentEmails;
+    }
+
+    // setAttendanceActive(): toggles attendance session state
+    public void setAttendanceActive(boolean attendanceActive) {
+        isAttendanceActive = attendanceActive;
+    }
+
+    // setArchived(): marks class as archived
+    public void setArchived(boolean archived) {
+        isArchived = archived;
+    }
+
+    // setCreatedAt(): records class creation timestamp
     public void setCreatedAt(long createdAt) {
         this.createdAt = createdAt;
     }
