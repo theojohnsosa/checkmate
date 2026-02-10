@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+// RecyclerView adapter for displaying attendance history list
 public class AttendanceHistoryAdapter extends RecyclerView.Adapter<AttendanceHistoryAdapter.HistoryViewHolder> {
 
     private List<AttendanceHistoryModel> historyList;
@@ -27,6 +28,12 @@ public class AttendanceHistoryAdapter extends RecyclerView.Adapter<AttendanceHis
         return new HistoryViewHolder(view);
     }
 
+    /*
+        Retrieves AttendanceHistoryModel at position
+        Sets class name, code, subject code text views
+        Formats and displays start/end time range
+        Converts timestamp to formatted date string
+     */
     @Override
     public void onBindViewHolder(@NonNull HistoryViewHolder holder, int position) {
         AttendanceHistoryModel history = historyList.get(position);
@@ -38,6 +45,11 @@ public class AttendanceHistoryAdapter extends RecyclerView.Adapter<AttendanceHis
         return historyList.size();
     }
 
+    /*
+        Replaces internal list with new data
+        Calls notifyDataSetChanged() to refresh UI
+        Both methods exist for flexibility in calling code
+     */
     public void setHistory(List<AttendanceHistoryModel> newHistory) {
         this.historyList = newHistory;
         notifyDataSetChanged();
@@ -77,6 +89,11 @@ public class AttendanceHistoryAdapter extends RecyclerView.Adapter<AttendanceHis
             dateAddedText.setText(formattedDate);
         }
 
+        /*
+            Uses SimpleDateFormat with "MM dd, yyyy" pattern
+            Converts long timestamp to human-readable date
+            Locale.getDefault() ensures date format matches user's device settings
+         */
         private String formatDate(long timestamp) {
             SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
             return sdf.format(new Date(timestamp));
