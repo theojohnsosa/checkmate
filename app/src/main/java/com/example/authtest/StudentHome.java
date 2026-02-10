@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Main home screen for students showing their enrolled classes
 public class StudentHome extends AppCompatActivity {
 
     private ActivityStudentHomeBinding binding;
@@ -91,6 +92,12 @@ public class StudentHome extends AppCompatActivity {
         }
     }
 
+    /*
+         Creates ClassAdapter with click listener
+         When class clicked, opens ClassInformation activity with class data
+         Sets up swipe-to-archive gesture
+         Passes classList to adapter
+     */
     private void setupRecyclerView() {
         classAdapter = new ClassAdapter(classModel -> {
             Intent intent = new Intent(StudentHome.this, ClassInformation.class);
@@ -106,6 +113,11 @@ public class StudentHome extends AppCompatActivity {
         classAdapter.setClasses(classList);
     }
 
+    /*
+         Implements TextWatcher on search EditText
+         Filters classes by className, classCode, or subjectCode
+         Shows clear button when search active
+     */
     private void setupClassSearch() {
         classSearchBar.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -134,6 +146,11 @@ public class StudentHome extends AppCompatActivity {
         });
     }
 
+    /*
+         Creates new filtered list matching search query
+         Updates adapter with filtered results
+         Case-insensitive matching using .toLowerCase().contains()
+     */
     private void filterClasses(String searchQuery) {
         filteredClasses.clear();
 
@@ -229,6 +246,12 @@ public class StudentHome extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(binding.classesRecyclerView);
     }
 
+    /*
+         Updates enrolledClasses document with isArchived = true
+         Removes from classList and updates adapter
+         Shows empty state if no classes remain
+         Returns to active class view if need to refresh
+     */
     private void archiveClass(ClassModel classItem, int position) {
         if (classItem == null) {
             Toast.makeText(StudentHome.this, "Error: Invalid class data", Toast.LENGTH_SHORT).show();
