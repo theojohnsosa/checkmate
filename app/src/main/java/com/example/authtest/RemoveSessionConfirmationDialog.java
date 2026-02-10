@@ -9,12 +9,17 @@ import android.view.Window;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
 
+// Confirmation dialog when deleting an attendance session
 public class RemoveSessionConfirmationDialog extends Dialog {
 
     private final Runnable onConfirm;
     private final Runnable onCancel;
     private AppCompatButton removeButton;
 
+    /*
+         Shows: "Are you sure you want to delete this session on [date]? This action cannot be undone."
+         Confirms deletion of permanent session record
+     */
     public RemoveSessionConfirmationDialog(
             Context context,
             String sessionDate,
