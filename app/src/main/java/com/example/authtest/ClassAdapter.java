@@ -10,10 +10,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+// RecyclerView adapter for displaying list of classes
 public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHolder> {
 
     private List<ClassModel> classList = new ArrayList<>();
     private OnClassClickListener listener;
+
     public interface OnClassClickListener {
         void onClassClick(ClassModel classModel);
     }
@@ -30,6 +32,12 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         return new ClassViewHolder(view);
     }
 
+    /*
+        Retrieves ClassModel at position
+        Populates text views with: class name, subject code, meeting days, time range, room
+        Formats time as "startTime - endTime" (e.g., "9:00 AM - 10:30 AM")
+        Sets up click listener that invokes OnClassListener callback
+     */
     @Override
     public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
         ClassModel classModel = classList.get(position);
@@ -41,11 +49,20 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         return classList.size();
     }
 
+    /*
+        Replaces internal classList with new data
+        Calls notifyDataSetChanged() to trigger RecyclerView refresh
+     */
     public void setClasses(List<ClassModel> classes) {
         this.classList = classes;
         notifyDataSetChanged();
     }
 
+    /*
+        Returns class model at given position
+        Checks bounds to prevent IndexOutOfBoundsException
+        Returns null if position is invalid
+     */
     public ClassModel getClassAt(int position) {
         if (position >= 0 && position < classList.size()) {
             return classList.get(position);
