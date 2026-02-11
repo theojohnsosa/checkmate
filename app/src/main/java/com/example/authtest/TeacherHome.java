@@ -55,11 +55,11 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        drawerLayout = findViewById(R.id.main);
-        navigationView = findViewById(R.id.navigation_view);
-
-        classSearchBar = findViewById(R.id.classSearchBar);
-        clearSearchButton = findViewById(R.id.clearSearchButton);
+        // Use binding instead of findViewById
+        drawerLayout = binding.main;  // Changed
+        navigationView = binding.navigationView;  // Changed
+        classSearchBar = binding.classSearchBar;  // Changed
+        clearSearchButton = binding.clearSearchButton;  // Changed
 
         binding.classesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         classAdapter = new ClassAdapter(this);
@@ -87,7 +87,9 @@ public class TeacherHome extends AppCompatActivity implements ClassAdapter.OnCla
         checkUserTypeAndConfigureMenu();
         loadClasses();
 
-        navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+        if (navigationView.getMenu().findItem(R.id.menu_streak) != null) {
+            navigationView.getMenu().findItem(R.id.menu_streak).setVisible(false);
+        }
     }
 
     private void setupBackPressHandler() {

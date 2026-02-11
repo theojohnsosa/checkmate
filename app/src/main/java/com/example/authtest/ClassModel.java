@@ -22,6 +22,13 @@ public class ClassModel implements Serializable {
     private boolean isArchived = false;
     private long createdAt = 0;
 
+    public ClassModel() {
+        this.allowedStudentEmails = new ArrayList<>();
+        this.isAttendanceActive = false;
+        this.isArchived = false;
+        this.createdAt = 0;
+    }
+
     /*
         Default constructor initializes collection fields and boolean flags
         Parameterized constructor sets all class properties

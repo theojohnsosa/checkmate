@@ -56,11 +56,11 @@ public class StudentHome extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        drawerLayout = findViewById(R.id.main);
-        navigationView = findViewById(R.id.navigation_view);
-
-        classSearchBar = findViewById(R.id.classSearchBar);
-        clearSearchButton = findViewById(R.id.clearSearchButton);
+        // Use binding instead of findViewById
+        drawerLayout = binding.main;  // Changed
+        navigationView = binding.navigationView;  // Changed
+        classSearchBar = binding.classSearchBar;  // Changed
+        clearSearchButton = binding.clearSearchButton;  // Changed
 
         binding.hamburgerIcon.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
